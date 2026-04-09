@@ -943,98 +943,29 @@ button { cursor: pointer; font-family: var(--font-body); }
 }
 .panel-overlay.visible { opacity: 1; pointer-events: all; }
 
-/* Modal */
+/* Modal backdrop */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(17,13,14,0.6);
+  background: rgba(17,13,14,0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 300;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition-kinetic);
+  transition: opacity 0.25s ease;
 }
 .modal-backdrop.open { opacity: 1; pointer-events: all; }
-.modal {
-  background: var(--surface-container-low);
-  border-radius: var(--roundness-lg);
-  padding: var(--space-xl);
-  width: 480px;
-  max-width: 90vw;
-  box-shadow: var(--shadow-float);
-  transform: translateY(20px);
-  transition: transform var(--transition-kinetic);
-}
-.modal-backdrop.open .modal { transform: translateY(0); }
-.modal-title {
-  font-family: var(--font-display);
-  font-size: 1.125rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--on-surface);
-  margin-bottom: var(--space-lg);
-}
-.modal-form .form-group { margin-bottom: var(--space-md); }
-.modal-form label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--on-surface-variant);
-  margin-bottom: 6px;
-}
-.modal-form input,
-.modal-form select,
-.modal-form textarea {
-  width: 100%;
-  background: var(--surface-container);
-  border: none;
-  border-bottom: 2px solid rgba(154,143,144,0.2);
-  border-radius: var(--roundness-xs) var(--roundness-xs) 0 0;
-  padding: 10px 12px;
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  color: var(--on-surface);
-  outline: none;
-  transition: border-color var(--transition-kinetic);
-}
-.modal-form input:focus,
-.modal-form select:focus,
-.modal-form textarea:focus { border-bottom-color: var(--secondary); }
-.modal-form input::placeholder { color: var(--on-surface-variant); opacity: 0.5; }
-.modal-form select option { background: var(--surface-container-low); }
-.modal-form textarea { resize: vertical; min-height: 80px; }
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
-}
-.modal-btn {
-  padding: 8px 20px;
-  border-radius: var(--roundness-sm);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: none;
-  transition: var(--transition-kinetic);
-}
-.modal-btn-primary { background: var(--gradient-cta); color: #fff; }
-.modal-btn-primary:hover { opacity: 0.9; }
-.modal-btn-secondary { background: var(--surface-container-high); color: var(--on-surface-variant); }
-.modal-btn-secondary:hover { background: var(--surface-container-highest); }
 
 @keyframes shake {
-  0%,100% { transform: translateY(0) translateX(0); }
-  20%      { transform: translateY(0) translateX(-6px); }
-  40%      { transform: translateY(0) translateX(6px); }
-  60%      { transform: translateY(0) translateX(-4px); }
-  80%      { transform: translateY(0) translateX(4px); }
+  0%,100% { transform: translateY(0) translateX(0) scale(1); }
+  20%      { transform: translateY(0) translateX(-7px) scale(1); }
+  40%      { transform: translateY(0) translateX(7px) scale(1); }
+  60%      { transform: translateY(0) translateX(-4px) scale(1); }
+  80%      { transform: translateY(0) translateX(4px) scale(1); }
 }
 
 </style>
@@ -1338,105 +1269,253 @@ button { cursor: pointer; font-family: var(--font-body); }
     }
     .panel-overlay.visible { opacity: 1; pointer-events: all; }
 
-    /* Client search inside modal */
-    .client-search-wrap {
+    /* ── Booking Modal ── */
+    .book-modal {
+      background: var(--surface-container-lowest);
+      border-radius: 16px;
+      width: 500px;
+      max-width: 94vw;
+      box-shadow: 0 32px 64px rgba(0,0,0,0.6);
+      transform: translateY(24px) scale(0.98);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      overflow: visible;
+    }
+    .modal-backdrop.open .book-modal { transform: translateY(0) scale(1); }
+
+    .book-modal-header {
+      padding: 28px 28px 0;
+      border-bottom: 1px solid var(--outline-variant);
+      padding-bottom: 20px;
+      margin-bottom: 0;
+    }
+    .book-modal-eyebrow {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--primary-container);
+      margin-bottom: 4px;
+    }
+    .book-modal-title {
+      font-family: var(--font-display);
+      font-size: 1.375rem;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--on-surface);
+      line-height: 1.1;
+    }
+    .book-modal-subtitle {
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      margin-top: 4px;
+    }
+
+    .book-modal-body {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Field label */
+    .bm-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* Generic field row */
+    .bm-field {
+      background: var(--surface-container);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: border-color 0.2s;
       position: relative;
     }
-    .client-search-input {
+    .bm-field:focus-within { border-color: var(--primary-container); }
+    .bm-field input,
+    .bm-field select {
       width: 100%;
-      background: var(--surface-container);
+      background: transparent;
       border: none;
-      border-bottom: 2px solid rgba(154,143,144,0.2);
-      border-radius: var(--roundness-xs) var(--roundness-xs) 0 0;
-      padding: 10px 12px 10px 36px;
+      padding: 12px 14px;
       font-family: var(--font-body);
       font-size: 0.875rem;
       color: var(--on-surface);
       outline: none;
-      transition: border-color var(--transition-kinetic);
     }
-    .client-search-input:focus { border-bottom-color: var(--primary-container); }
-    .client-search-icon {
+    .bm-field select { appearance: none; cursor: pointer; padding-right: 36px; }
+    .bm-field input::placeholder { color: var(--on-surface-variant); opacity: 0.45; }
+    .bm-field select option { background: var(--surface-container-high); }
+
+    /* Select arrow */
+    .bm-select-wrap { position: relative; }
+    .bm-select-arrow {
       position: absolute;
-      left: 10px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
+      pointer-events: none;
       stroke: var(--on-surface-variant);
       fill: none;
-      pointer-events: none;
     }
-    .client-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: var(--surface-container-high);
-      border-radius: 0 0 var(--roundness-md) var(--roundness-md);
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 10;
-      box-shadow: 0 8px 24px rgba(17,13,14,0.5);
-      display: none;
-    }
-    .client-dropdown.open { display: block; }
-    .client-option {
+
+    /* 2-col grid */
+    .bm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── Client Search ── */
+    .cs-wrap { position: relative; }
+    .cs-input-row {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 12px;
-      cursor: pointer;
-      transition: background var(--transition-fast);
+      background: var(--surface-container);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      padding: 0 14px;
+      transition: border-color 0.2s;
     }
-    .client-option:hover { background: var(--surface-container-highest); }
-    .client-option.selected { background: rgba(253,119,42,0.12); }
-    .client-option-avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 6px;
+    .cs-input-row:focus-within { border-color: var(--primary-container); }
+    .cs-input-row svg { width: 15px; height: 15px; stroke: var(--on-surface-variant); fill: none; flex-shrink: 0; }
+    .cs-input-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 0;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--on-surface);
+      outline: none;
+    }
+    .cs-input-row input::placeholder { color: var(--on-surface-variant); opacity: 0.45; }
+
+    /* Floating dropdown */
+    .cs-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--surface-container-high);
+      border-radius: 10px;
+      border: 1px solid var(--outline-variant);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 9999;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      display: none;
+    }
+    .cs-dropdown.open { display: block; }
+    .cs-dropdown::-webkit-scrollbar { width: 4px; }
+    .cs-dropdown::-webkit-scrollbar-track { background: transparent; }
+    .cs-dropdown::-webkit-scrollbar-thumb { background: var(--surface-container-highest); border-radius: 2px; }
+
+    .cs-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid rgba(154,143,144,0.07);
+    }
+    .cs-option:last-child { border-bottom: none; }
+    .cs-option:hover { background: var(--surface-container-highest); }
+    .cs-option.selected { background: rgba(253,119,42,0.1); }
+    .cs-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
       background: var(--gradient-cta);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 0.65rem;
+      font-weight: 800;
+      font-size: 0.7rem;
       color: #fff;
       flex-shrink: 0;
+      letter-spacing: 0.03em;
     }
-    .client-option-info { flex: 1; min-width: 0; }
-    .client-option-name { font-size: 0.8rem; font-weight: 600; color: var(--on-surface); }
-    .client-option-meta { font-size: 0.65rem; color: var(--on-surface-variant); }
-    .client-selected-display {
+    .cs-name { font-size: 0.875rem; font-weight: 600; color: var(--on-surface); line-height: 1.2; }
+    .cs-meta { font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 2px; }
+    .cs-empty { padding: 16px 14px; font-size: 0.8rem; color: var(--on-surface-variant); text-align: center; }
+
+    /* Selected client card */
+    .cs-selected {
       display: none;
       align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: rgba(253,119,42,0.1);
-      border-radius: var(--roundness-sm);
-      margin-top: 6px;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(253,119,42,0.08);
+      border: 1px solid rgba(253,119,42,0.2);
+      border-radius: 8px;
+      margin-top: 8px;
     }
-    .client-selected-display.visible { display: flex; }
-    .client-selected-name { font-size: 0.8rem; font-weight: 600; color: var(--on-surface); }
-    .client-clear-btn {
+    .cs-selected.visible { display: flex; }
+    .cs-selected-name { font-size: 0.875rem; font-weight: 600; color: var(--on-surface); }
+    .cs-selected-meta { font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 1px; }
+    .cs-clear {
       margin-left: auto;
-      background: none;
+      background: var(--surface-container-high);
       border: none;
-      color: var(--on-surface-variant);
-      font-size: 1rem;
-      line-height: 1;
-      padding: 0 4px;
+      border-radius: 6px;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      color: var(--on-surface-variant);
+      font-size: 0.8rem;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
     }
-    .client-clear-btn:hover { color: var(--on-surface); }
+    .cs-clear:hover { background: var(--surface-container-highest); color: var(--on-surface); }
 
-    /* Repeat weekly row */
-    .repeat-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-sm);
+    /* Modal footer */
+    .book-modal-footer {
+      padding: 0 28px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--outline-variant);
+      padding-top: 20px;
     }
+    .bm-btn {
+      padding: 11px 24px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .bm-btn-cancel {
+      background: var(--surface-container);
+      color: var(--on-surface-variant);
+      border: 1px solid var(--outline-variant);
+    }
+    .bm-btn-cancel:hover { background: var(--surface-container-high); color: var(--on-surface); }
+    .bm-btn-confirm {
+      background: var(--gradient-cta);
+      color: #fff;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .bm-btn-confirm:hover { opacity: 0.88; transform: translateY(-1px); }
+    .bm-btn-confirm svg { width: 14px; height: 14px; stroke: #fff; fill: none; }
 
     /* Slot click hint */
     .cal-hint {
@@ -1445,7 +1524,6 @@ button { cursor: pointer; font-family: var(--font-body); }
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: var(--space-md);
     }
     .cal-hint svg { width: 14px; height: 14px; stroke: var(--primary-container); fill: none; flex-shrink: 0; }
 
@@ -1708,93 +1786,115 @@ button { cursor: pointer; font-family: var(--font-body); }
 
 <!-- BOOK SESSION MODAL -->
 <div class="modal-backdrop" id="addSessionModal">
-  <div class="modal" style="width:520px">
-    <div class="modal-title">Book Session</div>
-    <div class="modal-form">
+  <div class="book-modal">
+
+    <!-- Header -->
+    <div class="book-modal-header">
+      <div class="book-modal-eyebrow">Schedule</div>
+      <div class="book-modal-title">Book a Session</div>
+      <div class="book-modal-subtitle" id="modalSubtitle">Select a client and time to book</div>
+    </div>
+
+    <!-- Body -->
+    <div class="book-modal-body">
 
       <!-- Client search -->
-      <div class="form-group">
-        <label>Client</label>
-        <div class="client-search-wrap">
-          <svg class="client-search-icon" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" class="client-search-input" id="clientSearchInput" placeholder="Search client by name…" autocomplete="off"/>
-          <div class="client-dropdown" id="clientDropdown">
-            <!-- populated by JS -->
+      <div>
+        <label class="bm-label">Client</label>
+        <div class="cs-wrap">
+          <div class="cs-input-row">
+            <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="clientSearchInput" placeholder="Search by name…" autocomplete="off"/>
           </div>
+          <div class="cs-dropdown" id="clientDropdown"></div>
         </div>
-        <div class="client-selected-display" id="clientSelectedDisplay">
-          <div class="client-option-avatar" id="clientSelectedAvatar"></div>
-          <div class="client-option-info">
-            <div class="client-selected-name" id="clientSelectedName"></div>
-            <div class="client-option-meta" id="clientSelectedMeta"></div>
+        <!-- Selected client pill -->
+        <div class="cs-selected" id="clientSelectedDisplay">
+          <div class="cs-avatar" id="clientSelectedAvatar"></div>
+          <div>
+            <div class="cs-selected-name" id="clientSelectedName"></div>
+            <div class="cs-selected-meta" id="clientSelectedMeta"></div>
           </div>
-          <button class="client-clear-btn" id="clientClearBtn" title="Clear">✕</button>
+          <button class="cs-clear" id="clientClearBtn" title="Change client">✕</button>
         </div>
         <input type="hidden" id="sess-client"/>
       </div>
 
       <!-- Date & Time -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="form-group">
-          <label>Date</label>
-          <input type="date" id="sess-date"/>
+      <div class="bm-grid2">
+        <div>
+          <label class="bm-label">Date</label>
+          <div class="bm-field"><input type="date" id="sess-date"/></div>
         </div>
-        <div class="form-group">
-          <label>Start Time</label>
-          <input type="time" id="sess-time" value="07:00"/>
+        <div>
+          <label class="bm-label">Start Time</label>
+          <div class="bm-field"><input type="time" id="sess-time" value="07:00"/></div>
         </div>
       </div>
 
       <!-- Type & Duration -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="form-group">
-          <label>Session Type</label>
-          <select id="sess-type">
-            <option value="elite">1-on-1 Elite</option>
-            <option value="online">Online Coaching</option>
-            <option value="group">Group Session</option>
-          </select>
+      <div class="bm-grid2">
+        <div>
+          <label class="bm-label">Session Type</label>
+          <div class="bm-field bm-select-wrap">
+            <select id="sess-type">
+              <option value="elite">1-on-1 Elite</option>
+              <option value="online">Online Coaching</option>
+              <option value="group">Group Session</option>
+            </select>
+            <svg class="bm-select-arrow" viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Duration</label>
-          <select id="sess-duration">
-            <option value="30">30 minutes</option>
-            <option value="45">45 minutes</option>
-            <option value="60" selected>60 minutes</option>
-            <option value="75">75 minutes</option>
-            <option value="90">90 minutes</option>
-            <option value="120">2 hours</option>
-          </select>
+        <div>
+          <label class="bm-label">Duration</label>
+          <div class="bm-field bm-select-wrap">
+            <select id="sess-duration">
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60" selected>60 min</option>
+              <option value="75">75 min</option>
+              <option value="90">90 min</option>
+              <option value="120">2 hours</option>
+            </select>
+            <svg class="bm-select-arrow" viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
         </div>
       </div>
 
       <!-- Repeat -->
-      <div class="form-group">
-        <label>Repeat Weekly</label>
-        <select id="sess-repeat">
-          <option value="0">No repeat — one-off session</option>
-          <option value="2">2 weeks (this + 1 more)</option>
-          <option value="4">4 weeks</option>
-          <option value="6">6 weeks</option>
-          <option value="8">8 weeks</option>
-          <option value="12">12 weeks</option>
-          <option value="52">Ongoing (1 year)</option>
-        </select>
+      <div>
+        <label class="bm-label">Repeat Weekly</label>
+        <div class="bm-field bm-select-wrap">
+          <select id="sess-repeat">
+            <option value="0">No repeat — one-off</option>
+            <option value="1">2 weeks total</option>
+            <option value="3">4 weeks total</option>
+            <option value="5">6 weeks total</option>
+            <option value="7">8 weeks total</option>
+            <option value="11">12 weeks total</option>
+            <option value="51">Ongoing — 1 year</option>
+          </select>
+          <svg class="bm-select-arrow" viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
       </div>
 
       <!-- Optional label -->
-      <div class="form-group">
-        <label>Session Label <span style="font-weight:400;text-transform:none;font-size:0.65rem">(optional)</span></label>
-        <input type="text" id="sess-title" placeholder="e.g. Upper Body Push A"/>
+      <div>
+        <label class="bm-label">Session Label <span style="font-weight:400;opacity:0.6;letter-spacing:0">(optional)</span></label>
+        <div class="bm-field"><input type="text" id="sess-title" placeholder="e.g. Upper Body Push A"/></div>
       </div>
 
     </div>
-    <div class="modal-actions">
-      <button class="modal-btn modal-btn-secondary" id="cancelSession">Cancel</button>
-      <button class="modal-btn modal-btn-primary" id="confirmSession">
+
+    <!-- Footer -->
+    <div class="book-modal-footer">
+      <button class="bm-btn bm-btn-cancel" id="cancelSession">Cancel</button>
+      <button class="bm-btn bm-btn-confirm" id="confirmSession">
+        <svg viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         <span id="confirmBtnLabel">Book Session</span>
       </button>
     </div>
+
   </div>
 </div>
 
@@ -2220,11 +2320,11 @@ overlay.addEventListener('click', closePanel);
 let selectedClientId = null;
 
 function initClientSearch() {
-  const input     = document.getElementById('clientSearchInput');
-  const dropdown  = document.getElementById('clientDropdown');
-  const display   = document.getElementById('clientSelectedDisplay');
-  const hiddenId  = document.getElementById('sess-client');
-  const clearBtn  = document.getElementById('clientClearBtn');
+  const input    = document.getElementById('clientSearchInput');
+  const dropdown = document.getElementById('clientDropdown');
+  const display  = document.getElementById('clientSelectedDisplay');
+  const hiddenId = document.getElementById('sess-client');
+  const clearBtn = document.getElementById('clientClearBtn');
 
   function renderDropdown(query) {
     const q = (query || '').toLowerCase().trim();
@@ -2238,15 +2338,16 @@ function initClientSearch() {
     dropdown.innerHTML = filtered.length
       ? filtered.map(c => {
           const initials = c.firstName[0] + c.lastName[0];
-          return `<div class="client-option${selectedClientId === c.id ? ' selected':''}" data-id="${c.id}">
-            <div class="client-option-avatar">${initials}</div>
-            <div class="client-option-info">
-              <div class="client-option-name">${c.firstName} ${c.lastName}</div>
-              <div class="client-option-meta">${c.program} · ${c.tier}</div>
+          const sel = selectedClientId === c.id ? ' selected' : '';
+          return `<div class="cs-option${sel}" data-id="${c.id}">
+            <div class="cs-avatar">${initials}</div>
+            <div>
+              <div class="cs-name">${c.firstName} ${c.lastName}</div>
+              <div class="cs-meta">${c.program} · ${c.tier}</div>
             </div>
           </div>`;
         }).join('')
-      : '<div style="padding:12px;font-size:0.8rem;color:var(--on-surface-variant)">No clients found</div>';
+      : '<div class="cs-empty">No clients found</div>';
 
     dropdown.classList.add('open');
   }
@@ -2258,42 +2359,39 @@ function initClientSearch() {
     hiddenId.value   = id;
     input.value      = '';
     dropdown.classList.remove('open');
-    // Show selected pill
     document.getElementById('clientSelectedAvatar').textContent = c.firstName[0] + c.lastName[0];
     document.getElementById('clientSelectedName').textContent   = `${c.firstName} ${c.lastName}`;
     document.getElementById('clientSelectedMeta').textContent   = `${c.program} · ${c.tier}`;
     display.classList.add('visible');
-    // Update confirm button label
     updateConfirmLabel();
   }
 
   function clearClient() {
-    selectedClientId  = null;
-    hiddenId.value    = '';
-    input.value       = '';
+    selectedClientId = null;
+    hiddenId.value   = '';
+    input.value      = '';
     display.classList.remove('visible');
+    dropdown.classList.remove('open');
     updateConfirmLabel();
   }
 
   input.addEventListener('focus', () => renderDropdown(input.value));
   input.addEventListener('input', () => renderDropdown(input.value));
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Escape') dropdown.classList.remove('open');
-  });
+  input.addEventListener('keydown', e => { if (e.key === 'Escape') dropdown.classList.remove('open'); });
 
   dropdown.addEventListener('mousedown', e => {
-    const opt = e.target.closest('.client-option');
+    const opt = e.target.closest('.cs-option');
     if (opt) selectClient(parseInt(opt.dataset.id));
   });
 
   document.addEventListener('mousedown', e => {
-    if (!e.target.closest('.client-search-wrap')) dropdown.classList.remove('open');
+    if (!e.target.closest('.cs-wrap') && !e.target.closest('.cs-selected')) {
+      dropdown.classList.remove('open');
+    }
   });
 
   clearBtn.addEventListener('click', clearClient);
-
-  // Expose selectClient for external use
-  window._selectClient = selectClient;
+  window._selectClient      = selectClient;
   window._clearClientSearch = clearClient;
 }
 
@@ -2401,11 +2499,15 @@ function openBookingModal(dateStr) {
   const time = `${hrs}:${mins}`;
 
   document.getElementById('sess-date').value = date;
-  document.getElementById('sess-time').value = (time === '00:00') ? '07:00' : time;
+  const finalTime = (time === '00:00') ? '07:00' : time;
+  document.getElementById('sess-time').value = finalTime;
 
-  // Reset client search
+  // Update subtitle with pre-filled slot info
+  const displayDate = dt.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('modalSubtitle').textContent =
+    (time !== '00:00') ? `${displayDate} at ${finalTime}` : displayDate;
+
   if (window._clearClientSearch) window._clearClientSearch();
-
   addModal.classList.add('open');
   setTimeout(() => document.getElementById('clientSearchInput').focus(), 50);
 }
@@ -2433,10 +2535,9 @@ document.getElementById('confirmSession').addEventListener('click', () => {
   const titleInput = document.getElementById('sess-title').value;
 
   if (!clientId || !date || !time) {
-    // Shake the modal if no client selected
-    const modal = addModal.querySelector('.modal');
+    const modal = addModal.querySelector('.book-modal');
     modal.style.animation = 'none';
-    modal.offsetHeight;
+    modal.offsetHeight; // reflow
     modal.style.animation = 'shake 0.4s ease';
     return;
   }
