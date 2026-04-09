@@ -1080,7 +1080,7 @@ button { cursor: pointer; font-family: var(--font-body); }
       right: 0;
       top: 0;
       bottom: 0;
-      width: 340px;
+      width: 360px;
       background: var(--surface-container-low);
       border-left: 1px solid var(--outline-variant);
       transform: translateX(100%);
@@ -1096,7 +1096,7 @@ button { cursor: pointer; font-family: var(--font-body); }
       border-bottom: 1px solid var(--outline-variant);
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 8px;
       position: sticky;
       top: 0;
       background: var(--surface-container-low);
@@ -1109,6 +1109,32 @@ button { cursor: pointer; font-family: var(--font-body); }
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--on-surface);
+      flex: 1;
+    }
+    /* View / Edit toggle tabs in header */
+    .panel-tabs {
+      display: flex;
+      background: var(--surface-container);
+      border-radius: 6px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .panel-tab {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      background: transparent;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .panel-tab.active {
+      background: var(--surface-container-highest);
+      color: var(--on-surface);
     }
     .panel-close {
       width: 30px;
@@ -1120,6 +1146,7 @@ button { cursor: pointer; font-family: var(--font-body); }
       align-items: center;
       justify-content: center;
       transition: var(--transition-fast);
+      flex-shrink: 0;
     }
     .panel-close svg { width: 14px; height: 14px; stroke: var(--on-surface-variant); fill: none; }
     .panel-close:hover { background: var(--surface-container-highest); }
@@ -1129,6 +1156,88 @@ button { cursor: pointer; font-family: var(--font-body); }
       display: flex;
       flex-direction: column;
       gap: var(--space-lg);
+    }
+
+    /* Edit panel fields */
+    .pe-section-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .pe-field {
+      background: var(--surface-container);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: border-color 0.2s;
+      margin-bottom: 12px;
+    }
+    .pe-field:focus-within { border-color: var(--primary-container); }
+    .pe-field input,
+    .pe-field select {
+      width: 100%;
+      background: transparent;
+      border: none;
+      padding: 11px 14px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--on-surface);
+      outline: none;
+    }
+    .pe-field select { appearance: none; cursor: pointer; padding-right: 32px; }
+    .pe-field input::placeholder { color: var(--on-surface-variant); opacity: 0.4; }
+    .pe-field select option { background: var(--surface-container-high); }
+    .pe-select-wrap { position: relative; }
+    .pe-select-wrap svg {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      stroke: var(--on-surface-variant);
+      fill: none;
+    }
+    .pe-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pe-grid2 .pe-field { margin-bottom: 0; }
+    .pe-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .pe-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s;
+    }
+    .pe-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+    .pe-btn-save   { background: var(--gradient-cta); color: #fff; }
+    .pe-btn-save:hover { opacity: 0.88; transform: translateY(-1px); }
+    .pe-btn-delete {
+      background: transparent;
+      color: var(--on-surface-variant);
+      border: 1px solid var(--outline-variant);
+    }
+    .pe-btn-delete:hover { background: rgba(200,50,50,0.1); color: #FF6B6B; border-color: rgba(200,50,50,0.3); }
+    .pe-divider {
+      height: 1px;
+      background: var(--outline-variant);
+      margin: 4px 0 16px;
     }
 
     /* Session info */
@@ -1774,14 +1883,16 @@ button { cursor: pointer; font-family: var(--font-body); }
 <div class="panel-overlay" id="panelOverlay"></div>
 <div class="client-panel" id="clientPanel">
   <div class="panel-header">
-    <div class="panel-title" id="panelTitle">Session Details</div>
+    <div class="panel-title" id="panelTitle">Session</div>
+    <div class="panel-tabs">
+      <button class="panel-tab active" id="tabView">View</button>
+      <button class="panel-tab" id="tabEdit">Edit</button>
+    </div>
     <button class="panel-close" id="panelClose">
       <svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
-  <div class="panel-body" id="panelBody">
-    <!-- populated by JS -->
-  </div>
+  <div class="panel-body" id="panelBody"><!-- populated by JS --></div>
 </div>
 
 <!-- BOOK SESSION MODAL -->
@@ -2212,38 +2323,35 @@ window.LHPT = {
 const panel   = document.getElementById('clientPanel');
 const overlay = document.getElementById('panelOverlay');
 const events  = generateCalendarEvents();
+let   currentPanelEvent = null; // the FullCalendar event object currently in the panel
 
-function openPanel(info) {
-  const evt = info.event;
-  const props = evt.extendedProps;
-  const c     = getClient(props.clientId);
-  const type  = props.type || 'elite';
+const typeMap = {
+  elite:  { label: '1-on-1 Elite',    cls: 'session-type-elite'  },
+  online: { label: 'Online Coaching', cls: 'session-type-online' },
+  group:  { label: 'Group Session',   cls: 'session-type-group'  },
+};
 
-  const start = evt.start;
-  const end   = evt.end;
-  const timeStr = start ? start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
-  const endStr  = end   ? end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+/* ── VIEW MODE ─────────────────────────────── */
+function renderPanelView(evt) {
+  const props   = evt.extendedProps;
+  const c       = getClient(props.clientId);
+  const type    = props.type || 'elite';
+  const t       = typeMap[type] || typeMap.elite;
+  const start   = evt.start;
+  const end     = evt.end;
+  const timeStr = start ? start.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }) : '';
+  const endStr  = end   ? end.toLocaleTimeString('en-GB',   { hour:'2-digit', minute:'2-digit' }) : '';
   const dateStr = start ? start.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' }) : '';
-
-  document.getElementById('panelTitle').textContent = 'Session Details';
-
-  const typeMap = {
-    elite:  { label: '1-on-1 Elite',      cls: 'session-type-elite'  },
-    online: { label: 'Online Coaching',   cls: 'session-type-online' },
-    group:  { label: 'Group Session',     cls: 'session-type-group'  },
-  };
-  const t = typeMap[type] || typeMap.elite;
 
   document.getElementById('panelBody').innerHTML = `
     <div class="session-info">
       <span class="session-type-badge ${t.cls}">${t.label}</span>
       <div class="session-title-panel">${evt.title}</div>
-      <div class="session-time">${dateStr} • ${timeStr}${endStr ? ' – ' + endStr : ''}</div>
+      <div class="session-time">${dateStr} · ${timeStr}${endStr ? ' – ' + endStr : ''}</div>
     </div>
-
     ${c ? `
     <div>
-      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:var(--space-sm)">Client</div>
+      <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:10px">Client</div>
       <div class="panel-client-row">
         <div class="panel-avatar">${getInitials(c)}</div>
         <div>
@@ -2252,56 +2360,171 @@ function openPanel(info) {
         </div>
       </div>
     </div>
-
     <div>
-      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:var(--space-sm)">Performance Snapshot</div>
+      <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:10px">Performance</div>
       <div class="panel-stats">
-        <div class="panel-stat">
-          <div class="num">${c.strengthIndex}</div>
-          <div class="lbl">Strength</div>
-        </div>
-        <div class="panel-stat">
-          <div class="num">${c.volumeConsistency}%</div>
-          <div class="lbl">Consistency</div>
-        </div>
-        <div class="panel-stat">
-          <div class="num">${c.progress}%</div>
-          <div class="lbl">Goal</div>
-        </div>
+        <div class="panel-stat"><div class="num">${c.strengthIndex}</div><div class="lbl">Strength</div></div>
+        <div class="panel-stat"><div class="num">${c.volumeConsistency}%</div><div class="lbl">Consistency</div></div>
+        <div class="panel-stat"><div class="num">${c.progress}%</div><div class="lbl">Goal</div></div>
       </div>
     </div>
-
     <div>
       <div class="panel-gauge-item">
-        <div class="panel-gauge-row">
-          <span class="panel-gauge-label">Nutrition Compliance</span>
-          <span class="panel-gauge-val">${c.nutritionCompliance}%</span>
-        </div>
+        <div class="panel-gauge-row"><span class="panel-gauge-label">Nutrition Compliance</span><span class="panel-gauge-val">${c.nutritionCompliance}%</span></div>
         <div class="panel-gauge-bar"><div class="panel-gauge-fill" style="width:${c.nutritionCompliance}%"></div></div>
       </div>
       <div class="panel-gauge-item">
-        <div class="panel-gauge-row">
-          <span class="panel-gauge-label">Volume Consistency</span>
-          <span class="panel-gauge-val">${c.volumeConsistency}%</span>
-        </div>
+        <div class="panel-gauge-row"><span class="panel-gauge-label">Volume Consistency</span><span class="panel-gauge-val">${c.volumeConsistency}%</span></div>
         <div class="panel-gauge-bar"><div class="panel-gauge-fill" style="width:${c.volumeConsistency}%"></div></div>
       </div>
     </div>
-
-    ${c.notes ? `
-    <div>
-      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:var(--space-xs)">Coach Notes</div>
-      <p style="font-size:0.8125rem;color:var(--on-surface-variant);line-height:1.55">${c.notes}</p>
-    </div>
-    ` : ''}
-
+    ${c.notes ? `<div><div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:8px">Coach Notes</div><p style="font-size:0.8125rem;color:var(--on-surface-variant);line-height:1.6">${c.notes}</p></div>` : ''}
     <a href="profile.html?id=${c.id}" class="topbar-btn topbar-btn-primary" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:auto;text-decoration:none">
       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       View Full Profile
-    </a>
-    ` : '<p style="color:var(--on-surface-variant)">No client details found.</p>'}
+    </a>` : '<p style="color:var(--on-surface-variant);font-size:0.875rem">No client details found.</p>'}
+  `;
+}
+
+/* ── EDIT MODE ─────────────────────────────── */
+function renderPanelEdit(evt) {
+  const props    = evt.extendedProps;
+  const c        = getClient(props.clientId);
+  const type     = props.type || 'elite';
+  const start    = evt.start;
+  const end      = evt.end;
+  const dateVal  = start ? start.toISOString().slice(0,10) : '';
+  const timeVal  = start ? start.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false }) : '07:00';
+  const durationMins = (start && end) ? Math.round((end - start) / 60000) : 60;
+
+  // Build client options
+  const clientOpts = CLIENTS.map(cl =>
+    `<option value="${cl.id}" ${cl.id === props.clientId ? 'selected' : ''}>${cl.firstName} ${cl.lastName}</option>`
+  ).join('');
+
+  document.getElementById('panelBody').innerHTML = `
+    <div>
+      <span class="pe-section-label">Client</span>
+      <div class="pe-field pe-select-wrap">
+        <select id="pe-client">${clientOpts}</select>
+        <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+
+      <div class="pe-grid2" style="margin-bottom:12px">
+        <div>
+          <span class="pe-section-label">Date</span>
+          <div class="pe-field"><input type="date" id="pe-date" value="${dateVal}"/></div>
+        </div>
+        <div>
+          <span class="pe-section-label">Start Time</span>
+          <div class="pe-field"><input type="time" id="pe-time" value="${timeVal}"/></div>
+        </div>
+      </div>
+
+      <div class="pe-grid2" style="margin-bottom:12px">
+        <div>
+          <span class="pe-section-label">Duration</span>
+          <div class="pe-field pe-select-wrap">
+            <select id="pe-duration">
+              <option value="30" ${durationMins===30?'selected':''}>30 min</option>
+              <option value="45" ${durationMins===45?'selected':''}>45 min</option>
+              <option value="60" ${durationMins===60?'selected':''}>60 min</option>
+              <option value="75" ${durationMins===75?'selected':''}>75 min</option>
+              <option value="90" ${durationMins===90?'selected':''}>90 min</option>
+              <option value="120" ${durationMins===120?'selected':''}>2 hours</option>
+            </select>
+            <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div>
+          <span class="pe-section-label">Type</span>
+          <div class="pe-field pe-select-wrap">
+            <select id="pe-type">
+              <option value="elite"  ${type==='elite' ?'selected':''}>1-on-1 Elite</option>
+              <option value="online" ${type==='online'?'selected':''}>Online</option>
+              <option value="group"  ${type==='group' ?'selected':''}>Group</option>
+            </select>
+            <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <span class="pe-section-label">Session Label</span>
+      <div class="pe-field" style="margin-bottom:20px">
+        <input type="text" id="pe-title" value="${evt.title}" placeholder="e.g. Upper Body Push A"/>
+      </div>
+
+      <div class="pe-divider"></div>
+
+      <div class="pe-actions">
+        <button class="pe-btn pe-btn-save" id="peSaveBtn">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Changes
+        </button>
+        <button class="pe-btn pe-btn-delete" id="peDeleteBtn">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Delete Session
+        </button>
+      </div>
+    </div>
   `;
 
+  // Save handler
+  document.getElementById('peSaveBtn').addEventListener('click', () => {
+    const newClientId = parseInt(document.getElementById('pe-client').value);
+    const newDate     = document.getElementById('pe-date').value;
+    const newTime     = document.getElementById('pe-time').value;
+    const newDuration = parseInt(document.getElementById('pe-duration').value);
+    const newType     = document.getElementById('pe-type').value;
+    const newTitle    = document.getElementById('pe-title').value.trim() ||
+                        (() => { const cl = getClient(newClientId); return cl ? `${cl.firstName} ${cl.lastName}` : evt.title; })();
+
+    const newStart = new Date(`${newDate}T${newTime}:00`);
+    const newEnd   = new Date(newStart.getTime() + newDuration * 60000);
+
+    // Mutate the FullCalendar event
+    evt.setDates(newStart, newEnd);
+    evt.setProp('title', newTitle);
+    evt.setProp('classNames', [`event-${newType}`]);
+    evt.setExtendedProp('type', newType);
+    evt.setExtendedProp('clientId', newClientId);
+
+    // Switch back to view mode
+    setActiveTab('view');
+    renderPanelView(evt);
+  });
+
+  // Delete handler
+  document.getElementById('peDeleteBtn').addEventListener('click', () => {
+    if (confirm(`Delete "${evt.title}"?`)) {
+      evt.remove();
+      closePanel();
+    }
+  });
+}
+
+/* ── TAB SWITCHING ──────────────────────────── */
+function setActiveTab(which) {
+  document.getElementById('tabView').classList.toggle('active', which === 'view');
+  document.getElementById('tabEdit').classList.toggle('active', which === 'edit');
+}
+
+document.getElementById('tabView').addEventListener('click', () => {
+  if (!currentPanelEvent) return;
+  setActiveTab('view');
+  renderPanelView(currentPanelEvent);
+});
+document.getElementById('tabEdit').addEventListener('click', () => {
+  if (!currentPanelEvent) return;
+  setActiveTab('edit');
+  renderPanelEdit(currentPanelEvent);
+});
+
+/* ── OPEN / CLOSE ───────────────────────────── */
+function openPanel(info) {
+  currentPanelEvent = info.event;
+  setActiveTab('view');
+  renderPanelView(info.event);
   panel.classList.add('open');
   overlay.classList.add('visible');
 }
@@ -2309,6 +2532,7 @@ function openPanel(info) {
 function closePanel() {
   panel.classList.remove('open');
   overlay.classList.remove('visible');
+  currentPanelEvent = null;
 }
 
 document.getElementById('panelClose').addEventListener('click', closePanel);
