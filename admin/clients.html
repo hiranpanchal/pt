@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clients — Lee Hayward PT Admin</title>
+  <style>
+/* =============================================
+   LEE HAYWARD PT — ADMIN DASHBOARD STYLES
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* === DESIGN TOKENS (same as main) === */
+:root {
+  --surface:                  #161213;
+  --surface-container-lowest: #110d0e;
+  --surface-container-low:    #1E1B1C;
+  --surface-container:        #252122;
+  --surface-container-high:   #2E2A2B;
+  --surface-container-highest:#383435;
+  --primary:                  #FF6B6B;
+  --primary-container:        #C02425;
+  --secondary:                #FFB787;
+  --secondary-container:      #A55100;
+  --on-primary:               #FFFFFF;
+  --on-surface:               #EDE0E1;
+  --on-surface-variant:       #9A8F90;
+  --outline-variant:          rgba(154, 143, 144, 0.15);
+  --gradient-cta:             linear-gradient(45deg, #C02425, #A55100);
+  --font-display:             'Lexend', sans-serif;
+  --font-body:                'Plus Jakarta Sans', sans-serif;
+  --space-xs:   0.5rem;
+  --space-sm:   1rem;
+  --space-md:   1.5rem;
+  --space-lg:   2rem;
+  --space-xl:   3rem;
+  --roundness-xs: 2px;
+  --roundness-sm: 4px;
+  --roundness-md: 8px;
+  --roundness-lg: 12px;
+  --transition-kinetic: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-float: 0 20px 40px rgba(17, 13, 14, 0.4);
+  --sidebar-width: 220px;
+}
+
+/* === RESET === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  font-family: var(--font-body);
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { cursor: pointer; font-family: var(--font-body); }
+
+/* === LAYOUT === */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--surface-container-lowest);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-lg) 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  border-right: 1px solid var(--outline-variant);
+}
+.sidebar-brand {
+  padding: 0 var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--outline-variant);
+  margin-bottom: var(--space-md);
+}
+.sidebar-logo {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  line-height: 1.2;
+}
+.sidebar-logo span { color: var(--primary-container); }
+.sidebar-sub {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  margin-top: 4px;
+}
+.sidebar-nav {
+  flex: 1;
+  padding: 0 var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--space-sm);
+  border-radius: var(--roundness-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  transition: var(--transition-kinetic);
+  position: relative;
+}
+.sidebar-link svg { width: 18px; height: 18px; stroke: currentColor; fill: none; flex-shrink: 0; }
+.sidebar-link:hover { background: var(--surface-container); color: var(--on-surface); }
+.sidebar-link.active {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+}
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--gradient-cta);
+  border-radius: 0 2px 2px 0;
+}
+.sidebar-footer {
+  padding: var(--space-md) var(--space-sm) 0;
+  border-top: 1px solid var(--outline-variant);
+  margin-top: var(--space-md);
+}
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-sm);
+  border-radius: var(--roundness-md);
+}
+.sidebar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gradient-cta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.sidebar-user-info h4 { font-size: 0.8125rem; font-weight: 600; color: var(--on-surface); }
+.sidebar-user-info p  { font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 1px; }
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--space-sm);
+  border-radius: var(--roundness-md);
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  background: none;
+  border: none;
+  width: 100%;
+  margin-top: 4px;
+  transition: var(--transition-kinetic);
+}
+.sidebar-logout svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+.sidebar-logout:hover { color: var(--primary-container); background: rgba(192,36,37,0.08); }
+
+/* === MAIN CONTENT === */
+.admin-main {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  min-height: 100vh;
+  background: var(--surface-container-lowest);
+  display: flex;
+  flex-direction: column;
+}
+
+/* === TOP BAR === */
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(17, 13, 14, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--outline-variant);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.admin-topbar-left h1 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  line-height: 1;
+}
+.admin-topbar-left p {
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+  margin-top: 3px;
+}
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.topbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--roundness-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  transition: var(--transition-kinetic);
+}
+.topbar-btn-primary {
+  background: var(--gradient-cta);
+  color: #fff;
+}
+.topbar-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.topbar-btn-secondary {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+.topbar-btn-secondary:hover { background: var(--surface-container-high); }
+.topbar-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+/* === PAGE CONTENT === */
+.admin-content {
+  flex: 1;
+  padding: var(--space-lg);
+}
+
+/* === KPI CARDS === */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.kpi-card {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  padding: var(--space-md) var(--space-lg);
+}
+.kpi-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  margin-bottom: var(--space-sm);
+}
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: var(--on-surface);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.kpi-value span { font-size: 1rem; color: var(--on-surface-variant); }
+.kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.kpi-bar { margin-top: var(--space-sm); }
+.kpi-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--on-surface-variant);
+  margin-bottom: 6px;
+}
+.kpi-bar-track {
+  height: 4px;
+  background: var(--surface-container-highest);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.kpi-bar-fill {
+  height: 100%;
+  background: var(--gradient-cta);
+  border-radius: 2px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === CLIENT TABLE === */
+.client-table-wrap {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  overflow: hidden;
+}
+.client-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--outline-variant);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+.client-tabs {
+  display: flex;
+  gap: 4px;
+}
+.tab-btn {
+  padding: 6px 14px;
+  border-radius: var(--roundness-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  transition: var(--transition-kinetic);
+}
+.tab-btn.active {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+}
+.tab-btn:hover:not(.active) { color: var(--on-surface); }
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-container);
+  border-radius: var(--roundness-sm);
+  padding: 6px 12px;
+}
+.search-wrap svg { width: 14px; height: 14px; stroke: var(--on-surface-variant); fill: none; flex-shrink: 0; }
+.search-wrap input {
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--on-surface);
+  width: 180px;
+}
+.search-wrap input::placeholder { color: var(--on-surface-variant); }
+.client-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.client-table thead tr {
+  border-bottom: 1px solid var(--outline-variant);
+}
+.client-table th {
+  padding: 10px var(--space-lg);
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+.client-table tbody tr {
+  border-bottom: 1px solid var(--outline-variant);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+.client-table tbody tr:last-child { border-bottom: none; }
+.client-table tbody tr:hover { background: var(--surface-container); }
+.client-table td {
+  padding: 14px var(--space-lg);
+  vertical-align: middle;
+}
+.client-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.client-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-container-high);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--on-surface-variant);
+}
+.client-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.client-name { font-size: 0.875rem; font-weight: 600; color: var(--on-surface); }
+.client-email { font-size: 0.75rem; color: var(--on-surface-variant); margin-top: 2px; }
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-active   { background: rgba(74,222,128,0.1); color: #4ade80; }
+.status-active::before  { background: #4ade80; }
+.status-onboarding { background: rgba(251,191,36,0.1); color: #fbbf24; }
+.status-onboarding::before { background: #fbbf24; }
+.status-paused   { background: rgba(154,143,144,0.15); color: var(--on-surface-variant); }
+.status-paused::before  { background: var(--on-surface-variant); }
+.tier-text { font-size: 0.8125rem; color: var(--on-surface-variant); }
+.progress-mini-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.progress-mini-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--surface-container-highest);
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 80px;
+}
+.progress-mini-fill { height: 100%; background: var(--gradient-cta); border-radius: 2px; }
+.progress-mini-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+}
+.action-btns {
+  display: flex;
+  gap: 6px;
+}
+.action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--roundness-sm);
+  background: var(--surface-container-high);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-kinetic);
+}
+.action-btn svg { width: 14px; height: 14px; stroke: var(--on-surface-variant); fill: none; }
+.action-btn:hover { background: var(--primary-container); }
+.action-btn:hover svg { stroke: #fff; }
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-lg);
+  border-top: 1px solid var(--outline-variant);
+}
+.table-info { font-size: 0.75rem; color: var(--on-surface-variant); }
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.page-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--roundness-sm);
+  background: var(--surface-container-high);
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  transition: var(--transition-kinetic);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+.page-btn.active { background: var(--primary-container); color: #fff; }
+.page-btn:hover:not(.active) { background: var(--surface-container-highest); color: var(--on-surface); }
+
+/* === PROFILE PAGE === */
+.profile-header {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+.profile-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--roundness-md);
+  background: var(--gradient-cta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+}
+.profile-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  margin-bottom: 4px;
+}
+.profile-name {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.profile-name .first { color: var(--on-surface); }
+.profile-name .last  { color: var(--surface-container-highest); }
+.profile-tags {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+.profile-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--roundness-sm);
+  background: var(--surface-container);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+.profile-tag.active { color: #4ade80; background: rgba(74,222,128,0.1); }
+.profile-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+.profile-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* === DASHBOARD GRID === */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+.dashboard-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.dash-card {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  padding: var(--space-lg);
+}
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+.dash-card-title {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+}
+.dash-card-subtitle {
+  font-size: 0.7rem;
+  color: var(--on-surface-variant);
+  margin-top: 3px;
+}
+.chart-toggle {
+  display: flex;
+  gap: 2px;
+}
+.chart-toggle-btn {
+  padding: 4px 10px;
+  border-radius: var(--roundness-xs);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  transition: var(--transition-fast);
+}
+.chart-toggle-btn.active {
+  background: var(--primary-container);
+  color: #fff;
+}
+
+/* Gauge */
+.gauge-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.gauge-item {}
+.gauge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.gauge-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+.gauge-val {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--on-surface);
+  line-height: 1;
+}
+.gauge-val .unit { font-size: 0.75rem; color: var(--on-surface-variant); }
+.gauge-bar {
+  height: 8px;
+  background: var(--surface-container-highest);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.gauge-fill {
+  height: 100%;
+  background: var(--gradient-cta);
+  border-radius: 4px;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Strength stat */
+.strength-display {
+  text-align: center;
+  padding: var(--space-md) 0;
+}
+.strength-num {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--on-surface);
+  line-height: 1;
+}
+.strength-unit { font-size: 1rem; color: var(--on-surface-variant); }
+.strength-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  margin-top: 8px;
+}
+.strength-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4ade80;
+  margin-top: var(--space-sm);
+}
+
+/* Activity feed */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-container);
+  border-radius: var(--roundness-md);
+  padding: 12px var(--space-md);
+  transition: var(--transition-fast);
+}
+.activity-item:hover { background: var(--surface-container-high); }
+.activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--roundness-sm);
+  background: var(--surface-container-high);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.activity-icon svg { width: 16px; height: 16px; stroke: var(--on-surface-variant); fill: none; }
+.activity-info { flex: 1; }
+.activity-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+.activity-meta {
+  font-size: 0.7rem;
+  color: var(--on-surface-variant);
+  margin-top: 2px;
+}
+.activity-status {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #4ade80;
+}
+
+/* Schedule */
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+.schedule-date {
+  text-align: center;
+  min-width: 40px;
+}
+.schedule-date .day {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--primary-container);
+  line-height: 1;
+}
+.schedule-date .month {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+.schedule-info { flex: 1; }
+.schedule-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+.schedule-subtitle {
+  font-size: 0.7rem;
+  color: var(--on-surface-variant);
+  margin-top: 2px;
+}
+.schedule-btn {
+  padding: 6px 14px;
+  border-radius: var(--roundness-sm);
+  background: var(--surface-container-high);
+  border: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  transition: var(--transition-fast);
+}
+.schedule-btn:hover { background: var(--primary-container); color: #fff; }
+
+/* === CALENDAR PAGE === */
+.calendar-wrap {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  padding: var(--space-lg);
+}
+
+/* FullCalendar overrides */
+.fc {
+  --fc-border-color: var(--outline-variant);
+  --fc-today-bg-color: rgba(192, 36, 37, 0.06);
+  --fc-event-bg-color: var(--primary-container);
+  --fc-event-border-color: transparent;
+  --fc-button-bg-color: var(--surface-container-high);
+  --fc-button-border-color: transparent;
+  --fc-button-active-bg-color: var(--primary-container);
+  --fc-button-active-border-color: transparent;
+  --fc-button-hover-bg-color: var(--surface-container-highest);
+  --fc-button-text-color: var(--on-surface);
+  --fc-page-bg-color: transparent;
+  font-family: var(--font-body);
+}
+.fc .fc-toolbar-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+}
+.fc .fc-button {
+  border-radius: var(--roundness-sm) !important;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+}
+.fc .fc-button-primary:not(.fc-button-active):hover {
+  background: var(--surface-container-highest);
+  border-color: transparent;
+}
+.fc th {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  padding: 8px;
+}
+.fc .fc-daygrid-day-number {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  padding: 6px;
+}
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: var(--primary-container); font-weight: 700; }
+.fc-event {
+  border-radius: var(--roundness-xs) !important;
+  font-size: 0.7rem !important;
+  padding: 2px 6px !important;
+  cursor: pointer;
+}
+.fc-event:hover { opacity: 0.85; }
+.fc .fc-timegrid-slot-label {
+  font-size: 0.65rem;
+  color: var(--on-surface-variant);
+}
+
+/* Event color classes */
+.event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
+.event-online   { background: #A55100 !important; border-color: transparent !important; }
+.event-group    { background: #2E5B9A !important; border-color: transparent !important; }
+
+/* Client detail panel */
+.client-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 360px;
+  background: var(--surface-container-low);
+  border-left: 1px solid var(--outline-variant);
+  transform: translateX(100%);
+  transition: transform var(--transition-kinetic);
+  z-index: 200;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+.client-panel.open { transform: translateX(0); }
+.panel-close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--roundness-sm);
+  background: var(--surface-container-high);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+.panel-close svg { width: 14px; height: 14px; stroke: var(--on-surface-variant); fill: none; }
+.panel-close:hover { background: var(--surface-container-highest); }
+
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,13,14,0.5);
+  z-index: 199;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-kinetic);
+}
+.panel-overlay.visible { opacity: 1; pointer-events: all; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,13,14,0.6);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-kinetic);
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  padding: var(--space-xl);
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-float);
+  transform: translateY(20px);
+  transition: transform var(--transition-kinetic);
+}
+.modal-backdrop.open .modal { transform: translateY(0); }
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  margin-bottom: var(--space-lg);
+}
+.modal-form .form-group { margin-bottom: var(--space-md); }
+.modal-form label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  margin-bottom: 6px;
+}
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  width: 100%;
+  background: var(--surface-container);
+  border: none;
+  border-bottom: 2px solid rgba(154,143,144,0.2);
+  border-radius: var(--roundness-xs) var(--roundness-xs) 0 0;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--on-surface);
+  outline: none;
+  transition: border-color var(--transition-kinetic);
+}
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus { border-bottom-color: var(--secondary); }
+.modal-form input::placeholder { color: var(--on-surface-variant); opacity: 0.5; }
+.modal-form select option { background: var(--surface-container-low); }
+.modal-form textarea { resize: vertical; min-height: 80px; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+.modal-btn {
+  padding: 8px 20px;
+  border-radius: var(--roundness-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  transition: var(--transition-kinetic);
+}
+.modal-btn-primary { background: var(--gradient-cta); color: #fff; }
+.modal-btn-primary:hover { opacity: 0.9; }
+.modal-btn-secondary { background: var(--surface-container-high); color: var(--on-surface-variant); }
+.modal-btn-secondary:hover { background: var(--surface-container-highest); }
+
+</style>
+</head>
+<body>
+<script>
+(function(){
+  if(localStorage.getItem('lhpt_auth') !== 'authenticated'){
+    window.location.replace('login.html');
+  }
+})();
+</script>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">Lee Hayward <span>PT</span></div>
+      <div class="sidebar-sub">Admin Portal</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="clients.html" class="sidebar-link active">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clients
+      </a>
+      <a href="calendar.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendar
+      </a>
+      <a href="../index.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        View Site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">LH</div>
+        <div class="sidebar-user-info">
+          <h4>Lee Hayward</h4>
+          <p>Master Coach</p>
+        </div>
+      </div>
+      <button class="sidebar-logout" onclick="(function(){localStorage.removeItem('lhpt_auth');window.location.replace('login.html');})()">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- TOP BAR -->
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <h1>Client Portfolio</h1>
+        <p>Managing the elite roster of Lee Hayward PT high-performance transformations.</p>
+      </div>
+      <div class="admin-topbar-right">
+        <button class="topbar-btn topbar-btn-primary" id="addClientBtn">
+          <svg viewBox="0 0 24 24" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New Client
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="admin-content">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- Client Table -->
+      <div class="client-table-wrap">
+        <div class="client-table-header">
+          <div class="client-tabs">
+            <button class="tab-btn active" data-filter="all">All Clients</button>
+            <button class="tab-btn" data-filter="active">Active</button>
+            <button class="tab-btn" data-filter="onboarding">Onboarding</button>
+            <button class="tab-btn" data-filter="paused">Paused</button>
+          </div>
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Search client…"/>
+          </div>
+        </div>
+
+        <table class="client-table" id="clientTable">
+          <thead>
+            <tr>
+              <th>Client Athlete</th>
+              <th>Program Status</th>
+              <th>Current Tier</th>
+              <th>Progress</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientTableBody">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+
+        <div class="table-footer" id="tableFooter">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ADD CLIENT MODAL -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Add New Client</div>
+    <form class="modal-form" id="addClientForm">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="nc-first" placeholder="First name" required/>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="nc-last" placeholder="Last name" required/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="nc-email" placeholder="email@example.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="nc-phone" placeholder="+44 7700 000000"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>Program</label>
+          <select id="nc-program">
+            <option>1-on-1 Training</option>
+            <option>Online Coaching</option>
+            <option>Group Sessions</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="nc-status">
+            <option value="onboarding">Onboarding</option>
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Goal</label>
+        <input type="text" id="nc-goal" placeholder="e.g. Build Muscle, Fat Loss…"/>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-btn-secondary" id="cancelAddClient">Cancel</button>
+        <button type="submit" class="modal-btn modal-btn-primary">Add Client</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* =============================================
+   LEE HAYWARD PT — ADMIN DASHBOARD JS
+   Mock data, client management, interactions
+   ============================================= */
+
+/* === MOCK DATA === */
+const CLIENTS = [
+  {
+    id: 1,
+    firstName: 'Marcus',
+    lastName:  'Thorne',
+    email:     'marcus.t@corporate.com',
+    phone:     '+44 7700 900001',
+    status:    'active',
+    tier:      'Elite Performance',
+    program:   '1-on-1 Training',
+    joined:    '2024-01-15',
+    phase:     'Hypertrophy',
+    progress:  75,
+    goal:      'Build Muscle',
+    weight:    92,
+    targetWeight: 95,
+    strengthIndex: 88,
+    volumeConsistency: 94,
+    nutritionCompliance: 82,
+    personalBest: { lift: 'Deadlift', weight: 260 },
+    strengthGain: '+22%',
+    notes: 'Highly motivated. Responds well to high volume. Watch lower back on deadlift days.',
+    weightHistory: [88, 89, 89.5, 90, 90.5, 91, 91.5, 92, 92, 92.3, 92.5, 92],
+    recentActivity: [
+      { type: 'workout', title: 'Upper Body Push A', time: 'Yesterday at 16:30', duration: '65 mins', status: 'completed' },
+      { type: 'nutrition', title: 'Nutrition Log Updated', time: '3 hours ago', calories: '3200 kcal', status: '' },
+      { type: 'workout', title: 'Lower Body Power', time: '2 days ago', duration: '70 mins', status: 'completed' },
+    ],
+    upcomingSchedule: [
+      { date: '14', month: 'APR', title: 'Upper Body Pull B', subtitle: 'Target: Lat Width & Rear Delts' },
+      { date: '16', month: 'APR', title: 'Active Recovery / Mobility', subtitle: 'Low intensity steady state + Foam Rolling' },
+      { date: '18', month: 'APR', title: 'Lower Body Power', subtitle: 'Target: Posterior Chain Dominance' },
+    ]
+  },
+  {
+    id: 2,
+    firstName: 'Sarah',
+    lastName:  'Chen',
+    email:     's.chen.fit@gmail.com',
+    phone:     '+44 7700 900002',
+    status:    'onboarding',
+    tier:      'Kinetic Lifestyle',
+    program:   'Online Coaching',
+    joined:    '2024-03-01',
+    phase:     'Foundation',
+    progress:  15,
+    goal:      'Fat Loss',
+    weight:    68,
+    targetWeight: 62,
+    strengthIndex: 45,
+    volumeConsistency: 60,
+    nutritionCompliance: 55,
+    personalBest: { lift: 'Squat', weight: 80 },
+    strengthGain: '+5%',
+    notes: 'New client, still calibrating. Nutrition logging needs improvement.',
+    weightHistory: [70, 69.5, 69, 68.5, 68.5, 68.2, 68, 68, 67.8, 68, 67.5, 68],
+    recentActivity: [
+      { type: 'workout', title: 'Full Body Foundation A', time: 'Today at 07:15', duration: '45 mins', status: 'completed' },
+      { type: 'nutrition', title: 'Nutrition Log Updated', time: '5 hours ago', calories: '1800 kcal', status: '' },
+    ],
+    upcomingSchedule: [
+      { date: '13', month: 'APR', title: 'Intro Call + Assessment', subtitle: 'Video call — programme calibration' },
+      { date: '15', month: 'APR', title: 'Full Body Foundation B', subtitle: 'Target: Movement Patterns' },
+    ]
+  },
+  {
+    id: 3,
+    firstName: 'Jameson',
+    lastName:  'Vane',
+    email:     'vane.performance@web.io',
+    phone:     '+44 7700 900003',
+    status:    'active',
+    tier:      'Ultimate Cut',
+    program:   '1-on-1 Training',
+    joined:    '2023-09-10',
+    phase:     'Cutting',
+    progress:  92,
+    goal:      'Fat Loss / Aesthetics',
+    weight:    82,
+    targetWeight: 78,
+    strengthIndex: 91,
+    volumeConsistency: 97,
+    nutritionCompliance: 88,
+    personalBest: { lift: 'Bench Press', weight: 140 },
+    strengthGain: '+18%',
+    notes: 'Elite performer. Near end of cut phase. Transition to maintenance in ~3 weeks.',
+    weightHistory: [90, 89, 88, 87, 86, 85.5, 85, 84.5, 84, 83, 82.5, 82],
+    recentActivity: [
+      { type: 'workout', title: 'Upper Body Push A', time: 'Yesterday at 17:45', duration: '65 mins', status: 'completed' },
+      { type: 'nutrition', title: 'Nutrition Log Updated', time: '2 hours ago', calories: '2850 kcal', status: '' },
+    ],
+    upcomingSchedule: [
+      { date: '14', month: 'APR', title: 'Lower Body Power', subtitle: 'Target: Posterior Chain Dominance' },
+      { date: '16', month: 'APR', title: 'Active Recovery / Mobility', subtitle: 'Low intensity steady state + Foam Rolling' },
+    ]
+  },
+  {
+    id: 4,
+    firstName: 'Elena',
+    lastName:  'Petrov',
+    email:     'petrov_e_recover@mail.ru',
+    phone:     '+44 7700 900004',
+    status:    'paused',
+    tier:      'Recovery Elite',
+    program:   'Online Coaching',
+    joined:    '2023-06-20',
+    phase:     'Rehabilitation',
+    progress:  44,
+    goal:      'Post-Injury Recovery',
+    weight:    65,
+    targetWeight: 65,
+    strengthIndex: 52,
+    volumeConsistency: 48,
+    nutritionCompliance: 72,
+    personalBest: { lift: 'Romanian Deadlift', weight: 70 },
+    strengthGain: '+8%',
+    notes: 'On pause due to travel. Resume April 20th. Lower back rehab protocol ongoing.',
+    weightHistory: [65, 65.5, 65.2, 65, 64.8, 65, 65.2, 65.5, 65, 64.8, 65, 65],
+    recentActivity: [
+      { type: 'workout', title: 'Rehab Protocol A', time: '2 weeks ago', duration: '35 mins', status: 'completed' },
+    ],
+    upcomingSchedule: [
+      { date: '20', month: 'APR', title: 'Programme Resume', subtitle: 'First session back — lower intensity' },
+    ]
+  },
+  {
+    id: 5,
+    firstName: 'Tyler',
+    lastName:  'Nash',
+    email:     'tyler.nash@gmail.com',
+    phone:     '+44 7700 900005',
+    status:    'active',
+    tier:      'Elite Performance',
+    program:   '1-on-1 Training',
+    joined:    '2024-02-01',
+    phase:     'Strength Block',
+    progress:  60,
+    goal:      'Athletic Performance',
+    weight:    88,
+    targetWeight: 90,
+    strengthIndex: 78,
+    volumeConsistency: 85,
+    nutritionCompliance: 76,
+    personalBest: { lift: 'Squat', weight: 200 },
+    strengthGain: '+14%',
+    notes: 'Former rugby player. Excellent base strength. Focus on hypertrophy accessory work.',
+    weightHistory: [86, 86.5, 87, 87, 87.5, 88, 88, 88.5, 88, 88, 88.5, 88],
+    recentActivity: [
+      { type: 'workout', title: 'Lower Body Strength', time: 'Today at 06:00', duration: '75 mins', status: 'completed' },
+      { type: 'nutrition', title: 'Nutrition Log Updated', time: '1 hour ago', calories: '3800 kcal', status: '' },
+    ],
+    upcomingSchedule: [
+      { date: '13', month: 'APR', title: 'Upper Body Push Power', subtitle: 'Target: Chest & Shoulder Strength' },
+      { date: '15', month: 'APR', title: 'Olympic Lifting Skill', subtitle: 'Power Clean technique refinement' },
+    ]
+  },
+  {
+    id: 6,
+    firstName: 'Priya',
+    lastName:  'Sharma',
+    email:     'p.sharma.fit@outlook.com',
+    phone:     '+44 7700 900006',
+    status:    'active',
+    tier:      'Kinetic Lifestyle',
+    program:   'Online Coaching',
+    joined:    '2024-01-28',
+    phase:     'Recomposition',
+    progress:  68,
+    goal:      'Body Recomposition',
+    weight:    58,
+    targetWeight: 57,
+    strengthIndex: 70,
+    volumeConsistency: 78,
+    nutritionCompliance: 85,
+    personalBest: { lift: 'Hip Thrust', weight: 120 },
+    strengthGain: '+16%',
+    notes: 'Excellent nutrition compliance. Strength progressing well.',
+    weightHistory: [60, 59.5, 59, 59, 58.5, 58.5, 58, 58, 58, 57.5, 58, 58],
+    recentActivity: [
+      { type: 'workout', title: 'Glute & Hamstring Day', time: 'Yesterday at 18:00', duration: '55 mins', status: 'completed' },
+    ],
+    upcomingSchedule: [
+      { date: '14', month: 'APR', title: 'Upper Body Hypertrophy', subtitle: 'Target: Shoulder & Back Volume' },
+      { date: '17', month: 'APR', title: 'Lower Body Recomp', subtitle: 'Quad dominant + glute finishers' },
+    ]
+  }
+];
+
+/* Persist to localStorage */
+function saveClients() {
+  localStorage.setItem('lhpt_clients', JSON.stringify(CLIENTS));
+}
+function loadClients() {
+  const stored = localStorage.getItem('lhpt_clients');
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    CLIENTS.length = 0;
+    parsed.forEach(c => CLIENTS.push(c));
+  } else {
+    saveClients();
+  }
+}
+loadClients();
+
+/* === HELPERS === */
+function getClient(id) {
+  return CLIENTS.find(c => c.id === id);
+}
+function getClientById(id) {
+  const idNum = parseInt(id);
+  return CLIENTS.find(c => c.id === idNum);
+}
+function getInitials(c) {
+  return (c.firstName[0] + c.lastName[0]).toUpperCase();
+}
+function statusLabel(s) {
+  return { active: 'Active', onboarding: 'Onboarding', paused: 'Paused' }[s] || s;
+}
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/* === CURRENT CLIENT (profile page) === */
+function getCurrentClientId() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  return id ? parseInt(id) : CLIENTS[0].id;
+}
+
+/* === NAVIGATE TO PROFILE === */
+function goToProfile(id) {
+  window.location.href = `profile.html?id=${id}`;
+}
+
+/* === KPI CALCULATIONS === */
+function getKPIs() {
+  const total   = CLIENTS.length;
+  const active  = CLIENTS.filter(c => c.status === 'active').length;
+  // Simulated revenue
+  const revenue = CLIENTS.filter(c => c.status === 'active').reduce((sum, c) => {
+    return sum + (c.program === '1-on-1 Training' ? 850 : c.program === 'Online Coaching' ? 350 : 180);
+  }, 0);
+  return { total, active, revenue };
+}
+
+/* === CALENDAR EVENTS === */
+function generateCalendarEvents() {
+  const events = [];
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  const sessionTemplates = [
+    { clientId: 1, title: 'Marcus Thorne — Upper Body Push', type: 'elite', hour: 7, duration: 1 },
+    { clientId: 3, title: 'Jameson Vane — Lower Body Power', type: 'elite', hour: 9, duration: 1 },
+    { clientId: 5, title: 'Tyler Nash — Strength Block', type: 'elite', hour: 6, duration: 1.25 },
+    { clientId: 2, title: 'Sarah Chen — Foundation', type: 'online', hour: 11, duration: 0.75 },
+    { clientId: 6, title: 'Priya Sharma — Recomp', type: 'online', hour: 18, duration: 0.75 },
+    { clientId: 1, title: 'Marcus Thorne — Active Recovery', type: 'elite', hour: 8, duration: 1 },
+    { clientId: 3, title: 'Jameson Vane — Upper Body Pull', type: 'elite', hour: 7, duration: 1 },
+    { clientId: 5, title: 'Tyler Nash — Olympic Lifting', type: 'elite', hour: 6, duration: 1 },
+    { clientId: 2, title: 'Group Session Alpha', type: 'group', hour: 10, duration: 1 },
+    { clientId: 6, title: 'Group Session Alpha', type: 'group', hour: 10, duration: 1 },
+    { clientId: 4, title: 'Elena Petrov — Resume', type: 'online', hour: 14, duration: 0.75 },
+  ];
+
+  // Spread events across next 4 weeks
+  for (let week = -1; week <= 3; week++) {
+    const days = [1, 2, 3, 4, 5, 6]; // Mon-Sat
+    sessionTemplates.forEach((t, i) => {
+      const day = days[i % days.length];
+      const d = new Date(year, month, now.getDate() + (week * 7) + (day - now.getDay()));
+      if (d.getMonth() !== month && d.getMonth() !== month + 1) return;
+      const start = new Date(d);
+      start.setHours(t.hour, 0, 0, 0);
+      const end = new Date(start);
+      end.setMinutes(end.getMinutes() + t.duration * 60);
+      events.push({
+        id: `evt-${week}-${i}`,
+        title: t.title,
+        start: start.toISOString(),
+        end:   end.toISOString(),
+        className: `event-${t.type}`,
+        extendedProps: { clientId: t.clientId, type: t.type }
+      });
+    });
+  }
+  return events;
+}
+
+window.LHPT = {
+  CLIENTS, getClient, getClientById, getInitials,
+  statusLabel, formatDate, getCurrentClientId,
+  goToProfile, getKPIs, generateCalendarEvents, saveClients
+};
+
+</script>
+<script>
+  const { CLIENTS, getInitials, statusLabel, getKPIs } = window.LHPT;
+
+  let currentFilter = 'all';
+  let searchQuery = '';
+
+  /* === RENDER KPIs === */
+  function renderKPIs() {
+    const kpis = getKPIs();
+    document.getElementById('kpiGrid').innerHTML = `
+      <div class="kpi-card">
+        <div class="kpi-label">Total Clients</div>
+        <div class="kpi-value">${kpis.total} <span style="font-size:1rem;color:var(--secondary)">+12%</span></div>
+        <div class="kpi-badge">↑ 12% vs last month</div>
+        <div class="kpi-bar">
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${(kpis.active/kpis.total*100).toFixed(0)}%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active Programs</div>
+        <div class="kpi-value">${kpis.active} <span style="font-size:0.875rem">Peak</span></div>
+        <div class="kpi-bar">
+          <div class="kpi-bar-label"><span>Active</span><span>${kpis.active}/${kpis.total}</span></div>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${(kpis.active/kpis.total*100).toFixed(0)}%"></div></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Monthly Revenue</div>
+        <div class="kpi-value">$${(kpis.revenue/1000).toFixed(1)}K <span>USD</span></div>
+        <div class="kpi-bar">
+          <div class="kpi-bar-label"><span>Target: $30K</span><span>${((kpis.revenue/30000)*100).toFixed(0)}% Achieved</span></div>
+          <div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${Math.min((kpis.revenue/30000)*100,100).toFixed(0)}%"></div></div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* === RENDER TABLE === */
+  function getFilteredClients() {
+    return CLIENTS.filter(c => {
+      const matchesFilter = currentFilter === 'all' || c.status === currentFilter;
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = !q ||
+        c.firstName.toLowerCase().includes(q) ||
+        c.lastName.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        c.tier.toLowerCase().includes(q);
+      return matchesFilter && matchesSearch;
+    });
+  }
+
+  function renderTable() {
+    const clients = getFilteredClients();
+    const tbody = document.getElementById('clientTableBody');
+
+    tbody.innerHTML = clients.map(c => `
+      <tr onclick="window.LHPT.goToProfile(${c.id})">
+        <td>
+          <div class="client-cell">
+            <div class="client-avatar">${getInitials(c)}</div>
+            <div>
+              <div class="client-name">${c.firstName} ${c.lastName}</div>
+              <div class="client-email">${c.email}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="status-badge status-${c.status}">${statusLabel(c.status)}</span></td>
+        <td><span class="tier-text">${c.tier}</span></td>
+        <td>
+          <div class="progress-mini-wrap">
+            <div class="progress-mini-bar">
+              <div class="progress-mini-fill" style="width:${c.progress}%"></div>
+            </div>
+            <span class="progress-mini-label">${c.progress}% ${c.status === 'paused' ? 'Paused' : 'Goal'}</span>
+          </div>
+        </td>
+        <td>
+          <div class="action-btns">
+            <button class="action-btn" title="Edit" onclick="event.stopPropagation();editClient(${c.id})">
+              <svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="action-btn" title="View Profile" onclick="event.stopPropagation();window.LHPT.goToProfile(${c.id})">
+              <svg viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    document.getElementById('tableFooter').innerHTML = `
+      <span class="table-info">Showing ${clients.length} of ${CLIENTS.length} clients</span>
+      <div class="pagination">
+        <button class="page-btn"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    `;
+  }
+
+  /* === TABS === */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderTable();
+    });
+  });
+
+  /* === SEARCH === */
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    renderTable();
+  });
+
+  /* === ADD CLIENT MODAL === */
+  const addModal = document.getElementById('addModal');
+  document.getElementById('addClientBtn').addEventListener('click', () => {
+    addModal.classList.add('open');
+  });
+  document.getElementById('cancelAddClient').addEventListener('click', () => {
+    addModal.classList.remove('open');
+  });
+  addModal.addEventListener('click', (e) => {
+    if (e.target === addModal) addModal.classList.remove('open');
+  });
+
+  document.getElementById('addClientForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newClient = {
+      id: CLIENTS.length + 1,
+      firstName: document.getElementById('nc-first').value,
+      lastName:  document.getElementById('nc-last').value,
+      email:     document.getElementById('nc-email').value,
+      phone:     document.getElementById('nc-phone').value || '',
+      status:    document.getElementById('nc-status').value,
+      tier:      document.getElementById('nc-program').value,
+      program:   document.getElementById('nc-program').value,
+      joined:    new Date().toISOString().split('T')[0],
+      phase:     'Onboarding',
+      progress:  0,
+      goal:      document.getElementById('nc-goal').value || '',
+      weight:    0,
+      targetWeight: 0,
+      strengthIndex: 0,
+      volumeConsistency: 0,
+      nutritionCompliance: 0,
+      personalBest: { lift: '—', weight: 0 },
+      strengthGain: '0%',
+      notes: '',
+      weightHistory: [0,0,0,0,0,0,0,0,0,0,0,0],
+      recentActivity: [],
+      upcomingSchedule: []
+    };
+    CLIENTS.push(newClient);
+    window.LHPT.saveClients();
+    addModal.classList.remove('open');
+    e.target.reset();
+    renderKPIs();
+    renderTable();
+  });
+
+  /* === EDIT CLIENT (simple modal re-use) === */
+  function editClient(id) {
+    const c = CLIENTS.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('nc-first').value   = c.firstName;
+    document.getElementById('nc-last').value    = c.lastName;
+    document.getElementById('nc-email').value   = c.email;
+    document.getElementById('nc-phone').value   = c.phone;
+    document.getElementById('nc-goal').value    = c.goal;
+    document.getElementById('nc-program').value = c.program;
+    document.getElementById('nc-status').value  = c.status;
+    addModal.classList.add('open');
+    document.querySelector('.modal-title').textContent = 'Edit Client';
+  }
+
+  /* === INIT === */
+  renderKPIs();
+  renderTable();
+</script>
+</body>
+</html>

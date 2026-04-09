@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Services — Lee Hayward PT</title>
+  <meta name="description" content="High Performance Methodology — 1-on-1 Training, Online Coaching, and Group Sessions."/>
+  <style>
+/* =============================================
+   LEE HAYWARD PT — KINETIC EDITORIAL DESIGN SYSTEM
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* === DESIGN TOKENS === */
+:root {
+  /* Surface Hierarchy */
+  --surface:                 #161213;
+  --surface-container-lowest: #110d0e;
+  --surface-container-low:   #1E1B1C;
+  --surface-container:       #252122;
+  --surface-container-high:  #2E2A2B;
+  --surface-container-highest: #383435;
+  --surface-variant:         rgba(56, 52, 53, 0.7);
+
+  /* Brand */
+  --primary:                 #FF6B6B;
+  --primary-container:       #C02425;
+  --secondary:               #FFB787;
+  --secondary-container:     #A55100;
+  --on-primary:              #FFFFFF;
+  --on-surface:              #EDE0E1;
+  --on-surface-variant:      #9A8F90;
+  --outline-variant:         rgba(154, 143, 144, 0.15);
+
+  /* Gradients */
+  --gradient-cta:            linear-gradient(45deg, #C02425, #A55100);
+  --gradient-hero:           linear-gradient(180deg, rgba(22,18,19,0) 0%, rgba(22,18,19,0.7) 60%, #161213 100%);
+  --gradient-section:        linear-gradient(180deg, #161213 0%, #1E1B1C 50%, #161213 100%);
+
+  /* Typography */
+  --font-display:            'Lexend', sans-serif;
+  --font-body:               'Plus Jakarta Sans', sans-serif;
+
+  /* Spacing */
+  --space-xs:   0.5rem;
+  --space-sm:   1rem;
+  --space-md:   1.5rem;
+  --space-lg:   2.5rem;
+  --space-xl:   4rem;
+  --space-2xl:  6rem;
+  --space-3xl:  10rem;
+
+  /* Roundness (performance-oriented, not circular) */
+  --roundness-xs:  2px;
+  --roundness-sm:  4px;
+  --roundness-md:  8px;
+  --roundness-lg:  12px;
+
+  /* Shadows */
+  --shadow-float:  0 20px 40px rgba(17, 13, 14, 0.4);
+  --shadow-glow:   0 0 40px rgba(192, 36, 37, 0.08);
+
+  /* Transitions */
+  --transition-kinetic: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast:    150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--surface);
+  color: var(--on-surface);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+a  { color: inherit; text-decoration: none; }
+
+/* === TYPOGRAPHY SCALE === */
+.display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 9vw, 8rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+.display-md {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.headline-lg {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+.headline-md {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.title-lg {
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.body-lg {
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--on-surface-variant);
+}
+.body-md {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--on-surface-variant);
+}
+.label-lg {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+/* === COLOR UTILITIES === */
+.text-primary    { color: var(--primary-container); }
+.text-secondary  { color: var(--secondary); }
+.text-on-surface { color: var(--on-surface); }
+.text-muted      { color: var(--on-surface-variant); }
+
+/* === LAYOUT === */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+.container-sm {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+.section {
+  padding: var(--space-3xl) 0;
+}
+.section-sm {
+  padding: var(--space-2xl) 0;
+}
+
+/* === NAVIGATION === */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: var(--space-md) 0;
+  transition: var(--transition-kinetic);
+}
+.nav.scrolled {
+  background: rgba(22, 18, 19, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: var(--space-sm) 0;
+  box-shadow: var(--shadow-float);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+}
+.nav-logo span {
+  color: var(--primary-container);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  list-style: none;
+}
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  transition: color var(--transition-fast);
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-cta);
+  transition: width var(--transition-kinetic);
+}
+.nav-links a:hover { color: var(--on-surface); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--on-surface); }
+.nav-links a.active::after { width: 100%; }
+
+/* === BUTTONS === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.875rem 2rem;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--roundness-sm);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-kinetic);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--gradient-cta);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(192, 36, 37, 0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(192, 36, 37, 0.4);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-ghost {
+  background: transparent;
+  color: var(--on-surface);
+  border: 1px solid rgba(154, 143, 144, 0.15);
+}
+.btn-ghost:hover {
+  border-color: var(--on-surface);
+  background: rgba(237, 224, 225, 0.05);
+}
+.btn-sm {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.75rem;
+}
+
+/* === OVERLINE / EYEBROW === */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--primary-container);
+  margin-bottom: var(--space-md);
+}
+.eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--gradient-cta);
+}
+
+/* === CARD === */
+.card {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  padding: var(--space-lg);
+  transition: var(--transition-kinetic);
+}
+.card:hover {
+  background: var(--surface-container-high);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-float);
+}
+
+/* === PROGRESS BAR === */
+.progress-bar {
+  height: 6px;
+  background: var(--surface-container-highest);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: var(--space-xs);
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-cta);
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left;
+}
+
+/* === STAT CHIP (glass overlay) === */
+.stat-chip {
+  display: inline-flex;
+  flex-direction: column;
+  background: rgba(56, 52, 53, 0.7);
+  backdrop-filter: blur(20px);
+  border-radius: var(--roundness-md);
+  padding: var(--space-sm) var(--space-md);
+}
+
+/* === REVEAL ANIMATIONS === */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+/* === FOOTER === */
+.footer {
+  background: var(--surface-container-lowest);
+  padding: var(--space-2xl) 0 var(--space-lg);
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+.footer-brand p {
+  max-width: 300px;
+  margin-top: var(--space-md);
+}
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  margin-bottom: var(--space-md);
+}
+.footer-col ul { list-style: none; }
+.footer-col ul li {
+  margin-bottom: var(--space-xs);
+}
+.footer-col ul li a {
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  transition: color var(--transition-fast);
+}
+.footer-col ul li a:hover { color: var(--on-surface); }
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--outline-variant);
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
+/* === MOBILE NAV TOGGLE === */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.nav-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--on-surface);
+  transition: var(--transition-kinetic);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 var(--space-md); }
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    background: var(--surface-container-lowest);
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-xl);
+    z-index: 99;
+  }
+  .nav-links.open a { font-size: 1.5rem; }
+  .footer-grid { grid-template-columns: 1fr; gap: var(--space-lg); }
+  .footer-bottom { flex-direction: column; gap: var(--space-sm); text-align: center; }
+}
+
+/* === LOADING SCREEN === */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--surface-container-lowest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+.loader-inner {
+  text-align: center;
+}
+.loader-logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  margin-bottom: var(--space-lg);
+}
+.loader-logo span { color: var(--primary-container); }
+.loader-bar {
+  width: 200px;
+  height: 2px;
+  background: var(--surface-container-highest);
+  border-radius: 1px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.loader-bar-fill {
+  height: 100%;
+  background: var(--gradient-cta);
+  animation: loaderFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes loaderFill {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+</style>
+  <style>
+    /* ── SERVICES PAGE STYLES ── */
+
+    /* Page Hero */
+    .page-hero {
+      position: relative;
+      padding: calc(var(--space-3xl) + 80px) 0 var(--space-3xl);
+      background: var(--surface-container-lowest);
+      overflow: hidden;
+    }
+    .page-hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(192,36,37,0.06) 0%, transparent 60%),
+        url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600&q=80&fit=crop') center/cover no-repeat;
+      opacity: 0.35;
+    }
+    .page-hero-content { position: relative; z-index: 1; }
+    .page-hero .display-lg { margin-top: var(--space-sm); }
+    .page-hero-sub {
+      max-width: 520px;
+      margin-top: var(--space-md);
+    }
+
+    /* Methodology Overview */
+    .methodology {
+      background: var(--surface-container-low);
+    }
+    .methodology-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
+      align-items: center;
+    }
+    .methodology-img {
+      width: 100%;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      border-radius: var(--roundness-lg);
+      filter: grayscale(20%) contrast(1.1);
+    }
+    .methodology-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-top: var(--space-xl);
+    }
+    .mstat {
+      background: var(--surface-container-high);
+      border-radius: var(--roundness-md);
+      padding: var(--space-md);
+    }
+    .mstat .num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--primary-container);
+      line-height: 1;
+    }
+    .mstat .lbl {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-top: 4px;
+    }
+
+    /* Pricing */
+    .pricing {
+      background: var(--surface);
+    }
+    .pricing-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto var(--space-3xl);
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+    .pricing-card {
+      background: var(--surface-container-low);
+      border-radius: var(--roundness-lg);
+      padding: var(--space-xl) var(--space-lg);
+      position: relative;
+      transition: var(--transition-kinetic);
+    }
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-float);
+    }
+    .pricing-card.featured {
+      background: var(--surface-container);
+      border: 1px solid rgba(192,36,37,0.3);
+      box-shadow: 0 0 50px rgba(192,36,37,0.08);
+    }
+    .pricing-card.featured:hover {
+      box-shadow: 0 20px 60px rgba(192,36,37,0.15);
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: var(--space-lg);
+      background: var(--gradient-cta);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 3px;
+    }
+    .pricing-tier {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--primary-container);
+      margin-bottom: var(--space-sm);
+    }
+    .pricing-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--on-surface);
+      margin-bottom: var(--space-lg);
+      line-height: 1.1;
+    }
+    .pricing-price {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      margin-bottom: var(--space-xl);
+    }
+    .pricing-price .amount {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--on-surface);
+      line-height: 1;
+    }
+    .pricing-price .period {
+      font-size: 0.8125rem;
+      color: var(--on-surface-variant);
+      padding-bottom: 6px;
+    }
+    .pricing-features {
+      list-style: none;
+      margin-bottom: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .pricing-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+      line-height: 1.5;
+    }
+    .pricing-features li::before {
+      content: '';
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      margin-top: 1px;
+      background: var(--primary-container);
+      border-radius: 50%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+      background-size: 10px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .pricing-card .btn { width: 100%; justify-content: center; }
+
+    /* Differentiator */
+    .differentiator {
+      background: var(--surface-container-low);
+    }
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
+      align-items: center;
+    }
+    .diff-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: var(--roundness-lg);
+      filter: grayscale(30%) contrast(1.1);
+    }
+    .diff-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-top: var(--space-xl);
+    }
+    .diff-stat .num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--primary-container);
+      line-height: 1;
+    }
+    .diff-stat .lbl {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-top: 6px;
+    }
+
+    /* Bottom CTA */
+    .services-cta {
+      background: var(--surface);
+      text-align: center;
+    }
+    .services-cta .display-lg { line-height: 1; }
+    .services-cta-btns {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: var(--space-xl);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+      .methodology-grid, .diff-grid { grid-template-columns: 1fr; gap: var(--space-xl); }
+      .methodology-img, .diff-img { aspect-ratio: 16/9; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="loader-inner">
+      <div class="loader-logo">Lee Hayward <span>PT</span></div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="nav" id="nav">
+    <div class="container">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Lee Hayward <span>PT</span></a>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="admin/clients.html" style="color:var(--primary-container)">Portal →</a></li>
+        </ul>
+        <a href="contact.html" class="btn btn-primary btn-sm">Get Started</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="container">
+      <div class="page-hero-content">
+        <div class="eyebrow">Engineered Results</div>
+        <h1 class="display-lg">High Performance<br/><span style="color:var(--primary-container)">Methodology</span></h1>
+        <p class="page-hero-sub body-lg">Rejecting the standard. We deliver bespoke physical architecture through science-backed coaching and relentless execution.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHODOLOGY -->
+  <section class="methodology section">
+    <div class="container">
+      <div class="methodology-grid">
+        <div class="reveal-left">
+          <img
+            src="https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800&q=80&fit=crop"
+            alt="High Performance Training"
+            class="methodology-img"
+          />
+        </div>
+        <div class="reveal-right">
+          <div class="eyebrow">The Approach</div>
+          <h2 class="display-md">The Kinetic<br/><span style="color:var(--primary-container)">Difference</span></h2>
+          <p class="body-lg" style="margin-top:var(--space-lg)">Standard coaching platforms focus on volume. We focus on velocity — of results, of data processing, and of technical mastery. Every package is a blueprint for evolution.</p>
+          <p class="body-lg" style="margin-top:var(--space-md)">Each programme is individually crafted using biometric movement analysis, real-time progress auditing, and macro-nutrient engineering. This isn't a template — it's architecture.</p>
+          <div class="methodology-stats">
+            <div class="mstat">
+              <div class="num"><span data-target="98" data-suffix="%">0%</span></div>
+              <div class="lbl">Client Retention</div>
+            </div>
+            <div class="mstat">
+              <div class="num"><span data-target="12" data-suffix="k+">0k+</span></div>
+              <div class="lbl">Training Hours</div>
+            </div>
+            <div class="mstat">
+              <div class="num"><span data-target="250" data-suffix="+">0+</span></div>
+              <div class="lbl">Transformations</div>
+            </div>
+            <div class="mstat">
+              <div class="num"><span data-target="4.9" data-suffix="/5">0/5</span></div>
+              <div class="lbl">Average Rating</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING TIERS -->
+  <section class="pricing section">
+    <div class="container">
+      <div class="pricing-header reveal">
+        <div class="eyebrow">Choose Your Tier</div>
+        <h2 class="display-md">Training<br/><span style="color:var(--primary-container)">Programmes</span></h2>
+        <p class="body-lg" style="margin-top:var(--space-md)">Three tiers of performance architecture. Each built to a different specification, all engineered for results.</p>
+      </div>
+
+      <div class="pricing-grid">
+
+        <!-- 1-on-1 -->
+        <div class="pricing-card reveal reveal-delay-1">
+          <div class="pricing-tier">Elite Tier</div>
+          <h3>1-on-1<br/>Training</h3>
+          <div class="pricing-price">
+            <span class="amount">$850</span>
+            <span class="period">/mo</span>
+          </div>
+          <ul class="pricing-features">
+            <li>Biometric movement analysis and customised kinetic programming</li>
+            <li>Nutrition architecture integrated with metabolic tracking</li>
+            <li>Direct 24/7 access to Coach Hayward via priority portal</li>
+            <li>Weekly in-person sessions (3x per week)</li>
+            <li>Monthly physiological assessment &amp; programme evolution</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary">Apply Now</a>
+        </div>
+
+        <!-- Online Coaching (featured) -->
+        <div class="pricing-card featured reveal reveal-delay-2">
+          <div class="pricing-badge">Most Popular</div>
+          <div class="pricing-tier">Performance Tier</div>
+          <h3>Online<br/>Coaching</h3>
+          <div class="pricing-price">
+            <span class="amount">$350</span>
+            <span class="period">/mo</span>
+          </div>
+          <ul class="pricing-features">
+            <li>Weekly performance auditing and technical video feedback</li>
+            <li>Dynamic training app access with real-time progress metrics</li>
+            <li>Macro-nutrient steering and supplement protocols</li>
+            <li>Monthly strategy calls for long-term physiological mapping</li>
+            <li>Access to private Kinetic athlete community</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary">Start Remote</a>
+        </div>
+
+        <!-- Group Sessions -->
+        <div class="pricing-card reveal reveal-delay-3">
+          <div class="pricing-tier">Community Alpha</div>
+          <h3>Group<br/>Sessions</h3>
+          <div class="pricing-price">
+            <span class="amount">$45</span>
+            <span class="period">/session</span>
+          </div>
+          <ul class="pricing-features">
+            <li>High-intensity metabolic conditioning in a competitive setting</li>
+            <li>Limited to 6 participants per session for technical integrity</li>
+            <li>Access to the private Kinetic athlete community Slack</li>
+            <li>Monthly group challenge events</li>
+            <li>Introductory nutrition guidance</li>
+          </ul>
+          <a href="contact.html" class="btn btn-ghost">Book Session</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFFERENTIATOR -->
+  <section class="differentiator section">
+    <div class="container">
+      <div class="diff-grid">
+        <div class="reveal-left">
+          <div class="eyebrow">Why Kinetic</div>
+          <h2 class="display-md">Stop Guessing.<br/><span style="color:var(--primary-container)">Start<br/>Architecting.</span></h2>
+          <p class="body-lg" style="margin-top:var(--space-lg)">Standard coaching platforms focus on volume. We focus on velocity — of results, of data processing, and of technical mastery. Every package is a blueprint for evolution.</p>
+          <div class="diff-stats">
+            <div class="diff-stat">
+              <div class="num"><span data-target="98" data-suffix="%">0%</span></div>
+              <div class="lbl">Client Retention</div>
+            </div>
+            <div class="diff-stat">
+              <div class="num"><span data-target="12" data-suffix="k+">0k+</span></div>
+              <div class="lbl">Training Hours</div>
+            </div>
+          </div>
+          <div class="services-cta-btns" style="justify-content:flex-start;margin-top:var(--space-xl)">
+            <a href="contact.html" class="btn btn-primary">Free Consultation</a>
+            <a href="#pricing" class="btn btn-ghost">View Schedule</a>
+          </div>
+        </div>
+        <div class="reveal-right">
+          <img
+            src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=800&q=80&fit=crop"
+            alt="Kinetic Training"
+            class="diff-img"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo" style="font-size:1.125rem">Lee Hayward <span style="color:var(--primary-container)">PT</span></div>
+          <p class="body-md" style="margin-top:var(--space-md)">High-performance personal training and coaching. The Kinetic Method — engineered for results, sustained by discipline.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Programs</h4>
+          <ul>
+            <li><a href="services.html">1-on-1 Training</a></li>
+            <li><a href="services.html">Online Coaching</a></li>
+            <li><a href="services.html">Group Sessions</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="contact.html">Email</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 Lee Hayward PT. Kinetic Editorial Design.</span>
+        <div style="display:flex;gap:var(--space-lg)">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">FAQ</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+/* =============================================
+   LEE HAYWARD PT — BROCHURE SITE JS
+   Kinetic animations, scroll reveals, nav logic
+   ============================================= */
+
+/* === LOADER === */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.querySelector('.loader');
+    if (loader) loader.classList.add('hidden');
+  }, 1300);
+});
+
+/* === NAVIGATION SCROLL === */
+const nav = document.querySelector('.nav');
+const navToggle = document.querySelector('.nav-toggle');
+const navLinks = document.querySelector('.nav-links');
+
+if (nav) {
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+}
+
+if (navToggle && navLinks) {
+  navToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+    document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+}
+
+/* === INTERSECTION OBSERVER — SCROLL REVEALS === */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+  revealObserver.observe(el);
+});
+
+/* === ANIMATED NUMBERS (count-up) === */
+function animateNumber(el) {
+  const target = parseFloat(el.dataset.target);
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const duration = 1800;
+  const start = performance.now();
+
+  function update(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease out cubic
+    const current = target * eased;
+    el.textContent = prefix + (Number.isInteger(target) ? Math.floor(current) : current.toFixed(1)) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+    else el.textContent = prefix + target + suffix;
+  }
+  requestAnimationFrame(update);
+}
+
+const statObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !entry.target.dataset.animated) {
+      entry.target.dataset.animated = 'true';
+      animateNumber(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('[data-target]').forEach(el => statObserver.observe(el));
+
+/* === PARALLAX HERO OFFSET === */
+const heroBg = document.querySelector('.hero-bg');
+if (heroBg) {
+  window.addEventListener('scroll', () => {
+    const offset = window.scrollY * 0.35;
+    heroBg.style.transform = `translateY(${offset}px)`;
+  }, { passive: true });
+}
+
+/* === MAGNETIC BUTTONS === */
+document.querySelectorAll('.btn-primary').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top  - rect.height / 2;
+    btn.style.transform = `translate(${x * 0.12}px, ${y * 0.18}px) translateY(-2px)`;
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+  });
+});
+
+/* === TICKER / MARQUEE (if present) === */
+const ticker = document.querySelector('.ticker-inner');
+if (ticker) {
+  // Duplicate content for seamless loop
+  ticker.innerHTML += ticker.innerHTML;
+}
+
+/* === ACTIVE NAV LINK === */
+const path = window.location.pathname.split('/').pop() || 'index.html';
+document.querySelectorAll('.nav-links a').forEach(a => {
+  const href = a.getAttribute('href');
+  if (href === path || (path === '' && href === 'index.html')) {
+    a.classList.add('active');
+  }
+});
+
+/* === SMOOTH ANCHOR SCROLL === */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', (e) => {
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+/* === CURSOR GLOW (desktop only) === */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const glow = document.createElement('div');
+  glow.className = 'cursor-glow';
+  glow.style.cssText = `
+    position: fixed; pointer-events: none; z-index: 9998;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,36,37,0.06) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+    top: 0; left: 0;
+  `;
+  document.body.appendChild(glow);
+
+  let mx = 0, my = 0, gx = 0, gy = 0;
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
+
+  function animateCursor() {
+    gx += (mx - gx) * 0.08;
+    gy += (my - gy) * 0.08;
+    glow.style.left = gx + 'px';
+    glow.style.top  = gy + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+}
+
+</script>
+</body>
+</html>

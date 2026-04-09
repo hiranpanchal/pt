@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lee Hayward PT — Transform Your Potential</title>
+  <meta name="description" content="High-performance personal training and coaching. The Kinetic Method — engineered for results, sustained by discipline."/>
+  <style>
+/* =============================================
+   LEE HAYWARD PT — KINETIC EDITORIAL DESIGN SYSTEM
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* === DESIGN TOKENS === */
+:root {
+  /* Surface Hierarchy */
+  --surface:                 #161213;
+  --surface-container-lowest: #110d0e;
+  --surface-container-low:   #1E1B1C;
+  --surface-container:       #252122;
+  --surface-container-high:  #2E2A2B;
+  --surface-container-highest: #383435;
+  --surface-variant:         rgba(56, 52, 53, 0.7);
+
+  /* Brand */
+  --primary:                 #FF6B6B;
+  --primary-container:       #C02425;
+  --secondary:               #FFB787;
+  --secondary-container:     #A55100;
+  --on-primary:              #FFFFFF;
+  --on-surface:              #EDE0E1;
+  --on-surface-variant:      #9A8F90;
+  --outline-variant:         rgba(154, 143, 144, 0.15);
+
+  /* Gradients */
+  --gradient-cta:            linear-gradient(45deg, #C02425, #A55100);
+  --gradient-hero:           linear-gradient(180deg, rgba(22,18,19,0) 0%, rgba(22,18,19,0.7) 60%, #161213 100%);
+  --gradient-section:        linear-gradient(180deg, #161213 0%, #1E1B1C 50%, #161213 100%);
+
+  /* Typography */
+  --font-display:            'Lexend', sans-serif;
+  --font-body:               'Plus Jakarta Sans', sans-serif;
+
+  /* Spacing */
+  --space-xs:   0.5rem;
+  --space-sm:   1rem;
+  --space-md:   1.5rem;
+  --space-lg:   2.5rem;
+  --space-xl:   4rem;
+  --space-2xl:  6rem;
+  --space-3xl:  10rem;
+
+  /* Roundness (performance-oriented, not circular) */
+  --roundness-xs:  2px;
+  --roundness-sm:  4px;
+  --roundness-md:  8px;
+  --roundness-lg:  12px;
+
+  /* Shadows */
+  --shadow-float:  0 20px 40px rgba(17, 13, 14, 0.4);
+  --shadow-glow:   0 0 40px rgba(192, 36, 37, 0.08);
+
+  /* Transitions */
+  --transition-kinetic: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast:    150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--surface);
+  color: var(--on-surface);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+a  { color: inherit; text-decoration: none; }
+
+/* === TYPOGRAPHY SCALE === */
+.display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 9vw, 8rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+.display-md {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.headline-lg {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+.headline-md {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.title-lg {
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.body-lg {
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--on-surface-variant);
+}
+.body-md {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--on-surface-variant);
+}
+.label-lg {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+/* === COLOR UTILITIES === */
+.text-primary    { color: var(--primary-container); }
+.text-secondary  { color: var(--secondary); }
+.text-on-surface { color: var(--on-surface); }
+.text-muted      { color: var(--on-surface-variant); }
+
+/* === LAYOUT === */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+.container-sm {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+.section {
+  padding: var(--space-3xl) 0;
+}
+.section-sm {
+  padding: var(--space-2xl) 0;
+}
+
+/* === NAVIGATION === */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: var(--space-md) 0;
+  transition: var(--transition-kinetic);
+}
+.nav.scrolled {
+  background: rgba(22, 18, 19, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: var(--space-sm) 0;
+  box-shadow: var(--shadow-float);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+}
+.nav-logo span {
+  color: var(--primary-container);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  list-style: none;
+}
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  transition: color var(--transition-fast);
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-cta);
+  transition: width var(--transition-kinetic);
+}
+.nav-links a:hover { color: var(--on-surface); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--on-surface); }
+.nav-links a.active::after { width: 100%; }
+
+/* === BUTTONS === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.875rem 2rem;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--roundness-sm);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-kinetic);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--gradient-cta);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(192, 36, 37, 0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(192, 36, 37, 0.4);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-ghost {
+  background: transparent;
+  color: var(--on-surface);
+  border: 1px solid rgba(154, 143, 144, 0.15);
+}
+.btn-ghost:hover {
+  border-color: var(--on-surface);
+  background: rgba(237, 224, 225, 0.05);
+}
+.btn-sm {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.75rem;
+}
+
+/* === OVERLINE / EYEBROW === */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--primary-container);
+  margin-bottom: var(--space-md);
+}
+.eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--gradient-cta);
+}
+
+/* === CARD === */
+.card {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  padding: var(--space-lg);
+  transition: var(--transition-kinetic);
+}
+.card:hover {
+  background: var(--surface-container-high);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-float);
+}
+
+/* === PROGRESS BAR === */
+.progress-bar {
+  height: 6px;
+  background: var(--surface-container-highest);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: var(--space-xs);
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-cta);
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left;
+}
+
+/* === STAT CHIP (glass overlay) === */
+.stat-chip {
+  display: inline-flex;
+  flex-direction: column;
+  background: rgba(56, 52, 53, 0.7);
+  backdrop-filter: blur(20px);
+  border-radius: var(--roundness-md);
+  padding: var(--space-sm) var(--space-md);
+}
+
+/* === REVEAL ANIMATIONS === */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+/* === FOOTER === */
+.footer {
+  background: var(--surface-container-lowest);
+  padding: var(--space-2xl) 0 var(--space-lg);
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+.footer-brand p {
+  max-width: 300px;
+  margin-top: var(--space-md);
+}
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  margin-bottom: var(--space-md);
+}
+.footer-col ul { list-style: none; }
+.footer-col ul li {
+  margin-bottom: var(--space-xs);
+}
+.footer-col ul li a {
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  transition: color var(--transition-fast);
+}
+.footer-col ul li a:hover { color: var(--on-surface); }
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--outline-variant);
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
+/* === MOBILE NAV TOGGLE === */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.nav-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--on-surface);
+  transition: var(--transition-kinetic);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 var(--space-md); }
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  .nav-links.open {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    background: var(--surface-container-lowest);
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-xl);
+    z-index: 99;
+  }
+  .nav-links.open a { font-size: 1.5rem; }
+  .footer-grid { grid-template-columns: 1fr; gap: var(--space-lg); }
+  .footer-bottom { flex-direction: column; gap: var(--space-sm); text-align: center; }
+}
+
+/* === LOADING SCREEN === */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--surface-container-lowest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+.loader-inner {
+  text-align: center;
+}
+.loader-logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  margin-bottom: var(--space-lg);
+}
+.loader-logo span { color: var(--primary-container); }
+.loader-bar {
+  width: 200px;
+  height: 2px;
+  background: var(--surface-container-highest);
+  border-radius: 1px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+.loader-bar-fill {
+  height: 100%;
+  background: var(--gradient-cta);
+  animation: loaderFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes loaderFill {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+</style>
+  <style>
+    /* ── HOME PAGE STYLES ── */
+
+    /* Hero */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: var(--space-3xl);
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: -10%;
+      background:
+        var(--gradient-hero),
+        url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600&q=80&fit=crop&crop=center') center/cover no-repeat;
+      z-index: 0;
+      will-change: transform;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+    }
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: var(--space-md);
+      opacity: 0;
+      animation: heroFadeUp 0.8s 1.4s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    .hero-eyebrow span {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--secondary);
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1px;
+      background: var(--secondary);
+    }
+    .hero-title {
+      opacity: 0;
+      animation: heroFadeUp 0.8s 1.6s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    .hero-title .line-accent { color: var(--primary-container); }
+    .hero-sub {
+      max-width: 480px;
+      margin-top: var(--space-lg);
+      opacity: 0;
+      animation: heroFadeUp 0.8s 1.9s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-lg);
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: heroFadeUp 0.8s 2.1s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    .hero-stats {
+      position: absolute;
+      right: var(--space-lg);
+      bottom: var(--space-3xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      z-index: 1;
+      opacity: 0;
+      animation: heroFadeLeft 0.8s 2.3s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    .hero-scroll {
+      position: absolute;
+      bottom: var(--space-xl);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .hero-scroll span {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    .hero-scroll-line {
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(to bottom, var(--on-surface-variant), transparent);
+    }
+
+    @keyframes heroFadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroFadeLeft {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: translateX(-50%) translateY(0); }
+      50%       { opacity: 1;   transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* Ticker */
+    .ticker {
+      background: var(--primary-container);
+      padding: 14px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .ticker-inner {
+      display: inline-flex;
+      animation: tickerScroll 28s linear infinite;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 24px;
+      padding: 0 24px;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .ticker-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      flex-shrink: 0;
+    }
+    @keyframes tickerScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* About Intro */
+    .about-intro {
+      background: var(--surface-container-low);
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
+      align-items: center;
+    }
+    .about-img-wrap {
+      position: relative;
+    }
+    .about-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      border-radius: var(--roundness-lg);
+      filter: grayscale(20%) contrast(1.05);
+    }
+    .about-badge {
+      position: absolute;
+      bottom: -24px;
+      right: -24px;
+      background: var(--gradient-cta);
+      border-radius: var(--roundness-md);
+      padding: var(--space-md) var(--space-lg);
+    }
+    .about-badge .num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+    }
+    .about-badge .lbl {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-top: 4px;
+    }
+    .about-credentials {
+      display: flex;
+      gap: var(--space-lg);
+      margin-top: var(--space-xl);
+    }
+    .about-cred {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+    .about-cred-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--roundness-sm);
+      background: var(--surface-container-highest);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .about-cred-icon svg { width: 18px; height: 18px; fill: var(--primary-container); }
+    .about-cred h4 {
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--on-surface);
+    }
+    .about-cred p {
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    /* Method */
+    .method {
+      background: var(--surface);
+    }
+    .method-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto var(--space-3xl);
+    }
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+    }
+    .method-card {
+      position: relative;
+      background: var(--surface-container-low);
+      border-radius: var(--roundness-lg);
+      padding: var(--space-xl) var(--space-lg);
+      transition: var(--transition-kinetic);
+      overflow: hidden;
+    }
+    .method-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-cta);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition-kinetic);
+    }
+    .method-card:hover::before { transform: scaleX(1); }
+    .method-card:hover {
+      background: var(--surface-container);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-float);
+    }
+    .method-num {
+      font-family: var(--font-display);
+      font-size: 4rem;
+      font-weight: 900;
+      color: var(--outline-variant);
+      line-height: 1;
+      margin-bottom: var(--space-md);
+      transition: color var(--transition-kinetic);
+    }
+    .method-card:hover .method-num { color: rgba(192,36,37,0.15); }
+    .method-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--roundness-sm);
+      background: var(--surface-container-highest);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-md);
+    }
+    .method-icon svg { width: 22px; height: 22px; fill: var(--primary-container); }
+    .method-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--on-surface);
+      margin-bottom: var(--space-sm);
+    }
+    .method-divider {
+      width: 32px;
+      height: 2px;
+      background: var(--gradient-cta);
+      margin-bottom: var(--space-md);
+    }
+
+    /* Results */
+    .results {
+      background: var(--surface-container-low);
+      position: relative;
+      overflow: hidden;
+    }
+    .results-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: flex-end;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-3xl);
+    }
+    .results-stats {
+      display: flex;
+      gap: var(--space-xl);
+    }
+    .results-stat {}
+    .results-stat .num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--on-surface);
+      line-height: 1;
+    }
+    .results-stat .lbl {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-top: 6px;
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+    }
+    .testimonial {
+      background: var(--surface-container-low);
+      border-radius: var(--roundness-lg);
+      overflow: hidden;
+      position: relative;
+    }
+    .testimonial-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      filter: grayscale(40%) contrast(1.1);
+      transition: filter var(--transition-kinetic);
+    }
+    .testimonial:hover .testimonial-img { filter: grayscale(0%) contrast(1.05); }
+    .testimonial-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(22,18,19,0.95) 0%, transparent 100%);
+      padding: var(--space-xl) var(--space-lg) var(--space-lg);
+    }
+    .testimonial-stars {
+      display: flex;
+      gap: 3px;
+      margin-bottom: var(--space-sm);
+    }
+    .star { color: var(--secondary); font-size: 0.875rem; }
+    .testimonial-overlay blockquote {
+      font-family: var(--font-body);
+      font-size: 0.9375rem;
+      font-style: italic;
+      color: var(--on-surface);
+      line-height: 1.55;
+      margin-bottom: var(--space-sm);
+    }
+    .testimonial-overlay cite {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--primary-container);
+    }
+
+    /* CTA Banner */
+    .cta-banner {
+      background: var(--surface);
+      text-align: center;
+      padding: var(--space-3xl) 0;
+    }
+    .cta-banner-inner {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .cta-banner .display-lg { margin-bottom: var(--space-lg); }
+    .cta-banner .accent { color: var(--primary-container); }
+    .cta-banner-btns {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: var(--space-xl);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .about-grid { grid-template-columns: 1fr; gap: var(--space-xl); }
+      .about-img { aspect-ratio: 16/9; }
+      .about-badge { bottom: -16px; right: 16px; }
+      .method-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hero { align-items: flex-end; padding-bottom: var(--space-xl); }
+      .hero-stats { display: none; }
+      .results-header { grid-template-columns: 1fr; }
+      .results-stats { flex-wrap: wrap; gap: var(--space-md); }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .method-grid { grid-template-columns: 1fr; }
+      .about-credentials { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="loader-inner">
+      <div class="loader-logo">Lee Hayward <span>PT</span></div>
+      <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="nav" id="nav">
+    <div class="container">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Lee Hayward <span>PT</span></a>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="admin/clients.html" style="color:var(--primary-container)">Portal →</a></li>
+        </ul>
+        <a href="contact.html" class="btn btn-primary btn-sm" style="display:none" id="navCta">Get Started</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span>Performance Coaching</span>
+        </div>
+        <div class="hero-title display-xl">
+          Transform<br/>Your <span class="line-accent">Potential</span>
+        </div>
+        <p class="hero-sub body-lg">
+          Where kinetic science meets editorial-level precision. Every rep engineered to drive you closer to a body that moves as good as it looks.
+        </p>
+        <div class="hero-ctas">
+          <a href="contact.html" class="btn btn-primary">Start Your Journey</a>
+          <a href="services.html" class="btn btn-ghost">View Programs</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-chip">
+        <span class="label-lg">Clients</span>
+        <span style="font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--on-surface);line-height:1">250+</span>
+      </div>
+      <div class="stat-chip">
+        <span class="label-lg">Retention</span>
+        <span style="font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--primary-container);line-height:1">98%</span>
+      </div>
+    </div>
+
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="hero-scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-inner" id="ticker">
+      <span class="ticker-item">Kinetic Power <span class="ticker-dot"></span></span>
+      <span class="ticker-item">Mindset Velocity <span class="ticker-dot"></span></span>
+      <span class="ticker-item">Recovery Fuel <span class="ticker-dot"></span></span>
+      <span class="ticker-item">Performance Luxury <span class="ticker-dot"></span></span>
+      <span class="ticker-item">Elite Coaching <span class="ticker-dot"></span></span>
+      <span class="ticker-item">Iron Velocity <span class="ticker-dot"></span></span>
+      <span class="ticker-item">Science Driven <span class="ticker-dot"></span></span>
+      <span class="ticker-item">No Excuses <span class="ticker-dot"></span></span>
+    </div>
+  </div>
+
+  <!-- ABOUT / INTRO -->
+  <section class="about-intro section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-img-wrap reveal-left">
+          <img
+            src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80&fit=crop&crop=top"
+            alt="Lee Hayward — Performance Coach"
+            class="about-img"
+          />
+          <div class="about-badge">
+            <div class="num">12K+</div>
+            <div class="lbl">Training Hours</div>
+          </div>
+        </div>
+
+        <div class="reveal-right">
+          <div class="eyebrow">About the Coach</div>
+          <h2 class="display-md">Not Just a Coach.<br/><span style="color:var(--primary-container)">A Performance<br/>Partner.</span></h2>
+          <p class="body-lg" style="margin-top:var(--space-lg)">
+            I specialise in high-performance transformations for those who refuse to settle. My approach combines kinetic science with editorial-level precision — ensuring every rep drives you closer to a body that moves as good as it looks.
+          </p>
+          <div class="about-credentials">
+            <div class="about-cred">
+              <div class="about-cred-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <div>
+                <h4>Certified Elite</h4>
+                <p>Personal Training &amp; Clinical Nutrition</p>
+              </div>
+            </div>
+            <div class="about-cred">
+              <div class="about-cred-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+              </div>
+              <div>
+                <h4>Science Driven</h4>
+                <p>Biomechanics &amp; Metabolic Conditioning</p>
+              </div>
+            </div>
+          </div>
+          <a href="services.html" class="btn btn-primary" style="margin-top:var(--space-xl)">View Programs</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE KINETIC METHOD -->
+  <section class="method section">
+    <div class="container">
+      <div class="method-header reveal">
+        <div class="eyebrow">The System</div>
+        <h2 class="display-md">The Kinetic<br/><span style="color:var(--primary-container)">Method</span></h2>
+        <p class="body-lg" style="margin-top:var(--space-md)">Engineered for results, sustained by discipline. Three pillars of peak human performance.</p>
+      </div>
+
+      <div class="method-grid">
+        <div class="method-card reveal reveal-delay-1">
+          <div class="method-num">01</div>
+          <div class="method-icon">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3>Mindset Velocity</h3>
+          <div class="method-divider"></div>
+          <p class="body-md">Transformation begins in the mind. We develop the psychological resilience required to push through metabolic plateaus. Your mental architecture is your first performance variable.</p>
+        </div>
+        <div class="method-card reveal reveal-delay-2">
+          <div class="method-num">02</div>
+          <div class="method-icon">
+            <svg viewBox="0 0 24 24"><path d="M18.5 9.5a6 6 0 0 1-12 0M12 3v1M4.22 4.22l.71.71M2 9.5h1M20 9.5h1M19.07 4.22l-.71.71M12 17v4M8 21h8"/></svg>
+          </div>
+          <h3>Kinetic Power</h3>
+          <div class="method-divider"></div>
+          <p class="body-md">Functional strength meets athletic aesthetics. Every movement is calculated for maximum metabolic impact and muscular hypertrophy. Science-backed programming, no guesswork.</p>
+        </div>
+        <div class="method-card reveal reveal-delay-3">
+          <div class="method-num">03</div>
+          <div class="method-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 3v9l6 3"/></svg>
+          </div>
+          <h3>Recovery Fuel</h3>
+          <div class="method-divider"></div>
+          <p class="body-md">Precision nutrition architecture. We don't just eat — we fuel the biological machine for rapid repair and sustained energy output. Macro-nutrient engineering for your phenotype.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS / SOCIAL PROOF -->
+  <section class="results section">
+    <div class="container">
+      <div class="results-header">
+        <div class="reveal-left">
+          <div class="eyebrow">Real Results</div>
+          <h2 class="display-md">Real Results.<br/><span style="color:var(--primary-container)">No Excuses.</span></h2>
+          <p class="body-lg" style="margin-top:var(--space-md);max-width:480px">Elite transformations from individuals who committed to the Kinetic Editorial standard.</p>
+        </div>
+        <div class="results-stats reveal-right">
+          <div class="results-stat">
+            <div class="num"><span data-target="250" data-suffix="+">0+</span></div>
+            <div class="lbl">Successful Clients</div>
+          </div>
+          <div class="results-stat">
+            <div class="num"><span data-target="4.9" data-suffix="/5">0/5</span></div>
+            <div class="lbl">Client Rating</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial reveal-left">
+          <img
+            src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=800&q=80&fit=crop"
+            alt="James Collins"
+            class="testimonial-img"
+          />
+          <div class="testimonial-overlay">
+            <div class="testimonial-stars">
+              <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+            </div>
+            <blockquote>"Lee didn't just give me a workout plan, he re-engineered my lifestyle. The transformation was physical, but the mental strength I gained is what stayed."</blockquote>
+            <cite>— James Collins, Former Client</cite>
+          </div>
+        </div>
+        <div class="testimonial reveal-right">
+          <img
+            src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&fit=crop&crop=top"
+            alt="Sarah Jenkins"
+            class="testimonial-img"
+          />
+          <div class="testimonial-overlay">
+            <div class="testimonial-stars">
+              <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+            </div>
+            <blockquote>"Professional, rigorous, and incredibly effective. The kinetic method is the only approach that has actually worked for my body type and goals."</blockquote>
+            <cite>— Sarah Jenkins, Performance Kinetic</cite>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cta-banner reveal">
+    <div class="container">
+      <div class="cta-banner-inner">
+        <div class="eyebrow" style="justify-content:center">Take Action Now</div>
+        <h2 class="display-lg">Are You Ready<br/>To <span class="accent">Move?</span></h2>
+        <p class="body-lg" style="margin-top:var(--space-md)">Stop waiting for the right moment. The right moment is engineered — by you, starting now.</p>
+        <div class="cta-banner-btns">
+          <a href="contact.html" class="btn btn-primary">Start Your Journey Now</a>
+          <a href="services.html" class="btn btn-ghost">Explore Programs</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo" style="font-size:1.125rem">Lee Hayward <span style="color:var(--primary-container)">PT</span></div>
+          <p class="body-md" style="margin-top:var(--space-md)">High-performance personal training and coaching. The Kinetic Method — engineered for results, sustained by discipline.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Programs</h4>
+          <ul>
+            <li><a href="services.html">1-on-1 Training</a></li>
+            <li><a href="services.html">Online Coaching</a></li>
+            <li><a href="services.html">Group Sessions</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="contact.html">Email</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 Lee Hayward PT. Kinetic Editorial Design.</span>
+        <div style="display:flex;gap:var(--space-lg)">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">FAQ</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+/* =============================================
+   LEE HAYWARD PT — BROCHURE SITE JS
+   Kinetic animations, scroll reveals, nav logic
+   ============================================= */
+
+/* === LOADER === */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.querySelector('.loader');
+    if (loader) loader.classList.add('hidden');
+  }, 1300);
+});
+
+/* === NAVIGATION SCROLL === */
+const nav = document.querySelector('.nav');
+const navToggle = document.querySelector('.nav-toggle');
+const navLinks = document.querySelector('.nav-links');
+
+if (nav) {
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+}
+
+if (navToggle && navLinks) {
+  navToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+    document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+}
+
+/* === INTERSECTION OBSERVER — SCROLL REVEALS === */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+  revealObserver.observe(el);
+});
+
+/* === ANIMATED NUMBERS (count-up) === */
+function animateNumber(el) {
+  const target = parseFloat(el.dataset.target);
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const duration = 1800;
+  const start = performance.now();
+
+  function update(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease out cubic
+    const current = target * eased;
+    el.textContent = prefix + (Number.isInteger(target) ? Math.floor(current) : current.toFixed(1)) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+    else el.textContent = prefix + target + suffix;
+  }
+  requestAnimationFrame(update);
+}
+
+const statObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !entry.target.dataset.animated) {
+      entry.target.dataset.animated = 'true';
+      animateNumber(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('[data-target]').forEach(el => statObserver.observe(el));
+
+/* === PARALLAX HERO OFFSET === */
+const heroBg = document.querySelector('.hero-bg');
+if (heroBg) {
+  window.addEventListener('scroll', () => {
+    const offset = window.scrollY * 0.35;
+    heroBg.style.transform = `translateY(${offset}px)`;
+  }, { passive: true });
+}
+
+/* === MAGNETIC BUTTONS === */
+document.querySelectorAll('.btn-primary').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top  - rect.height / 2;
+    btn.style.transform = `translate(${x * 0.12}px, ${y * 0.18}px) translateY(-2px)`;
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+  });
+});
+
+/* === TICKER / MARQUEE (if present) === */
+const ticker = document.querySelector('.ticker-inner');
+if (ticker) {
+  // Duplicate content for seamless loop
+  ticker.innerHTML += ticker.innerHTML;
+}
+
+/* === ACTIVE NAV LINK === */
+const path = window.location.pathname.split('/').pop() || 'index.html';
+document.querySelectorAll('.nav-links a').forEach(a => {
+  const href = a.getAttribute('href');
+  if (href === path || (path === '' && href === 'index.html')) {
+    a.classList.add('active');
+  }
+});
+
+/* === SMOOTH ANCHOR SCROLL === */
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', (e) => {
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+/* === CURSOR GLOW (desktop only) === */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const glow = document.createElement('div');
+  glow.className = 'cursor-glow';
+  glow.style.cssText = `
+    position: fixed; pointer-events: none; z-index: 9998;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,36,37,0.06) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+    top: 0; left: 0;
+  `;
+  document.body.appendChild(glow);
+
+  let mx = 0, my = 0, gx = 0, gy = 0;
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
+
+  function animateCursor() {
+    gx += (mx - gx) * 0.08;
+    gy += (my - gy) * 0.08;
+    glow.style.left = gx + 'px';
+    glow.style.top  = gy + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+}
+
+</script>
+  <script>
+    // Show nav CTA after scrolling past hero
+    const navCta = document.getElementById('navCta');
+    const hero   = document.getElementById('hero');
+    if (navCta && hero) {
+      const heroObs = new IntersectionObserver(([e]) => {
+        navCta.style.display = e.isIntersecting ? 'none' : 'inline-flex';
+      }, { threshold: 0.1 });
+      heroObs.observe(hero);
+    }
+  </script>
+</body>
+</html>
