@@ -2429,9 +2429,12 @@ document.addEventListener('DOMContentLoaded', () => {
     firstDay:     1,   // Monday
     nowIndicator: true,
     expandRows:   false,
+    editable:     true,   // drag & drop + resize existing events
     selectable:   true,
     selectMirror: true,
     unselectAuto: true,
+    eventDrop:    (info) => { /* event already updated in calendar model */ },
+    eventResize:  (info) => { /* event already updated in calendar model */ },
     height:       680,
     events:       events,
 
