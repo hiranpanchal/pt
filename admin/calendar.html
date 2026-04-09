@@ -1029,6 +1029,14 @@ button { cursor: pointer; font-family: var(--font-body); }
 .modal-btn-secondary { background: var(--surface-container-high); color: var(--on-surface-variant); }
 .modal-btn-secondary:hover { background: var(--surface-container-highest); }
 
+@keyframes shake {
+  0%,100% { transform: translateY(0) translateX(0); }
+  20%      { transform: translateY(0) translateX(-6px); }
+  40%      { transform: translateY(0) translateX(6px); }
+  60%      { transform: translateY(0) translateX(-4px); }
+  80%      { transform: translateY(0) translateX(4px); }
+}
+
 </style>
 
   <!-- FullCalendar -->
@@ -1330,6 +1338,117 @@ button { cursor: pointer; font-family: var(--font-body); }
     }
     .panel-overlay.visible { opacity: 1; pointer-events: all; }
 
+    /* Client search inside modal */
+    .client-search-wrap {
+      position: relative;
+    }
+    .client-search-input {
+      width: 100%;
+      background: var(--surface-container);
+      border: none;
+      border-bottom: 2px solid rgba(154,143,144,0.2);
+      border-radius: var(--roundness-xs) var(--roundness-xs) 0 0;
+      padding: 10px 12px 10px 36px;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--on-surface);
+      outline: none;
+      transition: border-color var(--transition-kinetic);
+    }
+    .client-search-input:focus { border-bottom-color: var(--primary-container); }
+    .client-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      stroke: var(--on-surface-variant);
+      fill: none;
+      pointer-events: none;
+    }
+    .client-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--surface-container-high);
+      border-radius: 0 0 var(--roundness-md) var(--roundness-md);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: 0 8px 24px rgba(17,13,14,0.5);
+      display: none;
+    }
+    .client-dropdown.open { display: block; }
+    .client-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    .client-option:hover { background: var(--surface-container-highest); }
+    .client-option.selected { background: rgba(253,119,42,0.12); }
+    .client-option-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: var(--gradient-cta);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.65rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .client-option-info { flex: 1; min-width: 0; }
+    .client-option-name { font-size: 0.8rem; font-weight: 600; color: var(--on-surface); }
+    .client-option-meta { font-size: 0.65rem; color: var(--on-surface-variant); }
+    .client-selected-display {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(253,119,42,0.1);
+      border-radius: var(--roundness-sm);
+      margin-top: 6px;
+    }
+    .client-selected-display.visible { display: flex; }
+    .client-selected-name { font-size: 0.8rem; font-weight: 600; color: var(--on-surface); }
+    .client-clear-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--on-surface-variant);
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 4px;
+      cursor: pointer;
+    }
+    .client-clear-btn:hover { color: var(--on-surface); }
+
+    /* Repeat weekly row */
+    .repeat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+    }
+
+    /* Slot click hint */
+    .cal-hint {
+      font-size: 0.7rem;
+      color: var(--on-surface-variant);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: var(--space-md);
+    }
+    .cal-hint svg { width: 14px; height: 14px; stroke: var(--primary-container); fill: none; flex-shrink: 0; }
+
     /* Stats sidebar */
     .cal-sidebar {
       display: flex;
@@ -1518,7 +1637,7 @@ button { cursor: pointer; font-family: var(--font-body); }
     <div class="admin-topbar">
       <div class="admin-topbar-left">
         <h1>Calendar</h1>
-        <p>Full session schedule — click any session to view client details</p>
+        <p>Click any slot to book a session · Click a session to view client details</p>
       </div>
       <div class="admin-topbar-right">
         <button class="topbar-btn topbar-btn-secondary" id="todayBtn">Today</button>
@@ -1551,11 +1670,17 @@ button { cursor: pointer; font-family: var(--font-body); }
         </div>
       </div>
 
-      <!-- Legend -->
-      <div class="cal-legend">
-        <span class="legend-item"><span class="legend-dot" style="background:#FD772A"></span>1-on-1 Elite</span>
-        <span class="legend-item"><span class="legend-dot" style="background:#7C3A00"></span>Online Coaching</span>
-        <span class="legend-item"><span class="legend-dot" style="background:#1E3A6E"></span>Group Session</span>
+      <!-- Legend + hint -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-sm);margin-bottom:var(--space-lg)">
+        <div class="cal-legend" style="margin-bottom:0">
+          <span class="legend-item"><span class="legend-dot" style="background:#FD772A"></span>1-on-1 Elite</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#7C3A00"></span>Online Coaching</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#1E3A6E"></span>Group Session</span>
+        </div>
+        <div class="cal-hint">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Click or drag any empty time slot to book
+        </div>
       </div>
 
       <!-- Calendar -->
@@ -1581,23 +1706,34 @@ button { cursor: pointer; font-family: var(--font-body); }
   </div>
 </div>
 
-<!-- ADD SESSION MODAL -->
+<!-- BOOK SESSION MODAL -->
 <div class="modal-backdrop" id="addSessionModal">
-  <div class="modal">
-    <div class="modal-title">Add Session</div>
+  <div class="modal" style="width:520px">
+    <div class="modal-title">Book Session</div>
     <div class="modal-form">
+
+      <!-- Client search -->
       <div class="form-group">
         <label>Client</label>
-        <select id="sess-client"><!-- populated by JS --></select>
+        <div class="client-search-wrap">
+          <svg class="client-search-icon" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="client-search-input" id="clientSearchInput" placeholder="Search client by name…" autocomplete="off"/>
+          <div class="client-dropdown" id="clientDropdown">
+            <!-- populated by JS -->
+          </div>
+        </div>
+        <div class="client-selected-display" id="clientSelectedDisplay">
+          <div class="client-option-avatar" id="clientSelectedAvatar"></div>
+          <div class="client-option-info">
+            <div class="client-selected-name" id="clientSelectedName"></div>
+            <div class="client-option-meta" id="clientSelectedMeta"></div>
+          </div>
+          <button class="client-clear-btn" id="clientClearBtn" title="Clear">✕</button>
+        </div>
+        <input type="hidden" id="sess-client"/>
       </div>
-      <div class="form-group">
-        <label>Session Type</label>
-        <select id="sess-type">
-          <option value="elite">1-on-1 Elite</option>
-          <option value="online">Online Coaching</option>
-          <option value="group">Group Session</option>
-        </select>
-      </div>
+
+      <!-- Date & Time -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
         <div class="form-group">
           <label>Date</label>
@@ -1608,18 +1744,56 @@ button { cursor: pointer; font-family: var(--font-body); }
           <input type="time" id="sess-time" value="07:00"/>
         </div>
       </div>
-      <div class="form-group">
-        <label>Duration (minutes)</label>
-        <input type="number" id="sess-duration" value="60" min="15" max="180" step="15"/>
+
+      <!-- Type & Duration -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>Session Type</label>
+          <select id="sess-type">
+            <option value="elite">1-on-1 Elite</option>
+            <option value="online">Online Coaching</option>
+            <option value="group">Group Session</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Duration</label>
+          <select id="sess-duration">
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60" selected>60 minutes</option>
+            <option value="75">75 minutes</option>
+            <option value="90">90 minutes</option>
+            <option value="120">2 hours</option>
+          </select>
+        </div>
       </div>
+
+      <!-- Repeat -->
       <div class="form-group">
-        <label>Session Title</label>
+        <label>Repeat Weekly</label>
+        <select id="sess-repeat">
+          <option value="0">No repeat — one-off session</option>
+          <option value="2">2 weeks (this + 1 more)</option>
+          <option value="4">4 weeks</option>
+          <option value="6">6 weeks</option>
+          <option value="8">8 weeks</option>
+          <option value="12">12 weeks</option>
+          <option value="52">Ongoing (1 year)</option>
+        </select>
+      </div>
+
+      <!-- Optional label -->
+      <div class="form-group">
+        <label>Session Label <span style="font-weight:400;text-transform:none;font-size:0.65rem">(optional)</span></label>
         <input type="text" id="sess-title" placeholder="e.g. Upper Body Push A"/>
       </div>
+
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-secondary" id="cancelSession">Cancel</button>
-      <button class="modal-btn modal-btn-primary" id="confirmSession">Add to Calendar</button>
+      <button class="modal-btn modal-btn-primary" id="confirmSession">
+        <span id="confirmBtnLabel">Book Session</span>
+      </button>
     </div>
   </div>
 </div>
@@ -1931,17 +2105,7 @@ window.LHPT = {
 <script>
 const { CLIENTS, getClient, getInitials, statusLabel, generateCalendarEvents } = window.LHPT;
 
-/* === POPULATE ADD SESSION MODAL === */
-const sessClient = document.getElementById('sess-client');
-CLIENTS.forEach(c => {
-  const opt = document.createElement('option');
-  opt.value = c.id;
-  opt.textContent = `${c.firstName} ${c.lastName}`;
-  sessClient.appendChild(opt);
-});
-
-// Set default date to today
-document.getElementById('sess-date').value = new Date().toISOString().split('T')[0];
+// Client list ready — search is driven dynamically by initClientSearch()
 
 /* === PANEL CONTROLS === */
 const panel   = document.getElementById('clientPanel');
@@ -2049,41 +2213,153 @@ function closePanel() {
 document.getElementById('panelClose').addEventListener('click', closePanel);
 overlay.addEventListener('click', closePanel);
 
-/* === FULLCALENDAR INIT === */
+/* ============================================================
+   CLIENT SEARCH LOGIC
+   ============================================================ */
+let selectedClientId = null;
+
+function initClientSearch() {
+  const input     = document.getElementById('clientSearchInput');
+  const dropdown  = document.getElementById('clientDropdown');
+  const display   = document.getElementById('clientSelectedDisplay');
+  const hiddenId  = document.getElementById('sess-client');
+  const clearBtn  = document.getElementById('clientClearBtn');
+
+  function renderDropdown(query) {
+    const q = (query || '').toLowerCase().trim();
+    const filtered = q
+      ? CLIENTS.filter(c =>
+          `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+          c.program.toLowerCase().includes(q)
+        )
+      : CLIENTS;
+
+    dropdown.innerHTML = filtered.length
+      ? filtered.map(c => {
+          const initials = c.firstName[0] + c.lastName[0];
+          return `<div class="client-option${selectedClientId === c.id ? ' selected':''}" data-id="${c.id}">
+            <div class="client-option-avatar">${initials}</div>
+            <div class="client-option-info">
+              <div class="client-option-name">${c.firstName} ${c.lastName}</div>
+              <div class="client-option-meta">${c.program} · ${c.tier}</div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div style="padding:12px;font-size:0.8rem;color:var(--on-surface-variant)">No clients found</div>';
+
+    dropdown.classList.add('open');
+  }
+
+  function selectClient(id) {
+    const c = getClient(id);
+    if (!c) return;
+    selectedClientId = id;
+    hiddenId.value   = id;
+    input.value      = '';
+    dropdown.classList.remove('open');
+    // Show selected pill
+    document.getElementById('clientSelectedAvatar').textContent = c.firstName[0] + c.lastName[0];
+    document.getElementById('clientSelectedName').textContent   = `${c.firstName} ${c.lastName}`;
+    document.getElementById('clientSelectedMeta').textContent   = `${c.program} · ${c.tier}`;
+    display.classList.add('visible');
+    // Update confirm button label
+    updateConfirmLabel();
+  }
+
+  function clearClient() {
+    selectedClientId  = null;
+    hiddenId.value    = '';
+    input.value       = '';
+    display.classList.remove('visible');
+    updateConfirmLabel();
+  }
+
+  input.addEventListener('focus', () => renderDropdown(input.value));
+  input.addEventListener('input', () => renderDropdown(input.value));
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') dropdown.classList.remove('open');
+  });
+
+  dropdown.addEventListener('mousedown', e => {
+    const opt = e.target.closest('.client-option');
+    if (opt) selectClient(parseInt(opt.dataset.id));
+  });
+
+  document.addEventListener('mousedown', e => {
+    if (!e.target.closest('.client-search-wrap')) dropdown.classList.remove('open');
+  });
+
+  clearBtn.addEventListener('click', clearClient);
+
+  // Expose selectClient for external use
+  window._selectClient = selectClient;
+  window._clearClientSearch = clearClient;
+}
+
+function updateConfirmLabel() {
+  const repeats = parseInt(document.getElementById('sess-repeat').value);
+  const label   = repeats > 0 ? `Book ${repeats + 1} Sessions` : 'Book Session';
+  document.getElementById('confirmBtnLabel').textContent = label;
+}
+
+/* ============================================================
+   FULLCALENDAR INIT
+   ============================================================ */
 let calendar;
 document.addEventListener('DOMContentLoaded', () => {
+
+  initClientSearch();
+
+  document.getElementById('sess-repeat').addEventListener('change', updateConfirmLabel);
+
   const el = document.getElementById('calendar');
   calendar = new FullCalendar.Calendar(el, {
-    initialView: 'timeGridWeek',
+    initialView:   'timeGridWeek',
     headerToolbar: {
       left:   'prev,next today',
       center: 'title',
       right:  'dayGridMonth,timeGridWeek,timeGridDay'
     },
-    buttonText: { month: 'Month', week: 'Week', day: 'Day', today: 'Today' },
-    slotMinTime: '05:00:00',
-    slotMaxTime: '21:00:00',
+    buttonText:   { month: 'Month', week: 'Week', day: 'Day', today: 'Today' },
+    slotMinTime:  '06:00:00',
+    slotMaxTime:  '18:00:00',
     slotDuration: '00:30:00',
-    allDaySlot: false,
-    weekends: true,
+    slotLabelInterval: '01:00:00',
+    allDaySlot:   false,
+    weekends:     true,
+    firstDay:     1,   // Monday
     nowIndicator: true,
-    height: 700,
-    events: events,
+    expandRows:   true,
+    selectable:   true,
+    selectMirror: true,
+    unselectAuto: true,
+    height:       'auto',
+    events:       events,
+
+    /* Click on an existing event → open client panel */
     eventClick: openPanel,
+
+    /* Click / drag on an empty slot → open booking modal */
+    select: (info) => {
+      openBookingModal(info.startStr);
+    },
+    dateClick: (info) => {
+      openBookingModal(info.dateStr);
+    },
+
     eventDidMount: (info) => {
-      // Tooltip on hover
       info.el.title = info.event.title;
     },
-    dayMaxEvents: 3,
     moreLinkClick: 'week',
-    firstDay: 1, // Monday start
   });
   calendar.render();
 
   // Count stats
-  const now = new Date();
-  const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay() + 1); weekStart.setHours(0,0,0,0);
-  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+  const now        = new Date();
+  const dayOfWeek  = now.getDay();
+  const diff       = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Mon offset
+  const weekStart  = new Date(now); weekStart.setDate(now.getDate() + diff); weekStart.setHours(0,0,0,0);
+  const weekEnd    = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
@@ -2095,7 +2371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (s > now && (!nextSession || s < new Date(nextSession.start))) nextSession = e;
   });
 
-  document.getElementById('statWeekSessions').textContent = weekCount;
+  document.getElementById('statWeekSessions').textContent  = weekCount;
   document.getElementById('statMonthSessions').textContent = monthCount;
   document.getElementById('statActiveClients').textContent = CLIENTS.filter(c => c.status === 'active').length;
   if (nextSession) {
@@ -2105,42 +2381,89 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* === TODAY BUTTON === */
-document.getElementById('todayBtn').addEventListener('click', () => {
-  calendar.today();
+/* ============================================================
+   TODAY BUTTON
+   ============================================================ */
+document.getElementById('todayBtn').addEventListener('click', () => calendar.today());
+
+/* ============================================================
+   BOOKING MODAL
+   ============================================================ */
+const addModal = document.getElementById('addSessionModal');
+
+function openBookingModal(dateStr) {
+  // Parse date and time from the ISO string
+  const dt   = new Date(dateStr);
+  const date = dt.toISOString().slice(0, 10);
+  const hrs  = String(dt.getHours()).padStart(2,'0');
+  const mins = String(dt.getMinutes()).padStart(2,'0');
+  const time = `${hrs}:${mins}`;
+
+  document.getElementById('sess-date').value = date;
+  document.getElementById('sess-time').value = (time === '00:00') ? '07:00' : time;
+
+  // Reset client search
+  if (window._clearClientSearch) window._clearClientSearch();
+
+  addModal.classList.add('open');
+  setTimeout(() => document.getElementById('clientSearchInput').focus(), 50);
+}
+
+document.getElementById('addSessionBtn').addEventListener('click', () => {
+  // Open with today's date, default time
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('sess-date').value = today;
+  document.getElementById('sess-time').value = '07:00';
+  if (window._clearClientSearch) window._clearClientSearch();
+  addModal.classList.add('open');
+  setTimeout(() => document.getElementById('clientSearchInput').focus(), 50);
 });
 
-/* === ADD SESSION MODAL === */
-const addModal = document.getElementById('addSessionModal');
-document.getElementById('addSessionBtn').addEventListener('click', () => addModal.classList.add('open'));
 document.getElementById('cancelSession').addEventListener('click', () => addModal.classList.remove('open'));
 addModal.addEventListener('click', e => { if (e.target === addModal) addModal.classList.remove('open'); });
 
 document.getElementById('confirmSession').addEventListener('click', () => {
-  const clientId  = parseInt(document.getElementById('sess-client').value);
-  const type      = document.getElementById('sess-type').value;
-  const date      = document.getElementById('sess-date').value;
-  const time      = document.getElementById('sess-time').value;
-  const duration  = parseInt(document.getElementById('sess-duration').value);
+  const clientId   = parseInt(document.getElementById('sess-client').value);
+  const type       = document.getElementById('sess-type').value;
+  const date       = document.getElementById('sess-date').value;
+  const time       = document.getElementById('sess-time').value;
+  const duration   = parseInt(document.getElementById('sess-duration').value);
+  const repeatWeeks= parseInt(document.getElementById('sess-repeat').value) || 0;
   const titleInput = document.getElementById('sess-title').value;
 
+  if (!clientId || !date || !time) {
+    // Shake the modal if no client selected
+    const modal = addModal.querySelector('.modal');
+    modal.style.animation = 'none';
+    modal.offsetHeight;
+    modal.style.animation = 'shake 0.4s ease';
+    return;
+  }
+
   const c = getClient(clientId);
-  if (!c || !date || !time) return;
+  if (!c) return;
 
-  const start = new Date(`${date}T${time}:00`);
-  const end   = new Date(start.getTime() + duration * 60000);
-  const title = titleInput || `${c.firstName} ${c.lastName} — Session`;
+  const title = titleInput || `${c.firstName} ${c.lastName}`;
+  const totalSessions = repeatWeeks + 1;
 
-  calendar.addEvent({
-    title,
-    start: start.toISOString(),
-    end:   end.toISOString(),
-    className: `event-${type}`,
-    extendedProps: { clientId, type }
-  });
+  for (let i = 0; i < totalSessions; i++) {
+    const start = new Date(`${date}T${time}:00`);
+    start.setDate(start.getDate() + (i * 7)); // each repeat is 7 days later
+    const end = new Date(start.getTime() + duration * 60000);
+
+    calendar.addEvent({
+      title,
+      start: start.toISOString(),
+      end:   end.toISOString(),
+      classNames: [`event-${type}`],
+      extendedProps: { clientId, type }
+    });
+  }
 
   addModal.classList.remove('open');
-  document.getElementById('sess-title').value = '';
+  document.getElementById('sess-title').value  = '';
+  document.getElementById('sess-repeat').value = '0';
+  updateConfirmLabel();
 });
 </script>
 </body>
