@@ -1111,31 +1111,48 @@ button { cursor: pointer; font-family: var(--font-body); }
       color: var(--on-surface);
       flex: 1;
     }
-    /* View / Edit toggle tabs in header */
-    .panel-tabs {
+    /* Edit session button (inside view body) */
+    .panel-edit-btn {
       display: flex;
-      background: var(--surface-container);
-      border-radius: 6px;
-      padding: 3px;
-      gap: 2px;
-    }
-    .panel-tab {
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 0.65rem;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      padding: 11px;
+      border-radius: 8px;
+      background: var(--gradient-cta);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      border: none;
-      background: transparent;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .panel-edit-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .panel-edit-btn svg { width: 13px; height: 13px; stroke: #fff; fill: none; stroke-width: 2.5; }
+
+    /* Back link in edit mode */
+    .pe-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.7rem;
+      font-weight: 600;
       color: var(--on-surface-variant);
+      background: none;
+      border: none;
       cursor: pointer;
-      transition: all 0.15s;
+      padding: 0;
+      margin-bottom: 18px;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
     }
-    .panel-tab.active {
-      background: var(--surface-container-highest);
-      color: var(--on-surface);
-    }
+    .pe-back-btn:hover { color: var(--on-surface); }
+    .pe-back-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+
     .panel-close {
       width: 30px;
       height: 30px;
@@ -1884,10 +1901,6 @@ button { cursor: pointer; font-family: var(--font-body); }
 <div class="client-panel" id="clientPanel">
   <div class="panel-header">
     <div class="panel-title" id="panelTitle">Session</div>
-    <div class="panel-tabs">
-      <button class="panel-tab active" id="tabView">View</button>
-      <button class="panel-tab" id="tabEdit">Edit</button>
-    </div>
     <button class="panel-close" id="panelClose">
       <svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
@@ -2379,11 +2392,19 @@ function renderPanelView(evt) {
       </div>
     </div>
     ${c.notes ? `<div><div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:8px">Coach Notes</div><p style="font-size:0.8125rem;color:var(--on-surface-variant);line-height:1.6">${c.notes}</p></div>` : ''}
-    <a href="profile.html?id=${c.id}" class="topbar-btn topbar-btn-primary" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:auto;text-decoration:none">
+    <a href="profile.html?id=${c.id}" class="topbar-btn topbar-btn-primary" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;text-decoration:none">
       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       View Full Profile
     </a>` : '<p style="color:var(--on-surface-variant);font-size:0.875rem">No client details found.</p>'}
+    <button class="panel-edit-btn" id="panelEditBtn">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit Session
+    </button>
   `;
+
+  document.getElementById('panelEditBtn').addEventListener('click', () => {
+    renderPanelEdit(evt);
+  });
 }
 
 /* ── EDIT MODE ─────────────────────────────── */
@@ -2404,6 +2425,11 @@ function renderPanelEdit(evt) {
 
   document.getElementById('panelBody').innerHTML = `
     <div>
+      <button class="pe-back-btn" id="peBackBtn">
+        <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to session
+      </button>
+
       <span class="pe-section-label">Client</span>
       <div class="pe-field pe-select-wrap">
         <select id="pe-client">${clientOpts}</select>
@@ -2469,6 +2495,9 @@ function renderPanelEdit(evt) {
     </div>
   `;
 
+  // Back to view
+  document.getElementById('peBackBtn').addEventListener('click', () => renderPanelView(evt));
+
   // Save handler
   document.getElementById('peSaveBtn').addEventListener('click', () => {
     const newClientId = parseInt(document.getElementById('pe-client').value);
@@ -2489,8 +2518,7 @@ function renderPanelEdit(evt) {
     evt.setExtendedProp('type', newType);
     evt.setExtendedProp('clientId', newClientId);
 
-    // Switch back to view mode
-    setActiveTab('view');
+    // Return to view mode
     renderPanelView(evt);
   });
 
@@ -2503,27 +2531,9 @@ function renderPanelEdit(evt) {
   });
 }
 
-/* ── TAB SWITCHING ──────────────────────────── */
-function setActiveTab(which) {
-  document.getElementById('tabView').classList.toggle('active', which === 'view');
-  document.getElementById('tabEdit').classList.toggle('active', which === 'edit');
-}
-
-document.getElementById('tabView').addEventListener('click', () => {
-  if (!currentPanelEvent) return;
-  setActiveTab('view');
-  renderPanelView(currentPanelEvent);
-});
-document.getElementById('tabEdit').addEventListener('click', () => {
-  if (!currentPanelEvent) return;
-  setActiveTab('edit');
-  renderPanelEdit(currentPanelEvent);
-});
-
 /* ── OPEN / CLOSE ───────────────────────────── */
 function openPanel(info) {
   currentPanelEvent = info.event;
-  setActiveTab('view');
   renderPanelView(info.event);
   panel.classList.add('open');
   overlay.classList.add('visible');
