@@ -2062,7 +2062,7 @@ function generateCalendarEvents() {
     { clientId: 3, title: 'Jameson Vane — Lower Body Power', type: 'elite', hour: 9, duration: 1 },
     { clientId: 5, title: 'Tyler Nash — Strength Block', type: 'elite', hour: 6, duration: 1.25 },
     { clientId: 2, title: 'Sarah Chen — Foundation', type: 'online', hour: 11, duration: 0.75 },
-    { clientId: 6, title: 'Priya Sharma — Recomp', type: 'online', hour: 18, duration: 0.75 },
+    { clientId: 6, title: 'Priya Sharma — Recomp', type: 'online', hour: 10, duration: 0.75 },
     { clientId: 1, title: 'Marcus Thorne — Active Recovery', type: 'elite', hour: 8, duration: 1 },
     { clientId: 3, title: 'Jameson Vane — Upper Body Pull', type: 'elite', hour: 7, duration: 1 },
     { clientId: 5, title: 'Tyler Nash — Olympic Lifting', type: 'elite', hour: 6, duration: 1 },
@@ -2077,7 +2077,7 @@ function generateCalendarEvents() {
     sessionTemplates.forEach((t, i) => {
       const day = days[i % days.length];
       const d = new Date(year, month, now.getDate() + (week * 7) + (day - now.getDay()));
-      if (d.getMonth() !== month && d.getMonth() !== month + 1) return;
+      // Allow events within ±4 weeks regardless of month boundary
       const start = new Date(d);
       start.setHours(t.hour, 0, 0, 0);
       const end = new Date(start);
@@ -2103,7 +2103,8 @@ window.LHPT = {
 
 </script>
 <script>
-const { CLIENTS, getClient, getInitials, statusLabel, generateCalendarEvents } = window.LHPT;
+// CLIENTS, getClient, getInitials, statusLabel, generateCalendarEvents
+// are all available directly from the first script block above
 
 // Client list ready — search is driven dynamically by initClientSearch()
 
@@ -2329,11 +2330,11 @@ document.addEventListener('DOMContentLoaded', () => {
     weekends:     true,
     firstDay:     1,   // Monday
     nowIndicator: true,
-    expandRows:   true,
+    expandRows:   false,
     selectable:   true,
     selectMirror: true,
     unselectAuto: true,
-    height:       'auto',
+    height:       680,
     events:       events,
 
     /* Click on an existing event → open client panel */
