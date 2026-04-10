@@ -523,7 +523,7 @@ button { cursor: pointer; font-family: var(--font-body); }
 .profile-header {
   background: var(--surface-container-low);
   border-radius: var(--roundness-lg);
-  padding: var(--space-lg);
+  padding: 20px var(--space-lg);
   margin-bottom: var(--space-md);
 }
 .profile-header-top {
@@ -539,15 +539,15 @@ button { cursor: pointer; font-family: var(--font-body); }
   gap: var(--space-md);
 }
 .profile-avatar {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--roundness-md);
   background: var(--gradient-cta);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 900;
   color: #fff;
   flex-shrink: 0;
@@ -562,19 +562,19 @@ button { cursor: pointer; font-family: var(--font-body); }
 }
 .profile-name {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 900;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   line-height: 1;
 }
 .profile-name .first { color: var(--on-surface); }
-.profile-name .last  { color: var(--surface-container-highest); }
+.profile-name .last  { color: var(--on-surface); }
 .profile-tags {
   display: flex;
   gap: var(--space-xs);
   flex-wrap: wrap;
-  margin-top: var(--space-sm);
+  margin-top: 8px;
 }
 .profile-tag {
   display: inline-flex;
@@ -599,8 +599,12 @@ button { cursor: pointer; font-family: var(--font-body); }
 /* === DASHBOARD GRID === */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 340px 1fr;
   gap: var(--space-md);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
 }
 .dashboard-col {
   display: flex;
@@ -610,13 +614,13 @@ button { cursor: pointer; font-family: var(--font-body); }
 .dash-card {
   background: var(--surface-container-low);
   border-radius: var(--roundness-lg);
-  padding: var(--space-lg);
+  padding: 18px 20px;
 }
 .dash-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-lg);
+  margin-bottom: 14px;
 }
 .dash-card-title {
   font-family: var(--font-display);
@@ -1051,29 +1055,35 @@ button { cursor: pointer; font-family: var(--font-body); }
     .notes-area:focus { border-bottom-color: var(--secondary); }
     .metric-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-sm);
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
       margin-bottom: var(--space-md);
     }
     .metric-card {
       background: var(--surface-container);
       border-radius: var(--roundness-md);
-      padding: var(--space-md);
+      padding: 14px 12px;
       text-align: center;
     }
     .metric-num {
       font-family: var(--font-display);
-      font-size: 1.75rem;
+      font-size: 1.4rem;
       font-weight: 900;
       color: var(--on-surface);
       line-height: 1;
+      margin: 6px 0 4px;
     }
     .metric-lbl {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--on-surface-variant);
-      margin-top: 6px;
+    }
+    @media (max-width: 900px) {
+      .metric-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
     }
     /* Breadcrumb */
     .breadcrumb {
@@ -1926,9 +1936,9 @@ function renderProfile(c) {
       <div style="height:4px;background:var(--surface-container-highest);border-radius:2px;margin-top:8px"><div style="height:100%;width:${goalPct}%;background:var(--gradient-cta);border-radius:2px"></div></div>
     </div>
     <div class="metric-card">
-      <div class="metric-lbl">PB — ${c.personalBest.lift}</div>
-      <div class="metric-num">${c.personalBest.weight}<span style="font-size:1rem;color:var(--on-surface-variant)"> kg</span></div>
-      <div style="font-size:0.7rem;color:#4ade80;margin-top:4px">↑ ${c.strengthGain} this programme</div>
+      <div class="metric-lbl">PB${c.personalBest && c.personalBest.lift ? ' — ' + c.personalBest.lift : ''}</div>
+      <div class="metric-num">${c.personalBest && c.personalBest.weight ? c.personalBest.weight : '—'}<span style="font-size:1rem;color:var(--on-surface-variant)">${c.personalBest && c.personalBest.weight ? ' kg' : ''}</span></div>
+      <div style="font-size:0.7rem;color:#4ade80;margin-top:4px">${c.strengthGain && c.strengthGain !== '+0%' ? '↑ ' + c.strengthGain + ' this programme' : 'Not yet recorded'}</div>
     </div>
   `;
 
