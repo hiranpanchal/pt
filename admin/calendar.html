@@ -2335,8 +2335,35 @@ window.LHPT = {
 /* === PANEL CONTROLS === */
 const panel   = document.getElementById('clientPanel');
 const overlay = document.getElementById('panelOverlay');
-const events  = generateCalendarEvents();
 let   currentPanelEvent = null; // the FullCalendar event object currently in the panel
+
+/* === EVENT PERSISTENCE === */
+const EVENTS_KEY = 'lhpt_events';
+
+function saveCalendarEvents() {
+  if (!calendar) return;
+  const all = calendar.getEvents().map(e => ({
+    id:    e.id || ('evt-' + Date.now() + '-' + Math.random().toString(36).slice(2)),
+    title: e.title,
+    start: e.startStr,
+    end:   e.endStr,
+    classNames:    e.classNames,
+    extendedProps: { clientId: e.extendedProps.clientId, type: e.extendedProps.type }
+  }));
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(all));
+}
+
+function loadOrSeedEvents() {
+  const stored = localStorage.getItem(EVENTS_KEY);
+  if (stored) {
+    try { return JSON.parse(stored); } catch(e) {}
+  }
+  const generated = generateCalendarEvents();
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(generated));
+  return generated;
+}
+
+const events = loadOrSeedEvents();
 
 const typeMap = {
   elite:  { label: '1-on-1 Elite',    cls: 'session-type-elite'  },
@@ -2520,7 +2547,8 @@ function renderPanelEdit(evt) {
 
     // Return to view mode
     renderPanelView(evt);
-  });
+  
+    saveCalendarEvents();});
 
   // Delete handler
   document.getElementById('peDeleteBtn').addEventListener('click', () => {
@@ -2668,8 +2696,11 @@ document.addEventListener('DOMContentLoaded', () => {
     selectable:   true,
     selectMirror: true,
     unselectAuto: true,
-    eventDrop:    (info) => { /* event already updated in calendar model */ },
-    eventResize:  (info) => { /* event already updated in calendar model */ },
+    eventDrop:    (info) => { saveCalendarEvents(); },
+    eventResize:  (info) => { saveCalendarEvents(); },
+    eventAdd:     (info) => { saveCalendarEvents(); },
+    eventChange:  (info) => { saveCalendarEvents(); },
+    eventRemove:  (info) => { saveCalendarEvents(); },
     height:       680,
     events:       events,
 

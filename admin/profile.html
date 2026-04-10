@@ -2015,19 +2015,47 @@ function renderProfile(c) {
   // Coach notes
   document.getElementById('coachNotes').value = c.notes || '';
 
-  // Schedule
-  document.getElementById('scheduleList').innerHTML = (c.upcomingSchedule || []).map(s => `
-    <div class="schedule-item">
-      <div class="schedule-date">
-        <div class="day">${s.date}</div>
-        <div class="month">${s.month}</div>
-      </div>
-      <div class="schedule-info">
-        <div class="schedule-title">${s.title}</div>
-        <div class="schedule-subtitle">${s.subtitle}</div>
-      </div>
-    </div>
-  `).join('') || '<p style="color:var(--on-surface-variant);font-size:0.875rem">No upcoming sessions</p>';
+  // Schedule — read from calendar localStorage events
+  (function renderSchedule() {
+    const now = new Date();
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    let sessions = [];
+
+    try {
+      const stored = localStorage.getItem('lhpt_events');
+      if (stored) {
+        const allEvents = JSON.parse(stored);
+        sessions = allEvents
+          .filter(e => {
+            const cid = e.extendedProps && e.extendedProps.clientId;
+            return parseInt(cid) === c.id && new Date(e.start) > now;
+          })
+          .sort((a, b) => new Date(a.start) - new Date(b.start))
+          .slice(0, 5);
+      }
+    } catch(err) {}
+
+    if (sessions.length) {
+      document.getElementById('scheduleList').innerHTML = sessions.map(e => {
+        const d = new Date(e.start);
+        const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        const endStr  = e.end ? new Date(e.end).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+        return `
+          <div class="schedule-item">
+            <div class="schedule-date">
+              <div class="day">${d.getDate()}</div>
+              <div class="month">${months[d.getMonth()]}</div>
+            </div>
+            <div class="schedule-info">
+              <div class="schedule-title">${e.title}</div>
+              <div class="schedule-subtitle">${timeStr}${endStr ? ' – ' + endStr : ''} · ${d.toLocaleDateString('en-GB',{weekday:'long'})}</div>
+            </div>
+          </div>`;
+      }).join('');
+    } else {
+      document.getElementById('scheduleList').innerHTML = '<p style="color:var(--on-surface-variant);font-size:0.875rem">No upcoming sessions</p>';
+    }
+  })();
 
   // Charts
   renderWeightChart(c);
