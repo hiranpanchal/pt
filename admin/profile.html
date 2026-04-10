@@ -1889,11 +1889,26 @@ function renderProfile(c) {
     </div>
   `;
 
+  // Calculate goal progress from weight history
+  const startW   = (c.weightHistory && c.weightHistory.length) ? c.weightHistory[0] : c.weight;
+  const currentW = c.weight;
+  const targetW  = c.targetWeight;
+  let goalPct = 0;
+  if (Math.abs(targetW - startW) > 0.01) {
+    goalPct = Math.round(Math.min(100, Math.max(0,
+      Math.abs(currentW - startW) / Math.abs(targetW - startW) * 100
+    )));
+  }
+  // Weight delta vs first logged entry
+  const weightDelta = (currentW - startW).toFixed(1);
+  const deltaSign   = weightDelta >= 0 ? '+' : '';
+  const deltaColor  = (targetW >= startW) === (weightDelta >= 0) ? '#4ade80' : '#f87171';
+
   document.getElementById('metricGrid').innerHTML = `
     <div class="metric-card">
       <div class="metric-lbl">Weight</div>
-      <div class="metric-num">${c.weight}<span style="font-size:1rem;color:var(--on-surface-variant)"> kg</span></div>
-      <div style="font-size:0.7rem;color:var(--on-surface-variant);margin-top:4px">Target: ${c.targetWeight} kg</div>
+      <div class="metric-num">${currentW}<span style="font-size:1rem;color:var(--on-surface-variant)"> kg</span></div>
+      <div style="font-size:0.7rem;color:${deltaColor};margin-top:4px">${deltaSign}${weightDelta} kg since start · target ${targetW} kg</div>
     </div>
     <div class="metric-card">
       <div class="metric-lbl">Body Fat</div>
@@ -1907,8 +1922,8 @@ function renderProfile(c) {
     </div>
     <div class="metric-card">
       <div class="metric-lbl">Goal Progress</div>
-      <div class="metric-num" style="color:var(--primary-container)">${c.progress}%</div>
-      <div style="height:4px;background:var(--surface-container-highest);border-radius:2px;margin-top:8px"><div style="height:100%;width:${c.progress}%;background:var(--gradient-cta);border-radius:2px"></div></div>
+      <div class="metric-num" style="color:var(--primary-container)">${goalPct}%</div>
+      <div style="height:4px;background:var(--surface-container-highest);border-radius:2px;margin-top:8px"><div style="height:100%;width:${goalPct}%;background:var(--gradient-cta);border-radius:2px"></div></div>
     </div>
     <div class="metric-card">
       <div class="metric-lbl">PB — ${c.personalBest.lift}</div>
