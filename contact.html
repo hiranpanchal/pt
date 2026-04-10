@@ -1056,7 +1056,7 @@ a  { color: inherit; text-decoration: none; }
               <p class="body-md">Thank you — I'll be in touch within 24 hours to discuss your programme.</p>
             </div>
 
-            <form id="contactForm">
+            <form id="contactForm" action="https://formspree.io/f/mlgoqryq" method="POST">
               <div class="form-row">
                 <div class="form-group">
                   <label for="firstName">First Name</label>
@@ -1464,10 +1464,28 @@ if (window.matchMedia('(pointer: fine)').matches) {
     const form = document.getElementById('contactForm');
     const success = document.getElementById('formSuccess');
     if (form) {
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        form.style.display = 'none';
-        success.classList.add('visible');
+        const btn = form.querySelector('button[type="submit"]');
+        btn.textContent = 'Sending…';
+        btn.disabled = true;
+        try {
+          const res = await fetch('https://formspree.io/f/mlgoqryq', {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+          });
+          if (res.ok) {
+            form.style.display = 'none';
+            success.classList.add('visible');
+          } else {
+            btn.textContent = 'Something went wrong — try again';
+            btn.disabled = false;
+          }
+        } catch(err) {
+          btn.textContent = 'Something went wrong — try again';
+          btn.disabled = false;
+        }
       });
     }
 
