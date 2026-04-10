@@ -1140,6 +1140,69 @@ button { cursor: pointer; font-family: var(--font-body); }
     .edit-input:focus { border-color: var(--primary-container); }
     .edit-input option { background: var(--surface-container-low); }
 
+    /* ── MOBILE NAV TOGGLE ── */
+    .mobile-nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--on-surface);
+      padding: 4px;
+      cursor: pointer;
+    }
+    .mobile-nav-toggle svg { width: 22px; height: 22px; stroke: currentColor; fill: none; display: block; }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+    }
+
+    /* ── RESPONSIVE: tablet (≤900px) ── */
+    @media (max-width: 900px) {
+      .admin-topbar-right .client-select-wrap { display: none; }
+      .admin-topbar-left h1 { font-size: 1rem; }
+      .admin-content { padding: var(--space-md); }
+    }
+
+    /* ── RESPONSIVE: mobile (≤720px) ── */
+    @media (max-width: 720px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+        z-index: 200;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .mobile-nav-toggle { display: flex; align-items: center; }
+      .admin-main { margin-left: 0; }
+      .admin-topbar {
+        padding: 10px var(--space-md);
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .admin-topbar-left { min-width: 0; }
+      .admin-topbar-right {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .admin-topbar-right .client-select-wrap { display: none; }
+      .topbar-btn { padding: 7px 12px; font-size: 0.7rem; }
+      .admin-content { padding: 12px; }
+      .profile-header { padding: 14px; }
+      .profile-avatar { width: 42px; height: 42px; font-size: 1rem; }
+      .profile-name { font-size: 1.25rem; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .dashboard-grid { grid-template-columns: 1fr !important; }
+      .breadcrumb { font-size: 0.75rem; }
+    }
+
+    /* ── RESPONSIVE: small mobile (≤420px) ── */
+    @media (max-width: 420px) {
+      .metric-grid { grid-template-columns: 1fr 1fr !important; }
+      .admin-topbar-right .topbar-btn:not(.topbar-btn-primary) { display: none; }
+    }
+
   </style>
 </head>
 <body>
@@ -1151,10 +1214,11 @@ button { cursor: pointer; font-family: var(--font-body); }
 })();
 </script>
 
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="admin-layout">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 409.02 103.22" height="34" width="135" style="display:block;">
 <style type="text/css">
@@ -1300,9 +1364,14 @@ button { cursor: pointer; font-family: var(--font-body); }
 
     <!-- TOP BAR -->
     <div class="admin-topbar">
-      <div class="admin-topbar-left">
-        <h1 id="topbarTitle">Client Profile</h1>
-        <p id="topbarSub">Individual performance analytics</p>
+      <div class="admin-topbar-left" style="display:flex;align-items:center;gap:10px">
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <h1 id="topbarTitle">Client Profile</h1>
+          <p id="topbarSub">Individual performance analytics</p>
+        </div>
       </div>
       <div class="admin-topbar-right">
         <div class="client-select-wrap">
@@ -2275,6 +2344,15 @@ document.getElementById('confirmUpdate').addEventListener('click', () => {
   setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="14" height="14"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 0 2 2z"/></svg> Send Update'; }, 2000);
 });
 updateModal.addEventListener('click', e => { if (e.target === updateModal) updateModal.classList.remove('open'); });
+
+/* === MOBILE NAV === */
+const sidebar       = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const mobileToggle  = document.getElementById('mobileNavToggle');
+function openSidebar()  { sidebar.classList.add('open'); sidebarOverlay.classList.add('open'); }
+function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); }
+mobileToggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+sidebarOverlay.addEventListener('click', closeSidebar);
 
 /* === INIT === */
 const client = getClient(currentClientId) || CLIENTS[0];
