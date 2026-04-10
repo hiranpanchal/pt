@@ -1974,22 +1974,6 @@ function renderProfile(c) {
   // Coach notes
   document.getElementById('coachNotes').value = c.notes || '';
 
-  // Recent Activity
-  document.getElementById('activityList').innerHTML = (c.recentActivity || []).map(a => `
-    <div class="activity-item">
-      <div class="activity-icon">
-        ${a.type === 'workout'
-          ? '<svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
-          : '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12"/><path d="M2 12h4l3-3 3 3 3-3"/></svg>'}
-      </div>
-      <div class="activity-info">
-        <div class="activity-title">${a.title}</div>
-        <div class="activity-meta">${a.time}${a.duration ? ' • ' + a.duration : ''}${a.calories ? ' • ' + a.calories : ''}</div>
-      </div>
-      ${a.status === 'completed' ? '<span class="activity-status">Completed</span>' : ''}
-    </div>
-  `).join('') || '<p style="color:var(--on-surface-variant);font-size:0.875rem">No recent activity</p>';
-
   // Schedule
   document.getElementById('scheduleList').innerHTML = (c.upcomingSchedule || []).map(s => `
     <div class="schedule-item">
