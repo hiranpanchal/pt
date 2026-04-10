@@ -842,51 +842,47 @@ a  { color: inherit; text-decoration: none; }
     }
     .testimonials-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: var(--space-lg);
     }
     .testimonial {
-      background: var(--surface-container-low);
+      border: 2px solid var(--secondary);
       border-radius: var(--roundness-lg);
-      overflow: hidden;
-      position: relative;
-    }
-    .testimonial-img {
-      width: 100%;
-      aspect-ratio: 4/3;
-      object-fit: cover;
-      filter: grayscale(40%) contrast(1.1);
-      transition: filter var(--transition-kinetic);
-    }
-    .testimonial:hover .testimonial-img { filter: grayscale(0%) contrast(1.05); }
-    .testimonial-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(to top, rgba(22,18,19,0.95) 0%, transparent 100%);
-      padding: var(--space-xl) var(--space-lg) var(--space-lg);
+      padding: var(--space-xl) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
     }
     .testimonial-stars {
       display: flex;
-      gap: 3px;
-      margin-bottom: var(--space-sm);
+      gap: 4px;
     }
-    .star { color: var(--secondary); font-size: 0.875rem; }
-    .testimonial-overlay blockquote {
+    .star { color: var(--secondary); font-size: 1.1rem; }
+    .testimonial blockquote {
       font-family: var(--font-body);
-      font-size: 0.9375rem;
+      font-size: 1rem;
       font-style: italic;
       color: var(--on-surface);
-      line-height: 1.55;
-      margin-bottom: var(--space-sm);
+      line-height: 1.6;
+      flex: 1;
+      margin: 0;
     }
-    .testimonial-overlay cite {
+    .testimonial cite {
+      display: block;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--primary-container);
+      font-style: normal;
+    }
+    .testimonial cite span {
+      display: block;
+      font-weight: 400;
+      color: var(--on-surface-variant);
+      text-transform: none;
+      letter-spacing: 0;
+      margin-top: 2px;
     }
 
     /* CTA Banner */
@@ -921,6 +917,9 @@ a  { color: inherit; text-decoration: none; }
       .hero-stats { display: none; }
       .results-header { grid-template-columns: 1fr; }
       .results-stats { flex-wrap: wrap; gap: var(--space-md); }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 500px) {
       .testimonials-grid { grid-template-columns: 1fr; }
       .method-grid { grid-template-columns: 1fr; }
       .about-credentials { flex-direction: column; }
@@ -1336,35 +1335,32 @@ a  { color: inherit; text-decoration: none; }
         </div>
       </div>
 
-      <div class="testimonials-grid">
-        <div class="testimonial reveal-left">
-          <img
-            src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=800&q=80&fit=crop"
-            alt="James Collins"
-            class="testimonial-img"
-          />
-          <div class="testimonial-overlay">
-            <div class="testimonial-stars">
-              <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-            </div>
-            <blockquote>"Lee didn't just give me a workout plan, he re-engineered my lifestyle. The transformation was physical, but the mental strength I gained is what stayed."</blockquote>
-            <cite>— James Collins, Former Client</cite>
+      <div class="testimonials-grid" style="margin-top:var(--space-2xl)">
+
+        <div class="testimonial reveal">
+          <div class="testimonial-stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
           </div>
+          <blockquote>"Lee is the personal trainer who pushed me into bench pressing nearly five stone over my own 17 stone body weight. If you're in need of a great PT then I couldn't recommend Lee enough. He caters for anybody — not only 'athletes' like me!"</blockquote>
+          <cite>Paul Booth<span>Sports MC</span></cite>
         </div>
-        <div class="testimonial reveal-right">
-          <img
-            src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&fit=crop&crop=top"
-            alt="Sarah Jenkins"
-            class="testimonial-img"
-          />
-          <div class="testimonial-overlay">
-            <div class="testimonial-stars">
-              <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-            </div>
-            <blockquote>"Professional, rigorous, and incredibly effective. The kinetic method is the only approach that has actually worked for my body type and goals."</blockquote>
-            <cite>— Sarah Jenkins, Performance Kinetic</cite>
+
+        <div class="testimonial reveal reveal-delay-1">
+          <div class="testimonial-stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
           </div>
+          <blockquote>"As Nana to two lively grandsons and having to balance that with a demanding full-time job, I needed a training programme that was motivational, personalised, rewarding and above all enjoyable. I've been delighted with the results and I would recommend Lee to people all ages."</blockquote>
+          <cite>Alison Ellis<span>Working grandmother with a hectic life</span></cite>
         </div>
+
+        <div class="testimonial reveal reveal-delay-2">
+          <div class="testimonial-stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <blockquote>"After signing for AFC Fylde at the age of 16 I felt I was too slender and I needed a bit more presence on the pitch. Lee has coached me to become bigger and stronger than I've ever been. But most of all he has given me the belief and the confidence that I can do anything I put my mind to."</blockquote>
+          <cite>Lewis Thompson<span>Footballer with AFC Fylde</span></cite>
+        </div>
+
       </div>
     </div>
   </section>
