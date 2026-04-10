@@ -1250,28 +1250,64 @@ button { cursor: pointer; font-family: var(--font-body); }
 
 <!-- ADD CLIENT MODAL -->
 <div class="modal-backdrop" id="addModal">
-  <div class="modal">
-    <div class="modal-title">Add New Client</div>
+  <div class="modal" style="max-width:560px;width:95%;max-height:90vh;overflow-y:auto">
+    <div class="modal-title" id="addModalTitle">Add New Client</div>
     <form class="modal-form" id="addClientForm">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+      <!-- Name -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="form-group">
-          <label>First Name</label>
+          <label>First Name *</label>
           <input type="text" id="nc-first" placeholder="First name" required/>
         </div>
         <div class="form-group">
-          <label>Last Name</label>
+          <label>Last Name *</label>
           <input type="text" id="nc-last" placeholder="Last name" required/>
         </div>
       </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="nc-email" placeholder="email@example.com" required/>
+
+      <!-- Contact -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="nc-email" placeholder="email@example.com" required/>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="nc-phone" placeholder="+44 7700 000000"/>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Phone</label>
-        <input type="tel" id="nc-phone" placeholder="+44 7700 000000"/>
+
+      <!-- Demographics -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" id="nc-age" placeholder="e.g. 32" min="16" max="80"/>
+        </div>
+        <div class="form-group">
+          <label>Height (cm)</label>
+          <input type="number" id="nc-height" placeholder="e.g. 178" min="100" max="220"/>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+      <!-- Measurements -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label>Weight (kg)</label>
+          <input type="number" id="nc-weight" placeholder="e.g. 85" step="0.1"/>
+        </div>
+        <div class="form-group">
+          <label>Target Weight (kg)</label>
+          <input type="number" id="nc-target" placeholder="e.g. 80" step="0.1"/>
+        </div>
+        <div class="form-group">
+          <label>Body Fat (%)</label>
+          <input type="number" id="nc-bf" placeholder="e.g. 20" step="0.1"/>
+        </div>
+      </div>
+
+      <!-- Program -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="form-group">
           <label>Program</label>
           <select id="nc-program">
@@ -1289,13 +1325,15 @@ button { cursor: pointer; font-family: var(--font-body); }
           </select>
         </div>
       </div>
+
       <div class="form-group">
         <label>Goal</label>
-        <input type="text" id="nc-goal" placeholder="e.g. Build Muscle, Fat Loss…"/>
+        <input type="text" id="nc-goal" placeholder="e.g. Build Muscle, Fat Loss, Body Recomposition…"/>
       </div>
+
       <div class="modal-actions">
         <button type="button" class="modal-btn modal-btn-secondary" id="cancelAddClient">Cancel</button>
-        <button type="submit" class="modal-btn modal-btn-primary">Add Client</button>
+        <button type="submit" class="modal-btn modal-btn-primary" id="addClientSubmit">Add Client</button>
       </div>
     </form>
   </div>
@@ -1734,37 +1772,63 @@ window.LHPT = {
 
   document.getElementById('addClientForm').addEventListener('submit', (e) => {
     e.preventDefault();
+
+    // Safe unique ID — max existing + 1
+    const nextId = CLIENTS.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+
+    const weight     = parseFloat(document.getElementById('nc-weight').value)  || 0;
+    const targetW    = parseFloat(document.getElementById('nc-target').value)  || 0;
+    const bf         = parseFloat(document.getElementById('nc-bf').value)      || null;
+    const age        = parseInt(document.getElementById('nc-age').value)        || null;
+    const height     = parseInt(document.getElementById('nc-height').value)     || null;
+
+    // Calculate BMI if we have weight and height
+    const bmi = (weight && height) ? parseFloat((weight / ((height/100) ** 2)).toFixed(1)) : null;
+
     const newClient = {
-      id: CLIENTS.length + 1,
-      firstName: document.getElementById('nc-first').value,
-      lastName:  document.getElementById('nc-last').value,
-      email:     document.getElementById('nc-email').value,
-      phone:     document.getElementById('nc-phone').value || '',
+      id:        nextId,
+      firstName: document.getElementById('nc-first').value.trim(),
+      lastName:  document.getElementById('nc-last').value.trim(),
+      email:     document.getElementById('nc-email').value.trim(),
+      phone:     document.getElementById('nc-phone').value.trim() || '',
       status:    document.getElementById('nc-status').value,
       tier:      document.getElementById('nc-program').value,
       program:   document.getElementById('nc-program').value,
       joined:    new Date().toISOString().split('T')[0],
       phase:     'Onboarding',
-      progress:  0,
-      goal:      document.getElementById('nc-goal').value || '',
-      weight:    0,
-      targetWeight: 0,
+      goal:      document.getElementById('nc-goal').value.trim() || '',
+      weight,
+      targetWeight: targetW,
+      age,
+      height,
+      bodyFat:   bf,
+      bmi,
+      weightHistory:  weight ? [weight] : [],
+      bodyFatHistory: bf     ? [bf]     : [],
+      bmiHistory:     bmi    ? [bmi]    : [],
+      personalBest:   { lift: '', weight: 0 },
+      strengthGain:   '+0%',
       strengthIndex: 0,
       volumeConsistency: 0,
       nutritionCompliance: 0,
-      personalBest: { lift: '—', weight: 0 },
-      strengthGain: '0%',
       notes: '',
-      weightHistory: [0,0,0,0,0,0,0,0,0,0,0,0],
       recentActivity: [],
       upcomingSchedule: []
     };
+
     CLIENTS.push(newClient);
     window.LHPT.saveClients();
     addModal.classList.remove('open');
     e.target.reset();
     renderKPIs();
     renderTable();
+
+    // Flash feedback
+    const btn = document.getElementById('addClientBtn');
+    btn.textContent = 'Client Added ✓';
+    setTimeout(() => {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add New Client';
+    }, 2500);
   });
 
   /* === EDIT CLIENT (simple modal re-use) === */
