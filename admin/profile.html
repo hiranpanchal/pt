@@ -1580,17 +1580,29 @@ button { cursor: pointer; font-family: var(--font-body); }
 
 <!-- SEND UPDATE MODAL -->
 <div class="modal-backdrop" id="updateModal">
-  <div class="modal">
+  <div class="modal" style="max-width:520px;width:95%">
     <div class="modal-title">Send Update to Client</div>
+    <div style="font-size:0.75rem;color:var(--on-surface-variant);margin:-8px 0 18px">This will open your email client with the message pre-filled.</div>
     <div class="modal-form">
       <div class="form-group">
+        <label>To</label>
+        <input type="text" id="updateTo" readonly style="width:100%;background:var(--surface-container);border:none;border-bottom:2px solid rgba(154,143,144,0.2);border-radius:2px 2px 0 0;padding:10px;font-family:var(--font-body);font-size:0.875rem;color:var(--on-surface-variant);outline:none;box-sizing:border-box;cursor:default"/>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" id="updateSubject" style="width:100%;background:var(--surface-container);border:none;border-bottom:2px solid rgba(154,143,144,0.2);border-radius:2px 2px 0 0;padding:10px;font-family:var(--font-body);font-size:0.875rem;color:var(--on-surface);outline:none;box-sizing:border-box" placeholder="Monthly update from Lee Hayward PT"/>
+      </div>
+      <div class="form-group">
         <label>Message</label>
-        <textarea id="updateMessage" style="width:100%;background:var(--surface-container);border:none;border-bottom:2px solid rgba(154,143,144,0.2);border-radius:2px 2px 0 0;padding:10px;font-family:var(--font-body);font-size:0.875rem;color:var(--on-surface);outline:none;resize:vertical;min-height:100px" placeholder="Write a message to your client…"></textarea>
+        <textarea id="updateMessage" style="width:100%;background:var(--surface-container);border:none;border-bottom:2px solid rgba(154,143,144,0.2);border-radius:2px 2px 0 0;padding:10px;font-family:var(--font-body);font-size:0.875rem;color:var(--on-surface);outline:none;resize:vertical;min-height:140px;box-sizing:border-box" placeholder="Write a message to your client…"></textarea>
       </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-secondary" id="cancelUpdate">Cancel</button>
-      <button class="modal-btn modal-btn-primary" id="confirmUpdate">Send Update</button>
+      <button class="modal-btn modal-btn-primary" id="confirmUpdate">
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="14" height="14" style="margin-right:6px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Open in Email
+      </button>
     </div>
   </div>
 </div>
@@ -2363,15 +2375,46 @@ document.getElementById('confirmEdit').addEventListener('click', () => {
 
 /* === SEND UPDATE MODAL === */
 const updateModal = document.getElementById('updateModal');
-document.getElementById('sendUpdateBtn').addEventListener('click', () => updateModal.classList.add('open'));
-document.getElementById('cancelUpdate').addEventListener('click', () => updateModal.classList.remove('open'));
-document.getElementById('confirmUpdate').addEventListener('click', () => {
-  updateModal.classList.remove('open');
-  const btn = document.getElementById('sendUpdateBtn');
-  btn.textContent = 'Sent ✓';
-  setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="14" height="14"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 0 2 2z"/></svg> Send Update'; }, 2000);
+
+document.getElementById('sendUpdateBtn').addEventListener('click', () => {
+  const c = getClient(currentClientId);
+  if (!c) return;
+
+  // Pre-fill fields
+  document.getElementById('updateTo').value = `${c.firstName} ${c.lastName} <${c.email}>`;
+  document.getElementById('updateSubject').value = `Your Monthly Update — Lee Hayward PT`;
+
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('updateMessage').value =
+`Hi ${c.firstName},
+
+Here's your update for ${today}.
+
+[Add your notes here]
+
+Current weight: ${c.weight ? c.weight + ' kg' : '—'}
+Body fat: ${c.bodyFat ? c.bodyFat + '%' : '—'}
+Goal progress: [X]%
+
+Keep up the great work — speak soon.
+
+Lee Hayward
+Lee Hayward PT`;
+
+  updateModal.classList.add('open');
 });
+
+document.getElementById('cancelUpdate').addEventListener('click', () => updateModal.classList.remove('open'));
 updateModal.addEventListener('click', e => { if (e.target === updateModal) updateModal.classList.remove('open'); });
+
+document.getElementById('confirmUpdate').addEventListener('click', () => {
+  const c = getClient(currentClientId);
+  const subject = encodeURIComponent(document.getElementById('updateSubject').value || 'Update from Lee Hayward PT');
+  const body    = encodeURIComponent(document.getElementById('updateMessage').value || '');
+  const email   = c ? c.email : '';
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  updateModal.classList.remove('open');
+});
 
 /* === MOBILE NAV === */
 const sidebar       = document.getElementById('sidebar');
