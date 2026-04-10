@@ -1114,6 +1114,22 @@ button { cursor: pointer; font-family: var(--font-body); }
       cursor: pointer;
     }
     .client-select-wrap select option { background: var(--surface-container-low); }
+    .edit-input {
+      width: 100%;
+      background: var(--surface-container);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 9px 10px;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--on-surface);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+    .edit-input:focus { border-color: var(--primary-container); }
+    .edit-input option { background: var(--surface-container-low); }
+
   </style>
 </head>
 <body>
@@ -1337,6 +1353,35 @@ button { cursor: pointer; font-family: var(--font-body); }
             <div class="strength-display" id="strengthDisplay"><!-- JS --></div>
           </div>
 
+          <!-- Log Measurement -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <div class="dash-card-title">Log Measurement</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+              <div>
+                <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:6px">Date</div>
+                <input type="date" id="logDate" style="width:100%;background:var(--surface-container);border:none;border-radius:6px;padding:9px 10px;font-family:var(--font-body);font-size:0.8rem;color:var(--on-surface);outline:none;border:1px solid transparent" onfocus="this.style.borderColor='var(--primary-container)'" onblur="this.style.borderColor='transparent'"/>
+              </div>
+              <div>
+                <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:6px">Weight (kg)</div>
+                <input type="number" id="logWeight" step="0.1" placeholder="e.g. 88.5" style="width:100%;background:var(--surface-container);border:1px solid transparent;border-radius:6px;padding:9px 10px;font-family:var(--font-body);font-size:0.8rem;color:var(--on-surface);outline:none" onfocus="this.style.borderColor='var(--primary-container)'" onblur="this.style.borderColor='transparent'"/>
+              </div>
+              <div>
+                <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:6px">Body Fat (%)</div>
+                <input type="number" id="logBodyFat" step="0.1" placeholder="e.g. 18.5" style="width:100%;background:var(--surface-container);border:1px solid transparent;border-radius:6px;padding:9px 10px;font-family:var(--font-body);font-size:0.8rem;color:var(--on-surface);outline:none" onfocus="this.style.borderColor='var(--primary-container)'" onblur="this.style.borderColor='transparent'"/>
+              </div>
+              <div>
+                <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:6px">BMI</div>
+                <input type="number" id="logBmi" step="0.1" placeholder="e.g. 25.8" style="width:100%;background:var(--surface-container);border:1px solid transparent;border-radius:6px;padding:9px 10px;font-family:var(--font-body);font-size:0.8rem;color:var(--on-surface);outline:none" onfocus="this.style.borderColor='var(--primary-container)'" onblur="this.style.borderColor='transparent'"/>
+              </div>
+            </div>
+            <button class="topbar-btn topbar-btn-primary" style="width:100%;justify-content:center" id="logMeasurementBtn">
+              <svg viewBox="0 0 24 24" stroke-width="2.5" width="14" height="14" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Log Measurement
+            </button>
+          </div>
+
           <!-- Coach Notes -->
           <div class="dash-card">
             <div class="dash-card-header">
@@ -1356,30 +1401,50 @@ button { cursor: pointer; font-family: var(--font-body); }
             <div class="dash-card-header">
               <div>
                 <div class="dash-card-title">Weight Progression</div>
-                <div class="dash-card-subtitle">Last 90 Days</div>
+                <div class="dash-card-subtitle">kg over time</div>
               </div>
               <div class="chart-toggle">
-                <button class="chart-toggle-btn active" data-range="all">90D</button>
-                <button class="chart-toggle-btn" data-range="30">30D</button>
+                <button class="chart-toggle-btn active" data-chart="weight" data-range="all">90D</button>
+                <button class="chart-toggle-btn" data-chart="weight" data-range="30">30D</button>
               </div>
             </div>
-            <div class="weight-chart-wrap">
-              <canvas id="weightChart"></canvas>
-            </div>
+            <div class="weight-chart-wrap"><canvas id="weightChart"></canvas></div>
           </div>
 
-          <!-- Recent Activity -->
+          <!-- Body Fat Chart -->
           <div class="dash-card">
             <div class="dash-card-header">
-              <div class="dash-card-title">Recent Activity</div>
+              <div>
+                <div class="dash-card-title">Body Fat</div>
+                <div class="dash-card-subtitle">% over time</div>
+              </div>
+              <div class="chart-toggle">
+                <button class="chart-toggle-btn active" data-chart="bf" data-range="all">90D</button>
+                <button class="chart-toggle-btn" data-chart="bf" data-range="30">30D</button>
+              </div>
             </div>
-            <div class="activity-list" id="activityList"><!-- JS --></div>
+            <div class="weight-chart-wrap"><canvas id="bfChart"></canvas></div>
+          </div>
+
+          <!-- BMI Chart -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <div>
+                <div class="dash-card-title">BMI</div>
+                <div class="dash-card-subtitle">Body Mass Index over time</div>
+              </div>
+              <div class="chart-toggle">
+                <button class="chart-toggle-btn active" data-chart="bmi" data-range="all">90D</button>
+                <button class="chart-toggle-btn" data-chart="bmi" data-range="30">30D</button>
+              </div>
+            </div>
+            <div class="weight-chart-wrap"><canvas id="bmiChart"></canvas></div>
           </div>
 
           <!-- Upcoming Schedule -->
           <div class="dash-card">
             <div class="dash-card-header">
-              <div class="dash-card-title">Upcoming Schedule</div>
+              <div class="dash-card-title">Upcoming Sessions</div>
               <a href="calendar.html" class="topbar-btn topbar-btn-secondary" style="font-size:0.65rem;padding:4px 10px">View Calendar</a>
             </div>
             <div class="schedule-list" id="scheduleList"><!-- JS --></div>
@@ -1389,6 +1454,66 @@ button { cursor: pointer; font-family: var(--font-body); }
       </div>
     </div>
   </main>
+</div>
+
+<!-- EDIT PROGRAM MODAL -->
+<div class="modal-backdrop" id="editProgramModal">
+  <div class="modal" style="max-width:540px;width:95%">
+    <div class="modal-title">Edit Client Program</div>
+    <div class="modal-form" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Full Name</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <input type="text" id="editFirstName" placeholder="First name" class="edit-input"/>
+          <input type="text" id="editLastName" placeholder="Last name" class="edit-input"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="editAge" placeholder="e.g. 32" class="edit-input"/>
+      </div>
+      <div class="form-group">
+        <label>Height (cm)</label>
+        <input type="number" id="editHeight" placeholder="e.g. 183" class="edit-input"/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="editEmail" placeholder="client@example.com" class="edit-input"/>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="editPhone" placeholder="+44 7700 900000" class="edit-input"/>
+      </div>
+      <div class="form-group">
+        <label>Program</label>
+        <select id="editProgram" class="edit-input">
+          <option value="1-on-1 Training">1-on-1 Training</option>
+          <option value="Online Coaching">Online Coaching</option>
+          <option value="Group Training">Group Training</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tier</label>
+        <input type="text" id="editTier" placeholder="Elite Performance" class="edit-input"/>
+      </div>
+      <div class="form-group">
+        <label>Current Phase</label>
+        <input type="text" id="editPhase" placeholder="Hypertrophy" class="edit-input"/>
+      </div>
+      <div class="form-group">
+        <label>Goal</label>
+        <input type="text" id="editGoal" placeholder="Build Muscle" class="edit-input"/>
+      </div>
+      <div class="form-group">
+        <label>Target Weight (kg)</label>
+        <input type="number" id="editTargetWeight" step="0.1" placeholder="e.g. 90" class="edit-input"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" id="cancelEdit">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="confirmEdit">Save Changes</button>
+    </div>
+  </div>
 </div>
 
 <!-- SEND UPDATE MODAL -->
@@ -1436,6 +1561,10 @@ const CLIENTS = [
     nutritionCompliance: 82,
     personalBest: { lift: 'Deadlift', weight: 260 },
     strengthGain: '+22%',
+    age: 32, height: 183,
+    bodyFat: 18, bmi: 27.5,
+    bodyFatHistory: [22,21.5,21,20.5,20,19.5,19,18.8,18.5,18.2,18,18],
+    bmiHistory: [26,26.2,26.4,26.6,26.8,27,27.1,27.2,27.3,27.4,27.5,27.5],
     notes: 'Highly motivated. Responds well to high volume. Watch lower back on deadlift days.',
     weightHistory: [88, 89, 89.5, 90, 90.5, 91, 91.5, 92, 92, 92.3, 92.5, 92],
     recentActivity: [
@@ -1469,6 +1598,10 @@ const CLIENTS = [
     nutritionCompliance: 55,
     personalBest: { lift: 'Squat', weight: 80 },
     strengthGain: '+5%',
+    age: 28, height: 167,
+    bodyFat: 28, bmi: 24.4,
+    bodyFatHistory: [32,31.5,31,30.5,30,29.5,29,28.8,28.5,28.2,28,28],
+    bmiHistory: [25.2,25,24.8,24.6,24.5,24.4,24.3,24.3,24.2,24.2,24.4,24.4],
     notes: 'New client, still calibrating. Nutrition logging needs improvement.',
     weightHistory: [70, 69.5, 69, 68.5, 68.5, 68.2, 68, 68, 67.8, 68, 67.5, 68],
     recentActivity: [
@@ -1500,6 +1633,10 @@ const CLIENTS = [
     nutritionCompliance: 88,
     personalBest: { lift: 'Bench Press', weight: 140 },
     strengthGain: '+18%',
+    age: 35, height: 178,
+    bodyFat: 12, bmi: 25.9,
+    bodyFatHistory: [20,19,18,17,16,15,14,13.5,13,12.5,12,12],
+    bmiHistory: [28.4,28.1,27.8,27.5,27.2,26.8,26.5,26.3,26.1,25.9,25.9,25.9],
     notes: 'Elite performer. Near end of cut phase. Transition to maintenance in ~3 weeks.',
     weightHistory: [90, 89, 88, 87, 86, 85.5, 85, 84.5, 84, 83, 82.5, 82],
     recentActivity: [
@@ -1531,6 +1668,10 @@ const CLIENTS = [
     nutritionCompliance: 72,
     personalBest: { lift: 'Romanian Deadlift', weight: 70 },
     strengthGain: '+8%',
+    age: 29, height: 169,
+    bodyFat: 24, bmi: 22.8,
+    bodyFatHistory: [24.5,24.3,24.2,24,24,24.2,24.5,24.3,24.1,24,24,24],
+    bmiHistory: [22.8,22.8,22.9,23,22.9,22.8,22.7,22.8,22.8,22.9,22.8,22.8],
     notes: 'On pause due to travel. Resume April 20th. Lower back rehab protocol ongoing.',
     weightHistory: [65, 65.5, 65.2, 65, 64.8, 65, 65.2, 65.5, 65, 64.8, 65, 65],
     recentActivity: [
@@ -1560,6 +1701,10 @@ const CLIENTS = [
     nutritionCompliance: 76,
     personalBest: { lift: 'Squat', weight: 200 },
     strengthGain: '+14%',
+    age: 26, height: 183,
+    bodyFat: 14, bmi: 26.3,
+    bodyFatHistory: [18,17.5,17,16.5,16,15.5,15,14.8,14.5,14.2,14,14],
+    bmiHistory: [25.8,25.9,26,26.1,26.2,26.2,26.3,26.3,26.3,26.3,26.3,26.3],
     notes: 'Former rugby player. Excellent base strength. Focus on hypertrophy accessory work.',
     weightHistory: [86, 86.5, 87, 87, 87.5, 88, 88, 88.5, 88, 88, 88.5, 88],
     recentActivity: [
@@ -1591,6 +1736,10 @@ const CLIENTS = [
     nutritionCompliance: 85,
     personalBest: { lift: 'Hip Thrust', weight: 120 },
     strengthGain: '+16%',
+    age: 31, height: 164,
+    bodyFat: 22, bmi: 21.6,
+    bodyFatHistory: [27,26.5,26,25.5,25,24.5,24,23.5,23,22.5,22,22],
+    bmiHistory: [22.2,22.1,22,21.9,21.8,21.7,21.6,21.5,21.5,21.4,21.4,21.6],
     notes: 'Excellent nutrition compliance. Strength progressing well.',
     weightHistory: [60, 59.5, 59, 59, 58.5, 58.5, 58, 58, 58, 57.5, 58, 58],
     recentActivity: [
@@ -1717,6 +1866,8 @@ window.LHPT = {
 
 let currentClientId = getCurrentClientId();
 let weightChart = null;
+let bfChart = null;
+let bmiChart = null;
 
 /* === CLIENT SELECTOR === */
 const selector = document.getElementById('clientSelector');
@@ -1758,20 +1909,29 @@ function renderProfile(c) {
 
   document.getElementById('metricGrid').innerHTML = `
     <div class="metric-card">
-      <div class="metric-num">${c.weight}<span style="font-size:1rem;color:var(--on-surface-variant)">kg</span></div>
-      <div class="metric-lbl">Current Weight</div>
+      <div class="metric-lbl">Weight</div>
+      <div class="metric-num">${c.weight}<span style="font-size:1rem;color:var(--on-surface-variant)"> kg</span></div>
+      <div style="font-size:0.7rem;color:var(--on-surface-variant);margin-top:4px">Target: ${c.targetWeight} kg</div>
     </div>
     <div class="metric-card">
-      <div class="metric-num">${c.targetWeight}<span style="font-size:1rem;color:var(--on-surface-variant)">kg</span></div>
-      <div class="metric-lbl">Target Weight</div>
+      <div class="metric-lbl">Body Fat</div>
+      <div class="metric-num" style="color:var(--primary-container)">${c.bodyFat !== undefined ? c.bodyFat : '—'}<span style="font-size:1rem;color:var(--on-surface-variant)"> %</span></div>
+      <div style="font-size:0.7rem;color:var(--on-surface-variant);margin-top:4px">Logged weekly</div>
     </div>
     <div class="metric-card">
-      <div class="metric-num" style="color:var(--primary-container)">${c.progress}%</div>
+      <div class="metric-lbl">BMI</div>
+      <div class="metric-num">${c.bmi !== undefined ? c.bmi : '—'}</div>
+      <div style="font-size:0.7rem;color:var(--on-surface-variant);margin-top:4px">Height: ${c.height || '—'} cm</div>
+    </div>
+    <div class="metric-card">
       <div class="metric-lbl">Goal Progress</div>
+      <div class="metric-num" style="color:var(--primary-container)">${c.progress}%</div>
+      <div style="height:4px;background:var(--surface-container-highest);border-radius:2px;margin-top:8px"><div style="height:100%;width:${c.progress}%;background:var(--gradient-cta);border-radius:2px"></div></div>
     </div>
     <div class="metric-card">
-      <div class="metric-num">${c.personalBest.weight}<span style="font-size:1rem;color:var(--on-surface-variant)">kg</span></div>
-      <div class="metric-lbl">PB: ${c.personalBest.lift}</div>
+      <div class="metric-lbl">PB — ${c.personalBest.lift}</div>
+      <div class="metric-num">${c.personalBest.weight}<span style="font-size:1rem;color:var(--on-surface-variant)"> kg</span></div>
+      <div style="font-size:0.7rem;color:#4ade80;margin-top:4px">↑ ${c.strengthGain} this programme</div>
     </div>
   `;
 
@@ -1844,8 +2004,10 @@ function renderProfile(c) {
     </div>
   `).join('') || '<p style="color:var(--on-surface-variant);font-size:0.875rem">No upcoming sessions</p>';
 
-  // Weight Chart
+  // Charts
   renderWeightChart(c);
+  renderBfChart(c);
+  renderBmiChart(c);
 }
 
 /* === WEIGHT CHART === */
@@ -1907,14 +2069,185 @@ function renderWeightChart(c, range = 'all') {
   });
 }
 
+
+/* === BODY FAT CHART === */
+function renderBfChart(c, range = 'all') {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const history = c.bodyFatHistory || [];
+  const data = range === '30' ? history.slice(-4) : history;
+  const labels = data.map((_, i) => {
+    const idx = (new Date().getMonth() - data.length + i + 12) % 12;
+    return months[idx];
+  });
+
+  if (bfChart) bfChart.destroy();
+
+  const ctx = document.getElementById('bfChart').getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(96,165,250,0.3)');
+  gradient.addColorStop(1, 'rgba(96,165,250,0)');
+
+  bfChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#60a5fa',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        pointBackgroundColor: '#60a5fa',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: 'rgba(30,27,28,0.95)',
+        titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+        bodyFont:  { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '600' },
+        titleColor: 'rgba(154,143,144,1)',
+        bodyColor: '#EDE0E1',
+        padding: 10,
+        displayColors: false,
+        callbacks: { label: ctx => `${ctx.parsed.y}%` }
+      }},
+      scales: {
+        x: {
+          grid: { color: 'rgba(154,143,144,0.08)' },
+          ticks: { color: 'rgba(154,143,144,0.8)', font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" } }
+        },
+        y: {
+          grid: { color: 'rgba(154,143,144,0.08)' },
+          ticks: { color: 'rgba(154,143,144,0.8)', font: { size: 10 }, callback: v => `${v}%` }
+        }
+      }
+    }
+  });
+}
+
+/* === BMI CHART === */
+function renderBmiChart(c, range = 'all') {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const history = c.bmiHistory || [];
+  const data = range === '30' ? history.slice(-4) : history;
+  const labels = data.map((_, i) => {
+    const idx = (new Date().getMonth() - data.length + i + 12) % 12;
+    return months[idx];
+  });
+
+  if (bmiChart) bmiChart.destroy();
+
+  const ctx = document.getElementById('bmiChart').getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(74,222,128,0.3)');
+  gradient.addColorStop(1, 'rgba(74,222,128,0)');
+
+  bmiChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#4ade80',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        pointBackgroundColor: '#4ade80',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: 'rgba(30,27,28,0.95)',
+        titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+        bodyFont:  { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '600' },
+        titleColor: 'rgba(154,143,144,1)',
+        bodyColor: '#EDE0E1',
+        padding: 10,
+        displayColors: false,
+        callbacks: { label: ctx => `${ctx.parsed.y}` }
+      }},
+      scales: {
+        x: {
+          grid: { color: 'rgba(154,143,144,0.08)' },
+          ticks: { color: 'rgba(154,143,144,0.8)', font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" } }
+        },
+        y: {
+          grid: { color: 'rgba(154,143,144,0.08)' },
+          ticks: { color: 'rgba(154,143,144,0.8)', font: { size: 10 } }
+        }
+      }
+    }
+  });
+}
+
 /* === CHART TOGGLE === */
 document.querySelectorAll('.chart-toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.chart-toggle-btn').forEach(b => b.classList.remove('active'));
+    // Only deactivate buttons within the same chart toggle group
+    const group = btn.closest('.chart-toggle');
+    group.querySelectorAll('.chart-toggle-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const c = getClient(currentClientId);
-    renderWeightChart(c, btn.dataset.range);
+    const chart = btn.dataset.chart;
+    const range = btn.dataset.range;
+    if (chart === 'weight') renderWeightChart(c, range);
+    else if (chart === 'bf')  renderBfChart(c, range);
+    else if (chart === 'bmi') renderBmiChart(c, range);
   });
+});
+
+
+/* === LOG MEASUREMENT === */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+});
+
+document.getElementById('logMeasurementBtn').addEventListener('click', () => {
+  const c = CLIENTS.find(x => x.id === currentClientId);
+  if (!c) return;
+  const w   = parseFloat(document.getElementById('logWeight').value);
+  const bf  = parseFloat(document.getElementById('logBodyFat').value);
+  const bmi = parseFloat(document.getElementById('logBmi').value);
+  if (isNaN(w) && isNaN(bf) && isNaN(bmi)) {
+    alert('Please enter at least one measurement.');
+    return;
+  }
+  if (!isNaN(w)) {
+    c.weight = w;
+    if (!c.weightHistory) c.weightHistory = [];
+    c.weightHistory.push(w);
+  }
+  if (!isNaN(bf)) {
+    c.bodyFat = bf;
+    if (!c.bodyFatHistory) c.bodyFatHistory = [];
+    c.bodyFatHistory.push(bf);
+  }
+  if (!isNaN(bmi)) {
+    c.bmi = bmi;
+    if (!c.bmiHistory) c.bmiHistory = [];
+    c.bmiHistory.push(bmi);
+  }
+  window.LHPT.saveClients();
+  // Re-render metric cards and charts
+  renderProfile(c);
+  // Reset inputs
+  document.getElementById('logWeight').value = '';
+  document.getElementById('logBodyFat').value = '';
+  document.getElementById('logBmi').value = '';
+  document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+  const btn = document.getElementById('logMeasurementBtn');
+  btn.textContent = 'Logged ✓';
+  setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2.5" width="14" height="14" stroke="currentColor" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Log Measurement'; }, 2000);
 });
 
 /* === SAVE NOTES === */
@@ -1927,6 +2260,52 @@ document.getElementById('saveNotesBtn').addEventListener('click', () => {
     btn.textContent = 'Saved ✓';
     setTimeout(() => { btn.textContent = 'Save Notes'; }, 2000);
   }
+});
+
+
+/* === EDIT PROGRAM MODAL === */
+const editModal = document.getElementById('editProgramModal');
+
+document.getElementById('editBtn').addEventListener('click', () => {
+  const c = getClient(currentClientId);
+  if (!c) return;
+  document.getElementById('editFirstName').value    = c.firstName || '';
+  document.getElementById('editLastName').value     = c.lastName  || '';
+  document.getElementById('editAge').value          = c.age       || '';
+  document.getElementById('editHeight').value       = c.height    || '';
+  document.getElementById('editEmail').value        = c.email     || '';
+  document.getElementById('editPhone').value        = c.phone     || '';
+  document.getElementById('editProgram').value      = c.program   || '1-on-1 Training';
+  document.getElementById('editTier').value         = c.tier      || '';
+  document.getElementById('editPhase').value        = c.phase     || '';
+  document.getElementById('editGoal').value         = c.goal      || '';
+  document.getElementById('editTargetWeight').value = c.targetWeight || '';
+  editModal.classList.add('open');
+});
+
+document.getElementById('cancelEdit').addEventListener('click', () => editModal.classList.remove('open'));
+editModal.addEventListener('click', e => { if (e.target === editModal) editModal.classList.remove('open'); });
+
+document.getElementById('confirmEdit').addEventListener('click', () => {
+  const c = CLIENTS.find(x => x.id === currentClientId);
+  if (!c) return;
+  c.firstName    = document.getElementById('editFirstName').value.trim() || c.firstName;
+  c.lastName     = document.getElementById('editLastName').value.trim()  || c.lastName;
+  c.age          = parseInt(document.getElementById('editAge').value)     || c.age;
+  c.height       = parseInt(document.getElementById('editHeight').value)  || c.height;
+  c.email        = document.getElementById('editEmail').value.trim()      || c.email;
+  c.phone        = document.getElementById('editPhone').value.trim()      || c.phone;
+  c.program      = document.getElementById('editProgram').value;
+  c.tier         = document.getElementById('editTier').value.trim()       || c.tier;
+  c.phase        = document.getElementById('editPhase').value.trim()      || c.phase;
+  c.goal         = document.getElementById('editGoal').value.trim()       || c.goal;
+  c.targetWeight = parseFloat(document.getElementById('editTargetWeight').value) || c.targetWeight;
+  window.LHPT.saveClients();
+  editModal.classList.remove('open');
+  renderProfile(c);
+  // Refresh selector name
+  const opt = document.querySelector(`#clientSelector option[value="${c.id}"]`);
+  if (opt) opt.textContent = `${c.firstName} ${c.lastName}`;
 });
 
 /* === SEND UPDATE MODAL === */
