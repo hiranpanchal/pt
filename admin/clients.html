@@ -1367,6 +1367,7 @@ const CLIENTS = [
     nutritionCompliance: 82,
     personalBest: { lift: 'Deadlift', weight: 260 },
     strengthGain: '+22%',
+    paymentPlan: 'block', sessionsRemaining: 3, lastPaymentDate: '2026-03-01', countedEventIds: [],
     notes: 'Highly motivated. Responds well to high volume. Watch lower back on deadlift days.',
     weightHistory: [88, 89, 89.5, 90, 90.5, 91, 91.5, 92, 92, 92.3, 92.5, 92],
     recentActivity: [
@@ -1400,6 +1401,7 @@ const CLIENTS = [
     nutritionCompliance: 55,
     personalBest: { lift: 'Squat', weight: 80 },
     strengthGain: '+5%',
+    paymentPlan: 'payg',  sessionsRemaining: null, lastPaymentDate: '2026-03-15', countedEventIds: [],
     notes: 'New client, still calibrating. Nutrition logging needs improvement.',
     weightHistory: [70, 69.5, 69, 68.5, 68.5, 68.2, 68, 68, 67.8, 68, 67.5, 68],
     recentActivity: [
@@ -1431,6 +1433,7 @@ const CLIENTS = [
     nutritionCompliance: 88,
     personalBest: { lift: 'Bench Press', weight: 140 },
     strengthGain: '+18%',
+    paymentPlan: 'block', sessionsRemaining: 1, lastPaymentDate: '2026-03-20', countedEventIds: [],
     notes: 'Elite performer. Near end of cut phase. Transition to maintenance in ~3 weeks.',
     weightHistory: [90, 89, 88, 87, 86, 85.5, 85, 84.5, 84, 83, 82.5, 82],
     recentActivity: [
@@ -1462,6 +1465,7 @@ const CLIENTS = [
     nutritionCompliance: 72,
     personalBest: { lift: 'Romanian Deadlift', weight: 70 },
     strengthGain: '+8%',
+    paymentPlan: 'payg',  sessionsRemaining: null, lastPaymentDate: '2026-02-10', countedEventIds: [],
     notes: 'On pause due to travel. Resume April 20th. Lower back rehab protocol ongoing.',
     weightHistory: [65, 65.5, 65.2, 65, 64.8, 65, 65.2, 65.5, 65, 64.8, 65, 65],
     recentActivity: [
@@ -1491,6 +1495,7 @@ const CLIENTS = [
     nutritionCompliance: 76,
     personalBest: { lift: 'Squat', weight: 200 },
     strengthGain: '+14%',
+    paymentPlan: 'block', sessionsRemaining: 5, lastPaymentDate: '2026-04-01', countedEventIds: [],
     notes: 'Former rugby player. Excellent base strength. Focus on hypertrophy accessory work.',
     weightHistory: [86, 86.5, 87, 87, 87.5, 88, 88, 88.5, 88, 88, 88.5, 88],
     recentActivity: [
@@ -1522,6 +1527,7 @@ const CLIENTS = [
     nutritionCompliance: 85,
     personalBest: { lift: 'Hip Thrust', weight: 120 },
     strengthGain: '+16%',
+    paymentPlan: 'block', sessionsRemaining: 2, lastPaymentDate: '2026-03-10', countedEventIds: [],
     notes: 'Excellent nutrition compliance. Strength progressing well.',
     weightHistory: [60, 59.5, 59, 59, 58.5, 58.5, 58, 58, 58, 57.5, 58, 58],
     recentActivity: [
@@ -1536,10 +1542,10 @@ const CLIENTS = [
 
 /* Persist to localStorage */
 function saveClients() {
-  localStorage.setItem('lhpt_clients_v2', JSON.stringify(CLIENTS));
+  localStorage.setItem('lhpt_clients_v3', JSON.stringify(CLIENTS));
 }
 function loadClients() {
-  const stored = localStorage.getItem('lhpt_clients_v2');
+  const stored = localStorage.getItem('lhpt_clients_v3');
   if (stored) {
     const parsed = JSON.parse(stored);
     CLIENTS.length = 0;
@@ -1549,6 +1555,40 @@ function loadClients() {
   }
 }
 loadClients();
+
+/* === AUTO-DECREMENT SESSIONS FROM PAST CALENDAR EVENTS === */
+function processPastSessions() {
+  const now = new Date();
+  const stored = localStorage.getItem('lhpt_events');
+  if (!stored) return;
+  let events = [];
+  try { events = JSON.parse(stored); } catch(e) { return; }
+
+  let changed = false;
+  CLIENTS.forEach(c => {
+    if (c.paymentPlan !== 'block') return;
+    if (!Array.isArray(c.countedEventIds)) c.countedEventIds = [];
+
+    // Past events for this client not yet counted
+    const uncounted = events.filter(ev => {
+      const start = new Date(ev.start);
+      return ev.extendedProps && ev.extendedProps.clientId === c.id
+        && start < now
+        && !c.countedEventIds.includes(ev.id);
+    });
+
+    if (uncounted.length > 0) {
+      uncounted.forEach(ev => {
+        c.sessionsRemaining = Math.max(0, (c.sessionsRemaining ?? 5) - 1);
+        c.countedEventIds.push(ev.id);
+      });
+      changed = true;
+    }
+  });
+
+  if (changed) saveClients();
+}
+processPastSessions();
 
 /* === HELPERS === */
 function getClient(id) {
@@ -1586,7 +1626,7 @@ function getKPIs() {
   const active  = CLIENTS.filter(c => c.status === 'active').length;
   // Simulated revenue
   const revenue = CLIENTS.filter(c => c.status === 'active').reduce((sum, c) => {
-    return sum + (c.program === '1-on-1 Training' ? 850 : c.program === 'Online Coaching' ? 350 : 180);
+    return sum + (c.paymentPlan === 'block' ? 150 : 40);
   }, 0);
   return { total, active, revenue };
 }
@@ -1698,7 +1738,18 @@ window.LHPT = {
     const clients = getFilteredClients();
     const tbody = document.getElementById('clientTableBody');
 
-    tbody.innerHTML = clients.map(c => `
+    tbody.innerHTML = clients.map(c => {
+      const isBlock = c.paymentPlan === 'block';
+      const rem = c.sessionsRemaining ?? 0;
+      let payBadge = '';
+      if (isBlock) {
+        const col = rem === 0 ? '#f87171' : rem === 1 ? '#fb923c' : '#4ade80';
+        const label = rem === 0 ? 'Payment Due' : `${rem}/5 sessions left`;
+        payBadge = `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;background:${col}22;color:${col};border:1px solid ${col}66">${label}</span>`;
+      } else {
+        payBadge = `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;background:#60a5fa22;color:#60a5fa;border:1px solid #60a5fa66">Pay As You Go</span>`;
+      }
+      return `
       <tr onclick="window.LHPT.goToProfile(${c.id})">
         <td>
           <div class="client-cell">
@@ -1710,7 +1761,7 @@ window.LHPT = {
           </div>
         </td>
         <td><span class="status-badge status-${c.status}">${statusLabel(c.status)}</span></td>
-        <td><span class="tier-text">${c.tier}</span></td>
+        <td>${payBadge}</td>
         <td>
           <div class="progress-mini-wrap">
             <div class="progress-mini-bar">
@@ -1729,8 +1780,8 @@ window.LHPT = {
             </button>
           </div>
         </td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
 
     document.getElementById('tableFooter').innerHTML = `
       <span class="table-info">Showing ${clients.length} of ${CLIENTS.length} clients</span>

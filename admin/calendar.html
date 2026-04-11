@@ -2219,10 +2219,10 @@ const CLIENTS = [
 
 /* Persist to localStorage */
 function saveClients() {
-  localStorage.setItem('lhpt_clients_v2', JSON.stringify(CLIENTS));
+  localStorage.setItem('lhpt_clients_v3', JSON.stringify(CLIENTS));
 }
 function loadClients() {
-  const stored = localStorage.getItem('lhpt_clients_v2');
+  const stored = localStorage.getItem('lhpt_clients_v3');
   if (stored) {
     const parsed = JSON.parse(stored);
     CLIENTS.length = 0;

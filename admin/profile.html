@@ -1414,7 +1414,10 @@ button { cursor: pointer; font-family: var(--font-body); }
         <!-- Left Column -->
         <div class="dashboard-col">
 
-          <!-- Log Measurement -->
+          <!-- Payment Plan -->
+          <div class="dash-card" id="paymentCard"><!-- JS renders --></div>
+
+                    <!-- Log Measurement -->
           <div class="dash-card">
             <div class="dash-card-header">
               <div class="dash-card-title">Log Measurement</div>
@@ -1828,10 +1831,10 @@ const CLIENTS = [
 
 /* Persist to localStorage */
 function saveClients() {
-  localStorage.setItem('lhpt_clients_v2', JSON.stringify(CLIENTS));
+  localStorage.setItem('lhpt_clients_v3', JSON.stringify(CLIENTS));
 }
 function loadClients() {
-  const stored = localStorage.getItem('lhpt_clients_v2');
+  const stored = localStorage.getItem('lhpt_clients_v3');
   if (stored) {
     const parsed = JSON.parse(stored);
     CLIENTS.length = 0;
@@ -1957,10 +1960,83 @@ selector.addEventListener('change', () => {
 });
 
 /* === RENDER PROFILE === */
+function renderPaymentCard(c) {
+  const card = document.getElementById('paymentCard');
+  if (!card) return;
+  const isBlock = c.paymentPlan === 'block';
+  const rem = c.sessionsRemaining ?? 0;
+
+  if (!isBlock) {
+    // Pay As You Go
+    const lastPaid = c.lastPaymentDate ? new Date(c.lastPaymentDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    card.innerHTML = `
+      <div class="dash-card-header">
+        <div class="dash-card-title">Payment Plan</div>
+        <span style="padding:3px 10px;border-radius:20px;font-size:0.65rem;font-weight:700;background:#60a5fa22;color:#60a5fa;border:1px solid #60a5fa55">Pay As You Go</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <div>
+          <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:4px">Rate</div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--on-surface)">£40<span style="font-size:0.85rem;font-weight:400;color:var(--on-surface-variant)">/session</span></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:4px">Last Payment</div>
+          <div style="font-size:0.875rem;font-weight:600;color:var(--on-surface)">${lastPaid}</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Block Booking
+  const dotColor = rem === 0 ? '#f87171' : rem === 1 ? '#fb923c' : '#4ade80';
+  const dots = Array.from({length:5}, (_,i) =>
+    `<div style="width:26px;height:26px;border-radius:50%;background:${i < rem ? dotColor : 'var(--surface-container)'};border:2px solid ${i < rem ? dotColor : 'var(--surface-container-high)'}"></div>`
+  ).join('');
+
+  const statusText = rem === 0 ? 'Payment due — no sessions remaining'
+    : rem === 1 ? 'Last session — payment due soon'
+    : `${rem} of 5 sessions remaining`;
+  const statusCol = rem === 0 ? '#f87171' : rem === 1 ? '#fb923c' : '#4ade80';
+
+  const lastPaid = c.lastPaymentDate ? new Date(c.lastPaymentDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+
+  card.innerHTML = `
+    <div class="dash-card-header">
+      <div class="dash-card-title">Payment Plan</div>
+      <span style="padding:3px 10px;border-radius:20px;font-size:0.65rem;font-weight:700;background:var(--primary-container)22;color:var(--primary-container);border:1px solid var(--primary-container)55">Block Booking</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px">
+      <div>
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:4px">Block Price</div>
+        <div style="font-size:1.4rem;font-weight:800;color:var(--on-surface)">£150<span style="font-size:0.85rem;font-weight:400;color:var(--on-surface-variant)"> / 5 sessions</span></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:4px">Last Payment</div>
+        <div style="font-size:0.875rem;font-weight:600;color:var(--on-surface)">${lastPaid}</div>
+      </div>
+    </div>
+    <div style="font-size:0.75rem;font-weight:600;color:${statusCol};margin-bottom:10px">${statusText}</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">${dots}</div>
+    <button id="recordPaymentBtn" style="width:100%;padding:10px;background:var(--primary-container);color:#fff;border:none;border-radius:8px;font-family:var(--font-body);font-size:0.8rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer">
+      Record Payment (£150)
+    </button>`;
+
+  document.getElementById('recordPaymentBtn').addEventListener('click', () => {
+    c.sessionsRemaining = 5;
+    c.lastPaymentDate = new Date().toISOString().split('T')[0];
+    c.countedEventIds = c.countedEventIds || [];
+    window.LHPT.saveClients();
+    renderPaymentCard(c);
+    const btn = document.getElementById('recordPaymentBtn');
+    if (btn) { btn.textContent = 'Recorded ✓'; btn.style.background='#4ade80'; setTimeout(()=>renderPaymentCard(c),2000); }
+  });
+}
+
 function renderProfile(c) {
   document.title = `${c.firstName} ${c.lastName} — Lee Hayward PT Admin`;
   document.getElementById('topbarTitle').textContent = `${c.firstName} ${c.lastName}`;
   document.getElementById('topbarSub').textContent = `Client #${String(c.id).padStart(4,'0')} — ${c.program}`;
+  renderPaymentCard(c);
   document.getElementById('breadcrumbName').textContent = `${c.firstName} ${c.lastName}`;
 
   document.getElementById('profileHeader').innerHTML = `
