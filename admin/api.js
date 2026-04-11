@@ -98,7 +98,9 @@
   }
 
   function isLoggedIn() {
-    return !!getToken();
+    const t = getToken();
+    // Must be a real JWT (three base64 parts), not the old 'authenticated' string
+    return !!t && t.startsWith('eyJ') && t.split('.').length === 3;
   }
 
   // ── Expose ──────────────────────────────────────────────────────────────────
