@@ -65,7 +65,7 @@ app.post('/api/auth/login', async (req, res) => {
   const adminEmail    = process.env.ADMIN_EMAIL    || 'coach@leehaywardpt.com';
   const adminPassword = process.env.ADMIN_PASSWORD || 'changeme';
 
-  if (email !== adminEmail) {
+  if (email.toLowerCase() !== adminEmail.toLowerCase()) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
