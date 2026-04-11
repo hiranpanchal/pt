@@ -515,14 +515,10 @@
 
 </div>
 
+<script src="api.js"></script>
 <script>
-  // Credentials
-  const VALID_EMAIL    = 'coach@leehaywardpt.com';
-  const VALID_PASSWORD = 'Kinetic2024';
-  const SESSION_KEY    = 'lhpt_auth';
-
   // Already logged in? Go straight to dashboard
-  if (localStorage.getItem(SESSION_KEY) === 'authenticated') {
+  if (window.LHPT_API && window.LHPT_API.isLoggedIn()) {
     window.location.replace('clients.html');
   }
 
@@ -546,7 +542,7 @@
   document.head.appendChild(style);
 
   // Form submit
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email    = document.getElementById('email').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
@@ -556,28 +552,21 @@
     errMsg.classList.remove('visible');
     btn.classList.add('loading');
 
-    // Simulate auth delay for realism
-    setTimeout(() => {
-      if (email === VALID_EMAIL && password === VALID_PASSWORD) {
-        localStorage.setItem(SESSION_KEY, 'authenticated');
-        localStorage.setItem(SESSION_KEY + '_user', JSON.stringify({
-          name: 'Lee Hayward',
-          email: VALID_EMAIL,
-          role: 'Master Coach',
-          loginTime: new Date().toISOString()
-        }));
+    try {
+      const token = await window.LHPT_API.login(email, password);
+      if (token) {
         window.location.replace('clients.html');
       } else {
         btn.classList.remove('loading');
         errMsg.classList.add('visible');
-        // Shake the form
         const form = document.getElementById('loginForm');
         form.style.animation = 'none';
-        requestAnimationFrame(() => {
-          form.style.animation = 'shake 0.4s ease';
-        });
+        requestAnimationFrame(() => { form.style.animation = 'shake 0.4s ease'; });
       }
-    }, 900);
+    } catch {
+      btn.classList.remove('loading');
+      errMsg.classList.add('visible');
+    }
   });
 </script>
 <style>

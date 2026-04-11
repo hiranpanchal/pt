@@ -1830,20 +1830,18 @@ const CLIENTS = [
 ];
 
 /* Persist to localStorage */
-function saveClients() {
-  localStorage.setItem('lhpt_clients_v3', JSON.stringify(CLIENTS));
+async function saveClients() {
+  try { await window.LHPT_API.saveClients(CLIENTS); } catch(e) { console.error('saveClients failed', e); }
 }
-function loadClients() {
-  const stored = localStorage.getItem('lhpt_clients_v3');
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    CLIENTS.length = 0;
-    parsed.forEach(c => CLIENTS.push(c));
-  } else {
-    saveClients();
-  }
+async function loadClients() {
+  try {
+    const data = await window.LHPT_API.loadClients();
+    if (data && data.length) {
+      CLIENTS.length = 0;
+      data.forEach(c => CLIENTS.push(c));
+    }
+  } catch(e) { console.error('loadClients failed', e); }
 }
-loadClients();
 
 /* === HELPERS === */
 function getClient(id) {
@@ -2110,7 +2108,7 @@ function renderProfile(c) {
     let sessions = [];
 
     try {
-      const stored = localStorage.getItem('lhpt_events');
+      const stored = JSON.stringify(await window.LHPT_API.loadEvents());
       if (stored) {
         const allEvents = JSON.parse(stored);
         sessions = allEvents
@@ -2353,7 +2351,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
 });
 
-document.getElementById('logMeasurementBtn').addEventListener('click', () => {
+document.getElementById('logMeasurementBtn').addEventListener('click', async () => {
   const c = CLIENTS.find(x => x.id === currentClientId);
   if (!c) return;
   const w   = parseFloat(document.getElementById('logWeight').value);
@@ -2378,7 +2376,7 @@ document.getElementById('logMeasurementBtn').addEventListener('click', () => {
     if (!c.bmiHistory) c.bmiHistory = [];
     c.bmiHistory.push(bmi);
   }
-  window.LHPT.saveClients();
+  await window.LHPT.saveClients();
   // Re-render metric cards and charts
   renderProfile(c);
   // Reset inputs
@@ -2392,11 +2390,11 @@ document.getElementById('logMeasurementBtn').addEventListener('click', () => {
 });
 
 /* === SAVE NOTES === */
-document.getElementById('saveNotesBtn').addEventListener('click', () => {
+document.getElementById('saveNotesBtn').addEventListener('click', async () => {
   const c = CLIENTS.find(x => x.id === currentClientId);
   if (c) {
     c.notes = document.getElementById('coachNotes').value;
-    window.LHPT.saveClients();
+    await window.LHPT.saveClients();
     const btn = document.getElementById('saveNotesBtn');
     btn.textContent = 'Saved ✓';
     setTimeout(() => { btn.textContent = 'Save Notes'; }, 2000);
@@ -2427,7 +2425,7 @@ document.getElementById('editBtn').addEventListener('click', () => {
 document.getElementById('cancelEdit').addEventListener('click', () => editModal.classList.remove('open'));
 editModal.addEventListener('click', e => { if (e.target === editModal) editModal.classList.remove('open'); });
 
-document.getElementById('confirmEdit').addEventListener('click', () => {
+document.getElementById('confirmEdit').addEventListener('click', async () => {
   const c = CLIENTS.find(x => x.id === currentClientId);
   if (!c) return;
   c.firstName    = document.getElementById('editFirstName').value.trim() || c.firstName;
@@ -2441,7 +2439,7 @@ document.getElementById('confirmEdit').addEventListener('click', () => {
   c.phase        = document.getElementById('editPhase').value.trim()      || c.phase;
   c.goal         = document.getElementById('editGoal').value.trim()       || c.goal;
   c.targetWeight = parseFloat(document.getElementById('editTargetWeight').value) || c.targetWeight;
-  window.LHPT.saveClients();
+  await window.LHPT.saveClients();
   editModal.classList.remove('open');
   renderProfile(c);
   // Refresh selector name
@@ -2502,8 +2500,15 @@ mobileToggle.addEventListener('click', () => sidebar.classList.contains('open') 
 sidebarOverlay.addEventListener('click', closeSidebar);
 
 /* === INIT === */
-const client = getClient(currentClientId) || CLIENTS[0];
-if (client) renderProfile(client);
+async function init() {
+  if (!window.LHPT_API || !window.LHPT_API.isLoggedIn()) {
+    window.location.href = 'login.html'; return;
+  }
+  await loadClients();
+  const client = getClient(currentClientId) || CLIENTS[0];
+  if (client) renderProfile(client);
+}
+init();
 </script>
 </body>
 </html>

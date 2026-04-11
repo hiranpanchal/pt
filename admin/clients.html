@@ -1540,36 +1540,38 @@ const CLIENTS = [
   }
 ];
 
-/* Persist to localStorage */
-function saveClients() {
-  localStorage.setItem('lhpt_clients_v3', JSON.stringify(CLIENTS));
+/* === API-backed persistence === */
+async function saveClients() {
+  try { await window.LHPT_API.saveClients(CLIENTS); } catch(e) { console.error('saveClients failed', e); }
 }
-function loadClients() {
-  const stored = localStorage.getItem('lhpt_clients_v3');
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    CLIENTS.length = 0;
-    parsed.forEach(c => CLIENTS.push(c));
-  } else {
-    saveClients();
+
+async function loadClients() {
+  try {
+    const data = await window.LHPT_API.loadClients();
+    if (data && data.length) {
+      CLIENTS.length = 0;
+      data.forEach(c => CLIENTS.push(c));
+    } else {
+      // First run: seed database with defaults
+      await saveClients();
+    }
+  } catch(e) {
+    console.error('loadClients failed', e);
   }
 }
-loadClients();
 
 /* === AUTO-DECREMENT SESSIONS FROM PAST CALENDAR EVENTS === */
-function processPastSessions() {
+async function processPastSessions() {
   const now = new Date();
-  const stored = localStorage.getItem('lhpt_events');
-  if (!stored) return;
   let events = [];
-  try { events = JSON.parse(stored); } catch(e) { return; }
+  try { events = await window.LHPT_API.loadEvents(); } catch(e) { return; }
+  if (!events || !events.length) return;
 
   let changed = false;
   CLIENTS.forEach(c => {
     if (c.paymentPlan !== 'block') return;
     if (!Array.isArray(c.countedEventIds)) c.countedEventIds = [];
 
-    // Past events for this client not yet counted
     const uncounted = events.filter(ev => {
       const start = new Date(ev.start);
       return ev.extendedProps && ev.extendedProps.clientId === c.id
@@ -1586,9 +1588,8 @@ function processPastSessions() {
     }
   });
 
-  if (changed) saveClients();
+  if (changed) await saveClients();
 }
-processPastSessions();
 
 /* === HELPERS === */
 function getClient(id) {
@@ -1868,7 +1869,7 @@ window.LHPT = {
     };
 
     CLIENTS.push(newClient);
-    window.LHPT.saveClients();
+    await window.LHPT.saveClients();
     addModal.classList.remove('open');
     e.target.reset();
     renderKPIs();
@@ -1898,8 +1899,16 @@ window.LHPT = {
   }
 
   /* === INIT === */
-  renderKPIs();
-  renderTable();
+  async function init() {
+    if (!window.LHPT_API || !window.LHPT_API.isLoggedIn()) {
+      window.location.href = 'login.html'; return;
+    }
+    await loadClients();
+    await processPastSessions();
+    renderKPIs();
+    renderTable();
+  }
+  init();
 </script>
 </body>
 </html>

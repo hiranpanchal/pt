@@ -2218,20 +2218,18 @@ const CLIENTS = [
 ];
 
 /* Persist to localStorage */
-function saveClients() {
-  localStorage.setItem('lhpt_clients_v3', JSON.stringify(CLIENTS));
+async function saveClients() {
+  try { await window.LHPT_API.saveClients(CLIENTS); } catch(e) { console.error('saveClients failed', e); }
 }
-function loadClients() {
-  const stored = localStorage.getItem('lhpt_clients_v3');
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    CLIENTS.length = 0;
-    parsed.forEach(c => CLIENTS.push(c));
-  } else {
-    saveClients();
-  }
+async function loadClients() {
+  try {
+    const data = await window.LHPT_API.loadClients();
+    if (data && data.length) {
+      CLIENTS.length = 0;
+      data.forEach(c => CLIENTS.push(c));
+    }
+  } catch(e) { console.error('loadClients failed', e); }
 }
-loadClients();
 
 /* === HELPERS === */
 function getClient(id) {
@@ -2338,9 +2336,7 @@ const overlay = document.getElementById('panelOverlay');
 let   currentPanelEvent = null; // the FullCalendar event object currently in the panel
 
 /* === EVENT PERSISTENCE === */
-const EVENTS_KEY = 'lhpt_events';
-
-function saveCalendarEvents() {
+async function saveCalendarEvents() {
   if (!calendar) return;
   const all = calendar.getEvents().map(e => ({
     id:    e.id || ('evt-' + Date.now() + '-' + Math.random().toString(36).slice(2)),
@@ -2350,20 +2346,20 @@ function saveCalendarEvents() {
     classNames:    e.classNames,
     extendedProps: { clientId: e.extendedProps.clientId, type: e.extendedProps.type }
   }));
-  localStorage.setItem(EVENTS_KEY, JSON.stringify(all));
+  try { await window.LHPT_API.saveEvents(all); } catch(e) { console.error('saveEvents failed', e); }
 }
 
-function loadOrSeedEvents() {
-  const stored = localStorage.getItem(EVENTS_KEY);
-  if (stored) {
-    try { return JSON.parse(stored); } catch(e) {}
-  }
+async function loadOrSeedEvents() {
+  try {
+    const stored = await window.LHPT_API.loadEvents();
+    if (stored && stored.length) return stored;
+  } catch(e) {}
   const generated = generateCalendarEvents();
-  localStorage.setItem(EVENTS_KEY, JSON.stringify(generated));
+  try { await window.LHPT_API.saveEvents(generated); } catch(e) {}
   return generated;
 }
 
-const events = loadOrSeedEvents();
+let events = [];
 
 const typeMap = {
   elite:  { label: '1-on-1 Elite',    cls: 'session-type-elite'  },
@@ -2667,7 +2663,12 @@ function updateConfirmLabel() {
    FULLCALENDAR INIT
    ============================================================ */
 let calendar;
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!window.LHPT_API || !window.LHPT_API.isLoggedIn()) {
+    window.location.href = 'login.html'; return;
+  }
+  await loadClients();
+  events = await loadOrSeedEvents();
 
   initClientSearch();
 
