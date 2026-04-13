@@ -2110,16 +2110,15 @@ function renderProfile(c) {
   // Coach notes
   document.getElementById('coachNotes').value = c.notes || '';
 
-  // Schedule — read from calendar localStorage events
-  (function renderSchedule() {
+  // Schedule — read from calendar events
+  (async function renderSchedule() {
     const now = new Date();
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     let sessions = [];
 
     try {
-      const stored = JSON.stringify(await window.LHPT_API.loadEvents());
-      if (stored) {
-        const allEvents = JSON.parse(stored);
+      const allEvents = await window.LHPT_API.loadEvents() || [];
+      if (allEvents.length) {
         sessions = allEvents
           .filter(e => {
             const cid = e.extendedProps && e.extendedProps.clientId;
