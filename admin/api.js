@@ -27,7 +27,13 @@
       ...options,
       headers: { ...authHeaders(), ...(options.headers || {}) }
     });
-    if (res.status === 401) { requireLogin(); return null; }
+    if (res.status === 401) {
+      // Only redirect if we're not already on the login page
+      if (!window.location.pathname.includes('login')) {
+        requireLogin();
+      }
+      return null;
+    }
     if (!res.ok) throw new Error(`API error ${res.status} on ${path}`);
     return res.json();
   }
