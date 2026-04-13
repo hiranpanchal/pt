@@ -1903,8 +1903,13 @@ window.LHPT = {
     if (!window.LHPT_API || !window.LHPT_API.isLoggedIn()) {
       window.location.href = 'login.html'; return;
     }
-    await loadClients();
-    await processPastSessions();
+    try {
+      await loadClients();
+      await processPastSessions();
+    } catch(e) {
+      console.error('Init error:', e);
+      // Don't redirect — just render with whatever data we have
+    }
     renderKPIs();
     renderTable();
   }

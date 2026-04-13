@@ -55,6 +55,12 @@ async function initDb() {
   console.log('Database ready');
 }
 
+// Health check (no auth)
+app.get('/api/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+
+// Auth check (requires token)
+app.get('/api/auth/check', requireAuth, (req, res) => res.json({ ok: true, user: req.user }));
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════════════════════════════════
