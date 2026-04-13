@@ -1034,7 +1034,8 @@ button { cursor: pointer; font-family: var(--font-body); }
 <body>
 <script>
 (function(){
-  if(localStorage.getItem('lhpt_auth') !== 'authenticated'){
+  const t = localStorage.getItem('lhpt_auth');
+  if(!t || !t.startsWith('eyJ')){
     window.location.replace('login.html');
   }
 })();
