@@ -1824,7 +1824,7 @@ window.LHPT = {
     if (e.target === addModal) addModal.classList.remove('open');
   });
 
-  document.getElementById('addClientForm').addEventListener('submit', (e) => {
+  document.getElementById('addClientForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     // Safe unique ID — max existing + 1
@@ -1871,7 +1871,7 @@ window.LHPT = {
     };
 
     CLIENTS.push(newClient);
-    await window.LHPT.saveClients();
+    await window.LHPT_API.saveClients(CLIENTS);
     addModal.classList.remove('open');
     e.target.reset();
     renderKPIs();
