@@ -33,6 +33,16 @@ function requireAuth(req, res, next) {
   }
 }
 
+// ── Demo seed data ────────────────────────────────────────────────────────────
+const SEED_CLIENTS = [
+  { id:1, firstName:'Marcus',  lastName:'Thorne',  email:'marcus.t@corporate.com',   phone:'+44 7700 900001', status:'active',     tier:'Elite Performance', program:'1-on-1 Training', joined:'2024-01-15', phase:'Hypertrophy',    progress:75, goal:'Build Muscle',          weight:92, targetWeight:95, strengthIndex:88, volumeConsistency:94, nutritionCompliance:82, personalBest:{lift:'Deadlift',          weight:260}, strengthGain:'+22%', paymentPlan:'block', sessionsRemaining:3, lastPaymentDate:'2026-03-01', countedEventIds:[], notes:'Highly motivated. Responds well to high volume. Watch lower back on deadlift days.',       weightHistory:[88,89,89.5,90,90.5,91,91.5,92,92,92.3,92.5,92], recentActivity:[], upcomingSchedule:[] },
+  { id:2, firstName:'Sarah',   lastName:'Chen',    email:'s.chen.fit@gmail.com',     phone:'+44 7700 900002', status:'onboarding', tier:'Kinetic Lifestyle', program:'Online Coaching',  joined:'2024-03-01', phase:'Foundation',     progress:15, goal:'Fat Loss',              weight:68, targetWeight:62, strengthIndex:45, volumeConsistency:60, nutritionCompliance:55, personalBest:{lift:'Squat',             weight:80},  strengthGain:'+5%',  paymentPlan:'payg',  sessionsRemaining:null,lastPaymentDate:'2026-03-15', countedEventIds:[], notes:'New client, still calibrating. Nutrition logging needs improvement.',                     weightHistory:[70,69.5,69,68.5,68.5,68.2,68,68,67.8,68,67.5,68], recentActivity:[], upcomingSchedule:[] },
+  { id:3, firstName:'Jameson', lastName:'Vane',    email:'vane.performance@web.io',  phone:'+44 7700 900003', status:'active',     tier:'Ultimate Cut',      program:'1-on-1 Training', joined:'2023-09-10', phase:'Cutting',        progress:92, goal:'Fat Loss / Aesthetics', weight:82, targetWeight:78, strengthIndex:91, volumeConsistency:97, nutritionCompliance:88, personalBest:{lift:'Bench Press',       weight:140}, strengthGain:'+18%', paymentPlan:'block', sessionsRemaining:1, lastPaymentDate:'2026-03-20', countedEventIds:[], notes:'Elite performer. Near end of cut phase. Transition to maintenance in ~3 weeks.',           weightHistory:[90,89,88,87,86,85.5,85,84.5,84,83,82.5,82], recentActivity:[], upcomingSchedule:[] },
+  { id:4, firstName:'Elena',   lastName:'Petrov',  email:'petrov_e@mail.ru',         phone:'+44 7700 900004', status:'paused',     tier:'Recovery Elite',    program:'Online Coaching',  joined:'2023-06-20', phase:'Rehabilitation', progress:44, goal:'Post-Injury Recovery',  weight:65, targetWeight:65, strengthIndex:52, volumeConsistency:48, nutritionCompliance:72, personalBest:{lift:'Romanian Deadlift', weight:70},  strengthGain:'+8%',  paymentPlan:'payg',  sessionsRemaining:null,lastPaymentDate:'2026-02-10', countedEventIds:[], notes:'On pause due to travel. Resume April 20th. Lower back rehab protocol ongoing.',            weightHistory:[65,65.5,65.2,65,64.8,65,65.2,65.5,65,64.8,65,65], recentActivity:[], upcomingSchedule:[] },
+  { id:5, firstName:'Tyler',   lastName:'Nash',    email:'tyler.nash@gmail.com',     phone:'+44 7700 900005', status:'active',     tier:'Elite Performance', program:'1-on-1 Training', joined:'2024-02-01', phase:'Strength Block', progress:60, goal:'Athletic Performance',  weight:88, targetWeight:90, strengthIndex:78, volumeConsistency:85, nutritionCompliance:76, personalBest:{lift:'Squat',             weight:200}, strengthGain:'+14%', paymentPlan:'block', sessionsRemaining:5, lastPaymentDate:'2026-04-01', countedEventIds:[], notes:'Former rugby player. Excellent base strength. Focus on hypertrophy accessory work.',      weightHistory:[86,86.5,87,87,87.5,88,88,88.5,88,88,88.5,88], recentActivity:[], upcomingSchedule:[] },
+  { id:6, firstName:'Priya',   lastName:'Sharma',  email:'p.sharma.fit@outlook.com', phone:'+44 7700 900006', status:'active',     tier:'Kinetic Lifestyle', program:'Online Coaching',  joined:'2024-01-28', phase:'Recomposition',  progress:68, goal:'Body Recomposition',    weight:58, targetWeight:57, strengthIndex:70, volumeConsistency:78, nutritionCompliance:85, personalBest:{lift:'Hip Thrust',        weight:120}, strengthGain:'+16%', paymentPlan:'block', sessionsRemaining:2, lastPaymentDate:'2026-03-10', countedEventIds:[], notes:'Excellent nutrition compliance. Strength progressing well.',                                 weightHistory:[60,59.5,59,59,58.5,58.5,58,58,58,57.5,58,58], recentActivity:[], upcomingSchedule:[] }
+];
+
 // ── Init database ─────────────────────────────────────────────────────────────
 async function initDb() {
   await pool.query(`
@@ -52,6 +62,20 @@ async function initDb() {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
   `);
+
+  // Seed demo clients if table is empty
+  const { rows } = await pool.query('SELECT COUNT(*) AS n FROM clients');
+  if (parseInt(rows[0].n) === 0) {
+    console.log('Seeding clients table with demo data…');
+    for (const c of SEED_CLIENTS) {
+      await pool.query(
+        'INSERT INTO clients (id, data) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING',
+        [c.id, c]
+      );
+    }
+    console.log(`Seeded ${SEED_CLIENTS.length} demo clients`);
+  }
+
   console.log('Database ready');
 }
 
