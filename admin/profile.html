@@ -1574,6 +1574,13 @@ button { cursor: pointer; font-family: var(--font-body); }
         <label>Target Weight (kg)</label>
         <input type="number" id="editTargetWeight" step="0.1" placeholder="e.g. 90" class="edit-input"/>
       </div>
+      <div class="form-group">
+        <label>Payment Plan</label>
+        <select id="editPaymentPlan" class="edit-input">
+          <option value="payg">Pay As You Go (£40/session)</option>
+          <option value="block">Block Booking (£150 / 5 sessions)</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-secondary" id="cancelEdit">Cancel</button>
@@ -1962,6 +1969,7 @@ selector.addEventListener('change', () => {
 function renderPaymentCard(c) {
   const card = document.getElementById('paymentCard');
   if (!card) return;
+  if (!c.paymentPlan) c.paymentPlan = 'payg'; // default for older clients
   const isBlock = c.paymentPlan === 'block';
   const rem = c.sessionsRemaining ?? 0;
 
@@ -2377,7 +2385,10 @@ document.getElementById('logMeasurementBtn').addEventListener('click', async () 
     if (!c.bmiHistory) c.bmiHistory = [];
     c.bmiHistory.push(bmi);
   }
-  await window.LHPT.saveClients();
+  try {
+    await window.LHPT.saveClients();
+    showToast('Measurement saved ✓');
+  } catch(err) { showToast('Save failed — check connection', 'error'); }
   // Re-render metric cards and charts
   renderProfile(c);
   // Reset inputs
@@ -2395,7 +2406,10 @@ document.getElementById('saveNotesBtn').addEventListener('click', async () => {
   const c = CLIENTS.find(x => x.id === currentClientId);
   if (c) {
     c.notes = document.getElementById('coachNotes').value;
-    await window.LHPT.saveClients();
+    try {
+      await window.LHPT.saveClients();
+      showToast('Notes saved ✓');
+    } catch(err) { showToast('Save failed — check connection', 'error'); }
     const btn = document.getElementById('saveNotesBtn');
     btn.textContent = 'Saved ✓';
     setTimeout(() => { btn.textContent = 'Save Notes'; }, 2000);
@@ -2409,17 +2423,18 @@ const editModal = document.getElementById('editProgramModal');
 document.getElementById('editBtn').addEventListener('click', () => {
   const c = getClient(currentClientId);
   if (!c) return;
-  document.getElementById('editFirstName').value    = c.firstName || '';
-  document.getElementById('editLastName').value     = c.lastName  || '';
-  document.getElementById('editAge').value          = c.age       || '';
-  document.getElementById('editHeight').value       = c.height    || '';
-  document.getElementById('editEmail').value        = c.email     || '';
-  document.getElementById('editPhone').value        = c.phone     || '';
-  document.getElementById('editProgram').value      = c.program   || '1-on-1 Training';
-  document.getElementById('editTier').value         = c.tier      || '';
-  document.getElementById('editPhase').value        = c.phase     || '';
-  document.getElementById('editGoal').value         = c.goal      || '';
+  document.getElementById('editFirstName').value    = c.firstName    || '';
+  document.getElementById('editLastName').value     = c.lastName     || '';
+  document.getElementById('editAge').value          = c.age          || '';
+  document.getElementById('editHeight').value       = c.height       || '';
+  document.getElementById('editEmail').value        = c.email        || '';
+  document.getElementById('editPhone').value        = c.phone        || '';
+  document.getElementById('editProgram').value      = c.program      || '1-on-1 Training';
+  document.getElementById('editTier').value         = c.tier         || '';
+  document.getElementById('editPhase').value        = c.phase        || '';
+  document.getElementById('editGoal').value         = c.goal         || '';
   document.getElementById('editTargetWeight').value = c.targetWeight || '';
+  document.getElementById('editPaymentPlan').value  = c.paymentPlan  || 'payg';
   editModal.classList.add('open');
 });
 
@@ -2439,8 +2454,17 @@ document.getElementById('confirmEdit').addEventListener('click', async () => {
   c.tier         = document.getElementById('editTier').value.trim()       || c.tier;
   c.phase        = document.getElementById('editPhase').value.trim()      || c.phase;
   c.goal         = document.getElementById('editGoal').value.trim()       || c.goal;
-  c.targetWeight = parseFloat(document.getElementById('editTargetWeight').value) || c.targetWeight;
-  await window.LHPT.saveClients();
+  c.targetWeight  = parseFloat(document.getElementById('editTargetWeight').value) || c.targetWeight;
+  c.paymentPlan   = document.getElementById('editPaymentPlan').value;
+  if (c.paymentPlan === 'block' && c.sessionsRemaining == null) c.sessionsRemaining = 5;
+  if (c.paymentPlan === 'payg') c.sessionsRemaining = null;
+  if (!Array.isArray(c.countedEventIds)) c.countedEventIds = [];
+  try {
+    await window.LHPT.saveClients();
+    showToast('Changes saved ✓');
+  } catch(err) {
+    showToast('Save failed — check connection', 'error');
+  }
   editModal.classList.remove('open');
   renderProfile(c);
   // Refresh selector name
@@ -2499,6 +2523,23 @@ function openSidebar()  { sidebar.classList.add('open'); sidebarOverlay.classLis
 function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); }
 mobileToggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
 sidebarOverlay.addEventListener('click', closeSidebar);
+
+/* === TOAST NOTIFICATION === */
+function showToast(msg, type = 'success') {
+  let toast = document.getElementById('lhpt-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'lhpt-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-family:var(--font-body);font-size:0.8rem;font-weight:600;z-index:9999;transition:opacity 0.3s;pointer-events:none';
+    document.body.appendChild(toast);
+  }
+  toast.style.background = type === 'error' ? '#f87171' : '#4ade80';
+  toast.style.color = type === 'error' ? '#fff' : '#000';
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+}
 
 /* === INIT === */
 async function init() {

@@ -1333,6 +1333,21 @@ button { cursor: pointer; font-family: var(--font-body); }
         <input type="text" id="nc-goal" placeholder="e.g. Build Muscle, Fat Loss, Body Recomposition…"/>
       </div>
 
+      <!-- Payment Plan -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label>Payment Plan</label>
+          <select id="nc-payment-plan">
+            <option value="payg">Pay As You Go (£40/session)</option>
+            <option value="block">Block Booking (£150 / 5 sessions)</option>
+          </select>
+        </div>
+        <div class="form-group" id="nc-sessions-group" style="display:none">
+          <label>Sessions Remaining</label>
+          <input type="number" id="nc-sessions" value="5" min="0" max="5"/>
+        </div>
+      </div>
+
       <div class="modal-actions">
         <button type="button" class="modal-btn modal-btn-secondary" id="cancelAddClient">Cancel</button>
         <button type="submit" class="modal-btn modal-btn-primary" id="addClientSubmit">Add Client</button>
@@ -1812,10 +1827,32 @@ window.LHPT = {
     renderTable();
   });
 
+  /* === TOAST NOTIFICATION === */
+  function showToast(msg, type = 'success') {
+    let toast = document.getElementById('lhpt-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'lhpt-toast';
+      toast.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-family:var(--font-body);font-size:0.8rem;font-weight:600;z-index:9999;transition:opacity 0.3s;pointer-events:none';
+      document.body.appendChild(toast);
+    }
+    toast.style.background = type === 'error' ? '#f87171' : '#4ade80';
+    toast.style.color = type === 'error' ? '#fff' : '#000';
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+  }
+
   /* === ADD CLIENT MODAL === */
   const addModal = document.getElementById('addModal');
   document.getElementById('addClientBtn').addEventListener('click', () => {
     addModal.classList.add('open');
+  });
+
+  // Toggle sessions field based on payment plan
+  document.getElementById('nc-payment-plan').addEventListener('change', function() {
+    document.getElementById('nc-sessions-group').style.display = this.value === 'block' ? '' : 'none';
   });
   document.getElementById('cancelAddClient').addEventListener('click', () => {
     addModal.classList.remove('open');
@@ -1838,6 +1875,11 @@ window.LHPT = {
 
     // Calculate BMI if we have weight and height
     const bmi = (weight && height) ? parseFloat((weight / ((height/100) ** 2)).toFixed(1)) : null;
+
+    const paymentPlan = document.getElementById('nc-payment-plan').value;
+    const sessionsRemaining = paymentPlan === 'block'
+      ? (parseInt(document.getElementById('nc-sessions').value) || 5)
+      : null;
 
     const newClient = {
       id:        nextId,
@@ -1865,13 +1907,23 @@ window.LHPT = {
       strengthIndex: 0,
       volumeConsistency: 0,
       nutritionCompliance: 0,
+      paymentPlan,
+      sessionsRemaining,
+      lastPaymentDate: null,
+      countedEventIds: [],
       notes: '',
       recentActivity: [],
       upcomingSchedule: []
     };
 
     CLIENTS.push(newClient);
-    await window.LHPT_API.saveClients(CLIENTS);
+    try {
+      await window.LHPT_API.saveClients(CLIENTS);
+    } catch(err) {
+      showToast('Save failed — check your connection', 'error');
+      CLIENTS.pop(); // rollback
+      return;
+    }
     addModal.classList.remove('open');
     e.target.reset();
     renderKPIs();
