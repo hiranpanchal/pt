@@ -2397,24 +2397,6 @@ function renderPanelView(evt) {
         </div>
       </div>
     </div>
-    <div>
-      <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:10px">Performance</div>
-      <div class="panel-stats">
-        <div class="panel-stat"><div class="num">${c.strengthIndex}</div><div class="lbl">Strength</div></div>
-        <div class="panel-stat"><div class="num">${c.volumeConsistency}%</div><div class="lbl">Consistency</div></div>
-        <div class="panel-stat"><div class="num">${c.progress}%</div><div class="lbl">Goal</div></div>
-      </div>
-    </div>
-    <div>
-      <div class="panel-gauge-item">
-        <div class="panel-gauge-row"><span class="panel-gauge-label">Nutrition Compliance</span><span class="panel-gauge-val">${c.nutritionCompliance}%</span></div>
-        <div class="panel-gauge-bar"><div class="panel-gauge-fill" style="width:${c.nutritionCompliance}%"></div></div>
-      </div>
-      <div class="panel-gauge-item">
-        <div class="panel-gauge-row"><span class="panel-gauge-label">Volume Consistency</span><span class="panel-gauge-val">${c.volumeConsistency}%</span></div>
-        <div class="panel-gauge-bar"><div class="panel-gauge-fill" style="width:${c.volumeConsistency}%"></div></div>
-      </div>
-    </div>
     ${c.notes ? `<div><div style="font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:8px">Coach Notes</div><p style="font-size:0.8125rem;color:var(--on-surface-variant);line-height:1.6">${c.notes}</p></div>` : ''}
     <a href="profile.html?id=${c.id}" class="topbar-btn topbar-btn-primary" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;text-decoration:none">
       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -2717,8 +2699,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       openBookingModal(info.dateStr);
     },
 
+    eventContent: (info) => {
+      const cid = info.event.extendedProps && info.event.extendedProps.clientId;
+      const client = cid ? getClient(parseInt(cid)) : null;
+      const clientName = client ? `${client.firstName} ${client.lastName}` : '';
+      const sessionTitle = info.event.title || '';
+      return {
+        html: `<div class="fc-event-inner">
+          ${clientName ? `<div class="fc-event-client">${clientName}</div>` : ''}
+          ${sessionTitle ? `<div class="fc-event-session">${sessionTitle}</div>` : ''}
+        </div>`
+      };
+    },
     eventDidMount: (info) => {
-      info.el.title = info.event.title;
+      const cid = info.event.extendedProps && info.event.extendedProps.clientId;
+      const client = cid ? getClient(parseInt(cid)) : null;
+      const clientName = client ? `${client.firstName} ${client.lastName}` : '';
+      info.el.title = [clientName, info.event.title].filter(Boolean).join(' — ');
     },
     moreLinkClick: 'week',
   });
