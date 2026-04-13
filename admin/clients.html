@@ -1230,8 +1230,8 @@ button { cursor: pointer; font-family: var(--font-body); }
           <thead>
             <tr>
               <th>Client Athlete</th>
-              <th>Program Status</th>
-              <th>Current Tier</th>
+              <th>Status</th>
+              <th>Payment Plan</th>
               <th>Progress</th>
               <th>Actions</th>
             </tr>
@@ -1756,13 +1756,22 @@ window.LHPT = {
     const clients = getFilteredClients();
     const tbody = document.getElementById('clientTableBody');
 
+    if (CLIENTS.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:48px 20px;color:var(--on-surface-variant)">
+        <div style="font-size:0.9rem;margin-bottom:16px">No clients in database.</div>
+        <button onclick="forceSeed()" style="padding:10px 20px;background:var(--primary-container);color:#fff;border:none;border-radius:8px;font-family:var(--font-body);font-size:0.8rem;font-weight:700;cursor:pointer">Load Demo Clients</button>
+      </td></tr>`;
+      document.getElementById('tableFooter').innerHTML = '';
+      return;
+    }
+
     tbody.innerHTML = clients.map(c => {
       const isBlock = c.paymentPlan === 'block';
       const rem = c.sessionsRemaining ?? 0;
       let payBadge = '';
       if (isBlock) {
         const col = rem === 0 ? '#f87171' : rem === 1 ? '#fb923c' : '#4ade80';
-        const label = rem === 0 ? 'Payment Due' : `${rem}/5 sessions left`;
+        const label = rem === 0 ? 'Payment Due' : `${rem}/5 sessions`;
         payBadge = `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;background:${col}22;color:${col};border:1px solid ${col}66">${label}</span>`;
       } else {
         payBadge = `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;background:#60a5fa22;color:#60a5fa;border:1px solid #60a5fa66">Pay As You Go</span>`;
@@ -1783,9 +1792,9 @@ window.LHPT = {
         <td>
           <div class="progress-mini-wrap">
             <div class="progress-mini-bar">
-              <div class="progress-mini-fill" style="width:${c.progress}%"></div>
+              <div class="progress-mini-fill" style="width:${c.progress || 0}%"></div>
             </div>
-            <span class="progress-mini-label">${c.progress}% ${c.status === 'paused' ? 'Paused' : 'Goal'}</span>
+            <span class="progress-mini-label">${c.progress || 0}% ${c.status === 'paused' ? 'Paused' : 'Goal'}</span>
           </div>
         </td>
         <td>
@@ -1803,12 +1812,20 @@ window.LHPT = {
 
     document.getElementById('tableFooter').innerHTML = `
       <span class="table-info">Showing ${clients.length} of ${CLIENTS.length} clients</span>
-      <div class="pagination">
-        <button class="page-btn"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
-      </div>
     `;
+  }
+
+  async function forceSeed() {
+    try {
+      await window.LHPT_API.saveClients(window.LHPT.CLIENTS);
+      // Reload from DB
+      await loadClients();
+      renderKPIs();
+      renderTable();
+      showToast('Demo clients loaded ✓');
+    } catch(err) {
+      showToast('Failed to seed clients', 'error');
+    }
   }
 
   /* === TABS === */
@@ -1962,7 +1979,7 @@ window.LHPT = {
       await processPastSessions();
     } catch(e) {
       console.error('Init error:', e);
-      // Don't redirect — just render with whatever data we have
+      showToast('Error loading data: ' + e.message, 'error');
     }
     renderKPIs();
     renderTable();
