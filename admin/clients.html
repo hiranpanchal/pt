@@ -1029,6 +1029,69 @@ button { cursor: pointer; font-family: var(--font-body); }
 .modal-btn-secondary { background: var(--surface-container-high); color: var(--on-surface-variant); }
 .modal-btn-secondary:hover { background: var(--surface-container-highest); }
 
+/* ── MOBILE NAV TOGGLE ── */
+.mobile-nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--on-surface);
+  padding: 4px;
+  cursor: pointer;
+}
+.mobile-nav-toggle svg { width: 22px; height: 22px; stroke: currentColor; fill: none; display: block; }
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99;
+}
+
+/* ── RESPONSIVE: tablet (≤900px) ── */
+@media (max-width: 900px) {
+  .admin-topbar-left h1 { font-size: 1rem; }
+  .admin-content { padding: var(--space-md); }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── RESPONSIVE: mobile (≤720px) ── */
+@media (max-width: 720px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    z-index: 200;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .mobile-nav-toggle { display: flex; align-items: center; }
+  .admin-main { margin-left: 0; }
+  .admin-topbar { padding: 10px var(--space-md); flex-wrap: wrap; gap: 8px; }
+  .admin-topbar-left { min-width: 0; }
+  .admin-topbar-left p { display: none; }
+  .admin-topbar-right { flex-wrap: wrap; gap: 6px; }
+  .topbar-btn { padding: 7px 12px; font-size: 0.7rem; }
+  .admin-content { padding: 12px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+  .kpi-value { font-size: 1.75rem; }
+  .client-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .client-table { min-width: 580px; }
+  .modal-backdrop { align-items: flex-end; }
+  .modal {
+    padding: var(--space-md);
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--roundness-lg) var(--roundness-lg) 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* ── RESPONSIVE: small mobile (≤420px) ── */
+@media (max-width: 420px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .admin-topbar-right .topbar-btn:not(.topbar-btn-primary) { display: none; }
+}
+
 </style>
 </head>
 <body>
@@ -1042,10 +1105,11 @@ button { cursor: pointer; font-family: var(--font-body); }
 })();
 </script>
 
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="admin-layout">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 409.02 103.22" height="34" width="135" style="display:block;">
 <style type="text/css">
@@ -1191,6 +1255,9 @@ button { cursor: pointer; font-family: var(--font-body); }
 
     <!-- TOP BAR -->
     <div class="admin-topbar">
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <div class="admin-topbar-left">
         <h1>Client Portfolio</h1>
         <p>Managing the elite roster of Lee Hayward PT high-performance transformations.</p>
@@ -1968,6 +2035,17 @@ window.LHPT = {
     addModal.classList.add('open');
     document.querySelector('.modal-title').textContent = 'Edit Client';
   }
+
+  /* === MOBILE SIDEBAR === */
+  (function() {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const mobileNavToggle = document.getElementById('mobileNavToggle');
+    function openSidebar()  { sidebar.classList.add('open'); sidebarOverlay.classList.add('open'); }
+    function closeSidebar() { sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open'); }
+    if (mobileNavToggle) mobileNavToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+  })();
 
   /* === INIT === */
   async function init() {
