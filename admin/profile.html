@@ -1176,16 +1176,9 @@ button { cursor: pointer; font-family: var(--font-body); }
       .sidebar-overlay.open { display: block; }
       .mobile-nav-toggle { display: flex; align-items: center; }
       .admin-main { margin-left: 0; }
-      .admin-topbar {
-        padding: 10px var(--space-md);
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .admin-topbar-left { min-width: 0; }
-      .admin-topbar-right {
-        flex-wrap: wrap;
-        gap: 6px;
-      }
+      .admin-topbar { padding: 10px 14px; gap: 10px; }
+      .admin-topbar-left { min-width: 0; flex: 1; }
+      .admin-topbar-right { gap: 6px; flex-shrink: 0; }
       .admin-topbar-right .client-select-wrap { display: none; }
       .topbar-btn { padding: 7px 12px; font-size: 0.7rem; }
       .admin-content { padding: 12px; }

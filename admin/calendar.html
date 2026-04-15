@@ -1716,10 +1716,11 @@ button { cursor: pointer; font-family: var(--font-body); }
       .sidebar-overlay.open { display: block; }
       .mobile-nav-toggle { display: flex; align-items: center; }
       .admin-main { margin-left: 0; }
-      .admin-topbar { padding: 10px var(--space-md); flex-wrap: wrap; gap: 8px; }
-      .admin-topbar-left { min-width: 0; }
+      .admin-topbar { padding: 10px 14px; gap: 10px; }
+      .admin-topbar-left { min-width: 0; flex: 1; }
+      .admin-topbar-left h1 { font-size: 0.9375rem; }
       .admin-topbar-left p { display: none; }
-      .admin-topbar-right { flex-wrap: wrap; gap: 6px; }
+      .admin-topbar-right { gap: 6px; flex-shrink: 0; }
       .topbar-btn { padding: 7px 12px; font-size: 0.7rem; }
       .admin-content { padding: 12px; }
       .cal-sidebar { flex-wrap: wrap; }
@@ -2732,9 +2733,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('sess-repeat').addEventListener('change', updateConfirmLabel);
 
   const el = document.getElementById('calendar');
+  const isMobile = window.innerWidth < 720;
   calendar = new FullCalendar.Calendar(el, {
-    initialView:   'timeGridWeek',
-    headerToolbar: {
+    initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+    headerToolbar: isMobile ? {
+      left:   'prev,next',
+      center: 'title',
+      right:  'timeGridDay,timeGridWeek'
+    } : {
       left:   'prev,next today',
       center: 'title',
       right:  'dayGridMonth,timeGridWeek,timeGridDay'

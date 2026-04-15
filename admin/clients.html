@@ -1065,16 +1065,44 @@ button { cursor: pointer; font-family: var(--font-body); }
   .sidebar-overlay.open { display: block; }
   .mobile-nav-toggle { display: flex; align-items: center; }
   .admin-main { margin-left: 0; }
-  .admin-topbar { padding: 10px var(--space-md); flex-wrap: wrap; gap: 8px; }
-  .admin-topbar-left { min-width: 0; }
+  .admin-topbar { padding: 10px 14px; gap: 10px; }
+  .admin-topbar-left { min-width: 0; flex: 1; }
+  .admin-topbar-left h1 { font-size: 0.9375rem; }
   .admin-topbar-left p { display: none; }
-  .admin-topbar-right { flex-wrap: wrap; gap: 6px; }
+  .admin-topbar-right { gap: 6px; flex-shrink: 0; }
   .topbar-btn { padding: 7px 12px; font-size: 0.7rem; }
   .admin-content { padding: 12px; }
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi-card { padding: 14px 16px; }
   .kpi-value { font-size: 1.75rem; }
-  .client-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .client-table { min-width: 580px; }
+  /* Table → card layout on mobile */
+  .client-table-wrap { overflow-x: visible; }
+  .client-table { min-width: unset; width: 100%; }
+  .client-table thead { display: none; }
+  .client-table,
+  .client-table tbody { display: block; }
+  .client-table tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    margin-bottom: 6px;
+    background: var(--surface-container);
+    border-radius: var(--roundness-md);
+    border-bottom: none !important;
+  }
+  .client-table tbody tr:hover { background: var(--surface-container-high); }
+  .client-table td { display: block; padding: 0; border: none !important; }
+  /* Client name cell — full width */
+  .client-table td:nth-child(1) { flex: 0 0 100%; }
+  /* Status + payment badges — inline */
+  .client-table td:nth-child(2) { flex: 0 0 auto; }
+  .client-table td:nth-child(3) { flex: 0 0 auto; }
+  /* Hide progress bar on mobile */
+  .client-table td:nth-child(4) { display: none; }
+  /* Action buttons pushed right */
+  .client-table td:nth-child(5) { margin-left: auto; }
   .modal-backdrop { align-items: flex-end; }
   .modal {
     padding: var(--space-md);
