@@ -360,10 +360,10 @@ app.post('/api/contact', async (req, res) => {
       'INSERT INTO messages (from_name, from_email, subject, body) VALUES ($1,$2,$3,$4)',
       [name, email, subj, body]
     );
-    // Also notify Lee by email if SMTP configured
+    // Notify Lee by email in the background (don't await — never block the response)
     const t = getTransporter();
     if (t) {
-      await t.sendMail({
+      t.sendMail({
         from: `"${name}" <${process.env.SMTP_USER}>`,
         replyTo: email,
         to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
@@ -371,7 +371,7 @@ app.post('/api/contact', async (req, res) => {
         text: `From: ${name} <${email}>\n\n${body}`
       }).catch(err => console.error('Notification email failed:', err));
     }
-    res.json({ ok: true });
+    res.json({ ok: true }); // respond immediately — email sends in background
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Failed to save message' });
