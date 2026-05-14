@@ -56,6 +56,8 @@ setInterval(() => {
 // CORS — only allow requests from the same Railway domain
 const allowedOrigins = [
   'https://lee-haywood-pt.up.railway.app',
+  'https://leehaywardpt.co.uk',
+  'https://www.leehaywardpt.co.uk',
   /\.railway\.app$/,
   'http://localhost:3000'
 ];
