@@ -1340,9 +1340,15 @@ button { cursor: pointer; font-family: var(--font-body); }
         </div>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="modal-btn modal-btn-secondary" id="cancelAddClient">Cancel</button>
-        <button type="submit" class="modal-btn modal-btn-primary" id="addClientSubmit">Add Client</button>
+      <div class="modal-actions" style="justify-content:space-between">
+        <button type="button" class="modal-btn" id="deleteClientBtn" style="display:none;background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.3);" onclick="confirmDeleteClient()">
+          <svg viewBox="0 0 24 24" stroke-width="2" style="width:13px;height:13px;stroke:currentColor;fill:none;display:inline;vertical-align:middle;margin-right:4px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete Client
+        </button>
+        <div style="display:flex;gap:var(--space-sm);margin-left:auto">
+          <button type="button" class="modal-btn modal-btn-secondary" id="cancelAddClient">Cancel</button>
+          <button type="submit" class="modal-btn modal-btn-primary" id="addClientSubmit">Add Client</button>
+        </div>
       </div>
     </form>
   </div>
@@ -1853,112 +1859,196 @@ window.LHPT = {
     toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
   }
 
-  /* === ADD CLIENT MODAL === */
+  /* === ADD / EDIT CLIENT MODAL === */
   const addModal = document.getElementById('addModal');
-  document.getElementById('addClientBtn').addEventListener('click', () => {
+  let editingId = null; // null = add mode, number = edit mode
+
+  function openAddModal() {
+    editingId = null;
+    document.getElementById('addClientForm').reset();
+    document.getElementById('addModalTitle').textContent = 'Add New Client';
+    document.getElementById('addClientSubmit').textContent = 'Add Client';
+    document.getElementById('deleteClientBtn').style.display = 'none';
+    document.getElementById('nc-sessions-group').style.display = 'none';
     addModal.classList.add('open');
-  });
+  }
+
+  function closeAddModal() {
+    addModal.classList.remove('open');
+    editingId = null;
+  }
+
+  document.getElementById('addClientBtn').addEventListener('click', openAddModal);
 
   // Toggle sessions field based on payment plan
   document.getElementById('nc-payment-plan').addEventListener('change', function() {
     document.getElementById('nc-sessions-group').style.display = this.value === 'block' ? '' : 'none';
   });
-  document.getElementById('cancelAddClient').addEventListener('click', () => {
-    addModal.classList.remove('open');
-  });
+  document.getElementById('cancelAddClient').addEventListener('click', closeAddModal);
   addModal.addEventListener('click', (e) => {
-    if (e.target === addModal) addModal.classList.remove('open');
+    if (e.target === addModal) closeAddModal();
   });
 
   document.getElementById('addClientForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Safe unique ID — max existing + 1
-    const nextId = CLIENTS.reduce((max, c) => Math.max(max, c.id), 0) + 1;
-
-    const weight     = parseFloat(document.getElementById('nc-weight').value)  || 0;
-    const targetW    = parseFloat(document.getElementById('nc-target').value)  || 0;
-    const bf         = parseFloat(document.getElementById('nc-bf').value)      || null;
-    const age        = parseInt(document.getElementById('nc-age').value)        || null;
-    const height     = parseInt(document.getElementById('nc-height').value)     || null;
-
-    // Calculate BMI if we have weight and height
-    const bmi = (weight && height) ? parseFloat((weight / ((height/100) ** 2)).toFixed(1)) : null;
-
+    const weight  = parseFloat(document.getElementById('nc-weight').value)  || 0;
+    const targetW = parseFloat(document.getElementById('nc-target').value)  || 0;
+    const bf      = parseFloat(document.getElementById('nc-bf').value)      || null;
+    const age     = parseInt(document.getElementById('nc-age').value)        || null;
+    const height  = parseInt(document.getElementById('nc-height').value)     || null;
+    const bmi     = (weight && height) ? parseFloat((weight / ((height/100) ** 2)).toFixed(1)) : null;
     const paymentPlan = document.getElementById('nc-payment-plan').value;
     const sessionsRemaining = paymentPlan === 'block'
       ? (parseInt(document.getElementById('nc-sessions').value) || 5)
       : null;
 
-    const newClient = {
-      id:        nextId,
-      firstName: document.getElementById('nc-first').value.trim(),
-      lastName:  document.getElementById('nc-last').value.trim(),
-      email:     document.getElementById('nc-email').value.trim(),
-      phone:     document.getElementById('nc-phone').value.trim() || '',
-      status:    document.getElementById('nc-status').value,
-      tier:      document.getElementById('nc-program').value,
-      program:   document.getElementById('nc-program').value,
-      joined:    new Date().toISOString().split('T')[0],
-      phase:     'Onboarding',
-      goal:      document.getElementById('nc-goal').value.trim() || '',
-      weight,
-      targetWeight: targetW,
-      age,
-      height,
-      bodyFat:   bf,
-      bmi,
-      weightHistory:  weight ? [weight] : [],
-      bodyFatHistory: bf     ? [bf]     : [],
-      bmiHistory:     bmi    ? [bmi]    : [],
-      personalBest:   { lift: '', weight: 0 },
-      strengthGain:   '+0%',
-      strengthIndex: 0,
-      volumeConsistency: 0,
-      nutritionCompliance: 0,
-      paymentPlan,
-      sessionsRemaining,
-      lastPaymentDate: null,
-      countedEventIds: [],
-      notes: '',
-      recentActivity: [],
-      upcomingSchedule: []
-    };
+    const submitBtn = document.getElementById('addClientSubmit');
 
-    CLIENTS.push(newClient);
-    try {
-      await window.LHPT_API.saveClients(CLIENTS);
-    } catch(err) {
-      showToast('Save failed — check your connection', 'error');
-      CLIENTS.pop(); // rollback
-      return;
+    if (editingId !== null) {
+      // ── SAVE EDITS ──
+      const idx = CLIENTS.findIndex(x => x.id === editingId);
+      if (idx === -1) return;
+      const c = CLIENTS[idx];
+      c.firstName  = document.getElementById('nc-first').value.trim();
+      c.lastName   = document.getElementById('nc-last').value.trim();
+      c.email      = document.getElementById('nc-email').value.trim();
+      c.phone      = document.getElementById('nc-phone').value.trim() || '';
+      c.goal       = document.getElementById('nc-goal').value.trim() || '';
+      c.program    = document.getElementById('nc-program').value;
+      c.tier       = c.program;
+      c.status     = document.getElementById('nc-status').value;
+      c.paymentPlan = paymentPlan;
+      if (sessionsRemaining !== null) c.sessionsRemaining = sessionsRemaining;
+      if (weight)  c.weight = weight;
+      if (targetW) c.targetWeight = targetW;
+      if (bf !== null) c.bodyFat = bf;
+      if (age)     c.age = age;
+      if (height)  c.height = height;
+      if (bmi)     c.bmi = bmi;
+
+      submitBtn.textContent = 'Saving…';
+      submitBtn.disabled = true;
+      try {
+        await window.LHPT_API.saveClient(c);
+        closeAddModal();
+        renderKPIs();
+        renderTable();
+        showToast('Client updated ✓');
+      } catch(err) {
+        showToast('Save failed — check your connection', 'error');
+      } finally {
+        submitBtn.textContent = 'Save Changes';
+        submitBtn.disabled = false;
+      }
+    } else {
+      // ── ADD NEW CLIENT ──
+      const nextId = CLIENTS.reduce((max, c) => Math.max(max, c.id), 0) + 1;
+      const newClient = {
+        id:        nextId,
+        firstName: document.getElementById('nc-first').value.trim(),
+        lastName:  document.getElementById('nc-last').value.trim(),
+        email:     document.getElementById('nc-email').value.trim(),
+        phone:     document.getElementById('nc-phone').value.trim() || '',
+        status:    document.getElementById('nc-status').value,
+        tier:      document.getElementById('nc-program').value,
+        program:   document.getElementById('nc-program').value,
+        joined:    new Date().toISOString().split('T')[0],
+        phase:     'Onboarding',
+        goal:      document.getElementById('nc-goal').value.trim() || '',
+        weight,
+        targetWeight: targetW,
+        age,
+        height,
+        bodyFat:   bf,
+        bmi,
+        weightHistory:  weight ? [weight] : [],
+        bodyFatHistory: bf     ? [bf]     : [],
+        bmiHistory:     bmi    ? [bmi]    : [],
+        personalBest:   { lift: '', weight: 0 },
+        strengthGain:   '+0%',
+        strengthIndex: 0,
+        volumeConsistency: 0,
+        nutritionCompliance: 0,
+        paymentPlan,
+        sessionsRemaining,
+        lastPaymentDate: null,
+        countedEventIds: [],
+        notes: '',
+        recentActivity: [],
+        upcomingSchedule: []
+      };
+      CLIENTS.push(newClient);
+      submitBtn.textContent = 'Saving…';
+      submitBtn.disabled = true;
+      try {
+        await window.LHPT_API.saveClients(CLIENTS);
+        closeAddModal();
+        renderKPIs();
+        renderTable();
+        const btn = document.getElementById('addClientBtn');
+        btn.textContent = 'Client Added ✓';
+        setTimeout(() => {
+          btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add New Client';
+        }, 2500);
+      } catch(err) {
+        showToast('Save failed — check your connection', 'error');
+        CLIENTS.pop(); // rollback
+      } finally {
+        submitBtn.textContent = 'Add Client';
+        submitBtn.disabled = false;
+      }
     }
-    addModal.classList.remove('open');
-    e.target.reset();
-    renderKPIs();
-    renderTable();
-
-    // Flash feedback
-    const btn = document.getElementById('addClientBtn');
-    btn.textContent = 'Client Added ✓';
-    setTimeout(() => {
-      btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add New Client';
-    }, 2500);
   });
 
-  /* === EDIT CLIENT (simple modal re-use) === */
+  /* === EDIT CLIENT === */
   function editClient(id) {
     const c = CLIENTS.find(x => x.id === id);
     if (!c) return;
-    document.getElementById('nc-first').value   = c.firstName;
-    document.getElementById('nc-last').value    = c.lastName;
-    document.getElementById('nc-email').value   = c.email;
-    document.getElementById('nc-phone').value   = c.phone;
-    document.getElementById('nc-goal').value    = c.goal;
-    document.getElementById('nc-program').value = c.program;
-    document.getElementById('nc-status').value  = c.status;
+    editingId = id;
+    document.getElementById('nc-first').value   = c.firstName || '';
+    document.getElementById('nc-last').value    = c.lastName  || '';
+    document.getElementById('nc-email').value   = c.email     || '';
+    document.getElementById('nc-phone').value   = c.phone     || '';
+    document.getElementById('nc-goal').value    = c.goal      || '';
+    document.getElementById('nc-age').value     = c.age       || '';
+    document.getElementById('nc-height').value  = c.height    || '';
+    document.getElementById('nc-weight').value  = c.weight    || '';
+    document.getElementById('nc-target').value  = c.targetWeight || '';
+    document.getElementById('nc-bf').value      = c.bodyFat   || '';
+    document.getElementById('nc-program').value = c.program   || '1-on-1 Training';
+    document.getElementById('nc-status').value  = c.status    || 'active';
+    document.getElementById('nc-payment-plan').value = c.paymentPlan || 'payg';
+    const sessGroup = document.getElementById('nc-sessions-group');
+    if (c.paymentPlan === 'block') {
+      sessGroup.style.display = '';
+      document.getElementById('nc-sessions').value = c.sessionsRemaining ?? 5;
+    } else {
+      sessGroup.style.display = 'none';
+    }
+    document.getElementById('addModalTitle').textContent = 'Edit Client';
+    document.getElementById('addClientSubmit').textContent = 'Save Changes';
+    document.getElementById('deleteClientBtn').style.display = '';
     addModal.classList.add('open');
-    document.querySelector('.modal-title').textContent = 'Edit Client';
+  }
+
+  /* === DELETE CLIENT === */
+  async function confirmDeleteClient() {
+    if (editingId === null) return;
+    const c = CLIENTS.find(x => x.id === editingId);
+    if (!c) return;
+    if (!confirm(`Delete ${c.firstName} ${c.lastName}? This cannot be undone.`)) return;
+    try {
+      await window.LHPT_API.deleteClient(editingId);
+      const idx = CLIENTS.findIndex(x => x.id === editingId);
+      if (idx !== -1) CLIENTS.splice(idx, 1);
+      closeAddModal();
+      renderKPIs();
+      renderTable();
+      showToast(`${c.firstName} ${c.lastName} deleted`);
+    } catch(err) {
+      showToast('Delete failed — check your connection', 'error');
+    }
   }
 
   /* === MOBILE SIDEBAR === */
