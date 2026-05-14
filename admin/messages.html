@@ -375,6 +375,58 @@ button { cursor: pointer; font-family: var(--font-body); }
 .compose-send-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 .compose-status { font-size: 0.75rem; color: var(--on-surface-variant); }
 
+/* Client To picker */
+.compose-to-wrap {
+  flex: 1; position: relative;
+}
+.compose-to-input {
+  width: 100%; background: none; border: none; outline: none;
+  font-family: var(--font-body); font-size: 0.875rem; color: var(--on-surface);
+}
+.compose-to-input::placeholder { color: var(--on-surface-variant); opacity: 0.5; }
+.compose-to-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-container-high);
+  border-radius: 20px; padding: 3px 10px 3px 8px;
+  font-size: 0.75rem; font-weight: 600; color: var(--on-surface);
+  margin-bottom: 4px;
+}
+.compose-to-chip .chip-avatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--gradient-cta); display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.compose-to-chip .chip-remove {
+  background: none; border: none; padding: 0; color: var(--on-surface-variant);
+  font-size: 0.85rem; line-height: 1; cursor: pointer; margin-left: 2px;
+}
+.compose-to-chip .chip-remove:hover { color: var(--on-surface); }
+.client-dropdown {
+  position: absolute; top: calc(100% + 8px); left: -58px; right: 0;
+  background: var(--surface-container-high);
+  border-radius: var(--roundness-md);
+  border: 1px solid var(--outline-variant);
+  box-shadow: var(--shadow-float);
+  z-index: 10; max-height: 220px; overflow-y: auto;
+  display: none;
+}
+.client-dropdown.open { display: block; }
+.client-dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; cursor: pointer;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid var(--outline-variant);
+}
+.client-dropdown-item:last-child { border-bottom: none; }
+.client-dropdown-item:hover { background: var(--surface-container-highest); }
+.client-dropdown-item .dd-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--gradient-cta); display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.client-dropdown-item .dd-name { font-size: 0.8125rem; font-weight: 600; color: var(--on-surface); }
+.client-dropdown-item .dd-email { font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 1px; }
+
 /* Toast */
 .toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
@@ -546,9 +598,14 @@ button { cursor: pointer; font-family: var(--font-body); }
       </button>
     </div>
     <div class="compose-fields">
-      <div class="compose-field">
-        <label>To</label>
-        <input type="email" id="cTo" placeholder="recipient@email.com"/>
+      <div class="compose-field" style="align-items:flex-start;padding-top:6px">
+        <label style="margin-top:4px">To</label>
+        <div class="compose-to-wrap" id="composeToPicker">
+          <!-- selected chip appears here -->
+          <input type="text" class="compose-to-input" id="cToSearch" placeholder="Search client or type email…" autocomplete="off"/>
+          <input type="hidden" id="cTo"/>
+          <div class="client-dropdown" id="clientDropdown"></div>
+        </div>
       </div>
       <div class="compose-field">
         <label>Subject</label>
@@ -811,14 +868,129 @@ async function deleteMsg(id) {
   showToast('Message deleted');
 }
 
+// ── Client autocomplete for To field ───────────────────────────────────────
+let allClients = [];
+async function ensureClients() {
+  if (allClients.length) return;
+  try { allClients = await window.LHPT_API.loadClients() || []; } catch(e) {}
+}
+
+function initToPicker() {
+  const search   = document.getElementById('cToSearch');
+  const hidden   = document.getElementById('cTo');
+  const dropdown = document.getElementById('clientDropdown');
+  const picker   = document.getElementById('composeToPicker');
+
+  function getInitials(c) {
+    return ((c.firstName||'')[0]||'').toUpperCase() + ((c.lastName||'')[0]||'').toUpperCase();
+  }
+
+  function renderDropdown(clients) {
+    if (!clients.length) { dropdown.classList.remove('open'); return; }
+    dropdown.innerHTML = clients.map(c => `
+      <div class="client-dropdown-item" data-email="${c.email}" data-name="${c.firstName} ${c.lastName}">
+        <div class="dd-avatar">${getInitials(c)}</div>
+        <div>
+          <div class="dd-name">${c.firstName} ${c.lastName}</div>
+          <div class="dd-email">${c.email}</div>
+        </div>
+      </div>`).join('');
+    dropdown.classList.add('open');
+    dropdown.querySelectorAll('.client-dropdown-item').forEach(item => {
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        selectClient(item.dataset.email, item.dataset.name);
+      });
+    });
+  }
+
+  function selectClient(email, name) {
+    hidden.value = email;
+    search.value = '';
+    dropdown.classList.remove('open');
+    // Remove existing chip
+    const old = picker.querySelector('.compose-to-chip');
+    if (old) old.remove();
+    // Insert chip before search input
+    const initials = name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+    const chip = document.createElement('div');
+    chip.className = 'compose-to-chip';
+    chip.innerHTML = `<div class="chip-avatar">${initials}</div><span>${name}</span><button class="chip-remove" title="Remove">×</button>`;
+    chip.querySelector('.chip-remove').addEventListener('click', () => {
+      chip.remove();
+      hidden.value = '';
+      search.placeholder = 'Search client or type email…';
+      search.focus();
+    });
+    picker.insertBefore(chip, search);
+    search.placeholder = '';
+  }
+
+  search.addEventListener('input', async () => {
+    const q = search.value.trim().toLowerCase();
+    if (!q) { dropdown.classList.remove('open'); return; }
+    await ensureClients();
+    const filtered = allClients.filter(c =>
+      `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+      (c.email||'').toLowerCase().includes(q)
+    ).slice(0, 8);
+    if (filtered.length) {
+      renderDropdown(filtered);
+    } else {
+      // No match — allow freeform email entry
+      dropdown.classList.remove('open');
+      hidden.value = search.value.trim(); // treat as raw email
+    }
+  });
+
+  search.addEventListener('focus', async () => {
+    await ensureClients();
+    if (!search.value.trim()) renderDropdown(allClients.slice(0, 8));
+  });
+
+  search.addEventListener('blur', () => {
+    setTimeout(() => dropdown.classList.remove('open'), 150);
+    // If no chip selected but user typed something, treat as email
+    const chip = picker.querySelector('.compose-to-chip');
+    if (!chip && search.value.trim()) {
+      hidden.value = search.value.trim();
+    }
+  });
+
+  // Expose selectClient for prefill
+  picker._selectClient = selectClient;
+  picker._reset = () => {
+    hidden.value = '';
+    search.value = '';
+    const chip = picker.querySelector('.compose-to-chip');
+    if (chip) chip.remove();
+    search.placeholder = 'Search client or type email…';
+    dropdown.classList.remove('open');
+  };
+}
+
 // ── Compose modal ──────────────────────────────────────────────────────────
 function openCompose(prefill = {}) {
-  document.getElementById('cTo').value = prefill.to || '';
+  const picker = document.getElementById('composeToPicker');
+  picker._reset();
+  if (prefill.to) {
+    // Check if prefill.to matches a client
+    const match = allClients.find(c => c.email === prefill.to);
+    if (match) {
+      picker._selectClient(match.email, `${match.firstName} ${match.lastName}`);
+    } else {
+      document.getElementById('cTo').value = prefill.to;
+      document.getElementById('cToSearch').value = prefill.to;
+    }
+  }
   document.getElementById('cSubject').value = prefill.subject || '';
   document.getElementById('cBody').value = prefill.body || '';
   document.getElementById('composeStatus').textContent = '';
   document.getElementById('composeModal').classList.add('open');
-  setTimeout(() => document.getElementById('cTo').focus(), 100);
+  setTimeout(() => {
+    const chip = document.querySelector('.compose-to-chip');
+    chip ? document.getElementById('cSubject').focus() : document.getElementById('cToSearch').focus();
+  }, 100);
 }
 function closeCompose() {
   document.getElementById('composeModal').classList.remove('open');
@@ -879,6 +1051,8 @@ document.getElementById('composeBtnSide').addEventListener('click', () => openCo
 })();
 
 // ── Init ───────────────────────────────────────────────────────────────────
+initToPicker();
+ensureClients(); // pre-load client list in background
 loadMessages();
 </script>
 </body>
