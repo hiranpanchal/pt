@@ -1102,8 +1102,19 @@ if (window.matchMedia('(pointer: fine)').matches) {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = form.querySelector('button[type="submit"]');
+        const origLabel = btn.textContent;
         btn.textContent = 'Sending…';
         btn.disabled = true;
+
+        function resetBtn(msg) {
+          btn.textContent = msg || origLabel;
+          btn.disabled = false;
+        }
+
+        // Abort after 12 seconds so the button never stays frozen
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
+
         try {
           const data = Object.fromEntries(new FormData(form));
           const payload = {
@@ -1120,18 +1131,23 @@ if (window.matchMedia('(pointer: fine)').matches) {
           const res = await fetch('/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal: controller.signal
           });
+          clearTimeout(timeout);
           if (res.ok) {
             form.style.display = 'none';
             success.classList.add('visible');
           } else {
-            btn.textContent = 'Something went wrong — try again';
-            btn.disabled = false;
+            resetBtn('Something went wrong — try again');
           }
         } catch(err) {
-          btn.textContent = 'Something went wrong — try again';
-          btn.disabled = false;
+          clearTimeout(timeout);
+          if (err.name === 'AbortError') {
+            resetBtn('Request timed out — please try again');
+          } else {
+            resetBtn('Something went wrong — try again');
+          }
         }
       });
     }
