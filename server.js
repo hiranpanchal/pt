@@ -8,15 +8,74 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ── Startup secret check ───────────────────────────────────────────────────────
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET env var is missing or too short. Set a strong random secret in Railway.');
+  process.exit(1);
+}
+if (!process.env.ADMIN_PASSWORD) {
+  console.error('FATAL: ADMIN_PASSWORD env var is not set. Set it in Railway environment variables.');
+  process.exit(1);
+}
+
 // ── Database ──────────────────────────────────────────────────────────────────
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// ── Rate limiter (login brute-force protection) ────────────────────────────────
+const loginAttempts = new Map();
+function loginRateLimit(req, res, next) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxAttempts = 10;
+  const entry = loginAttempts.get(ip) || { count: 0, resetAt: now + windowMs };
+  if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + windowMs; }
+  entry.count++;
+  loginAttempts.set(ip, entry);
+  if (entry.count > maxAttempts) {
+    const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
+    res.set('Retry-After', retryAfter);
+    return res.status(429).json({ error: 'Too many login attempts. Try again later.' });
+  }
+  next();
+}
+// Clean up old entries every 30 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of loginAttempts) {
+    if (now > entry.resetAt) loginAttempts.delete(ip);
+  }
+}, 30 * 60 * 1000);
+
 // ── Middleware ─────────────────────────────────────────────────────────────────
-app.use(cors());
-app.use(express.json({ limit: '2mb' }));
+// CORS — only allow requests from the same Railway domain
+const allowedOrigins = [
+  'https://lee-haywood-pt.up.railway.app',
+  /\.railway\.app$/,
+  'http://localhost:3000'
+];
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // allow server-to-server / curl
+    const allowed = allowedOrigins.some(o => typeof o === 'string' ? o === origin : o.test(origin));
+    cb(allowed ? null : new Error('CORS blocked'), allowed);
+  },
+  credentials: true
+}));
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname)));
 
 // ── Auth middleware ────────────────────────────────────────────────────────────
@@ -26,7 +85,7 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Unauthorised' });
   }
   try {
-    req.user = jwt.verify(header.slice(7), process.env.JWT_SECRET || 'lhpt-dev-secret');
+    req.user = jwt.verify(header.slice(7), process.env.JWT_SECRET);
     next();
   } catch {
     res.status(401).json({ error: 'Invalid token' });
@@ -90,16 +149,18 @@ app.get('/api/auth/check', requireAuth, (req, res) => res.json({ ok: true, user:
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // POST /api/auth/login
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', loginRateLimit, async (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Missing credentials' });
+
   const adminEmail    = process.env.ADMIN_EMAIL    || 'coach@leehaywardpt.com';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'changeme';
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (email.toLowerCase() !== adminEmail.toLowerCase()) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  // Support both plain text (env var) and bcrypt hash
+  // Support both plain text and bcrypt hash
   let valid = false;
   if (adminPassword.startsWith('$2')) {
     valid = await bcrypt.compare(password, adminPassword);
@@ -111,8 +172,8 @@ app.post('/api/auth/login', async (req, res) => {
 
   const token = jwt.sign(
     { email },
-    process.env.JWT_SECRET || 'lhpt-dev-secret',
-    { expiresIn: '30d' }
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
   );
   res.json({ token });
 });
