@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const cron = require('node-cron');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -140,6 +141,15 @@ async function initDb() {
       body TEXT NOT NULL,
       sent_at TIMESTAMPTZ DEFAULT NOW(),
       reply_to_id INTEGER REFERENCES messages(id)
+    );
+    CREATE TABLE IF NOT EXISTS whatsapp_log (
+      id SERIAL PRIMARY KEY,
+      to_phone TEXT NOT NULL,
+      client_name TEXT,
+      event_id TEXT,
+      message TEXT NOT NULL,
+      status TEXT DEFAULT 'sent',
+      sent_at TIMESTAMPTZ DEFAULT NOW()
     );
   `);
 
@@ -449,6 +459,153 @@ app.post('/api/messages/send', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Failed to send email: ' + e.message });
   }
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WHATSAPP
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function getTwilioClient() {
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) return null;
+  const twilio = require('twilio');
+  return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+}
+
+// Normalise UK/international phone to E.164 (e.g. "+44 7700 123456" → "+447700123456")
+function normalisePhone(raw) {
+  if (!raw) return null;
+  let p = raw.replace(/[\s\-().]/g, '');
+  if (p.startsWith('07') && p.length === 11) p = '+44' + p.slice(1); // UK mobile shorthand
+  if (!p.startsWith('+')) p = '+44' + p;
+  return /^\+\d{7,15}$/.test(p) ? p : null;
+}
+
+async function sendWhatsAppMsg(toPhone, body) {
+  const client = getTwilioClient();
+  if (!client) throw new Error('WhatsApp not configured — set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_WHATSAPP_FROM in Railway.');
+  const from = (process.env.TWILIO_WHATSAPP_FROM || '+14155238886').replace('whatsapp:', '');
+  const to   = normalisePhone(toPhone);
+  if (!to) throw new Error('Invalid phone number: ' + toPhone);
+  return client.messages.create({ from: `whatsapp:${from}`, to: `whatsapp:${to}`, body });
+}
+
+function buildReminderText(client, start) {
+  const dateStr = start.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  const timeStr = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const tomorrow = new Date(Date.now() + 86400000);
+  const isTomorrow = tomorrow.toDateString() === start.toDateString();
+  const isToday    = new Date().toDateString() === start.toDateString();
+  const when = isTomorrow ? 'tomorrow' : isToday ? 'today' : `on ${dateStr}`;
+  return `Hi ${client.firstName}! 👋\n\nJust a reminder from Lee Hayward PT that your session is confirmed ${when}:\n\n📅 ${dateStr}\n⏰ ${timeStr}\n\nSee you then! 💪\n\n– Lee Hayward PT`;
+}
+
+// POST /api/whatsapp/remind — send a reminder for a specific client + session
+app.post('/api/whatsapp/remind', requireAuth, async (req, res) => {
+  const { clientId, eventId, eventStart } = req.body;
+  if (!clientId || !eventStart) return res.status(400).json({ error: 'Missing clientId or eventStart' });
+  try {
+    const { rows } = await pool.query('SELECT data FROM clients WHERE id=$1', [parseInt(clientId)]);
+    if (!rows.length) return res.status(404).json({ error: 'Client not found' });
+    const client = rows[0].data;
+    if (!client.phone) return res.status(400).json({ error: 'Client has no phone number saved' });
+    const start   = new Date(eventStart);
+    const message = buildReminderText(client, start);
+    await sendWhatsAppMsg(client.phone, message);
+    await pool.query(
+      'INSERT INTO whatsapp_log (to_phone, client_name, event_id, message) VALUES ($1,$2,$3,$4)',
+      [normalisePhone(client.phone), `${client.firstName} ${client.lastName}`, eventId || null, message]
+    );
+    res.json({ ok: true, to: `${client.firstName} ${client.lastName}`, phone: normalisePhone(client.phone) });
+  } catch (e) {
+    console.error('WhatsApp remind error:', e.message);
+    const code = e.message.includes('not configured') ? 503 : 500;
+    res.status(code).json({ error: e.message });
+  }
+});
+
+// POST /api/whatsapp/send — freeform send (manual compose)
+app.post('/api/whatsapp/send', requireAuth, async (req, res) => {
+  const { phone, clientName, message } = req.body;
+  if (!phone || !message) return res.status(400).json({ error: 'Missing phone or message' });
+  try {
+    await sendWhatsAppMsg(phone, message);
+    await pool.query(
+      'INSERT INTO whatsapp_log (to_phone, client_name, message) VALUES ($1,$2,$3)',
+      [normalisePhone(phone) || phone, clientName || null, message]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    const code = e.message.includes('not configured') ? 503 : 500;
+    res.status(code).json({ error: e.message });
+  }
+});
+
+// GET /api/whatsapp/log — see recent sends
+app.get('/api/whatsapp/log', requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM whatsapp_log ORDER BY sent_at DESC LIMIT 100');
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// ── Daily session reminder cron — runs 08:00 UK time ─────────────────────────
+cron.schedule('0 8 * * *', async () => {
+  console.log('[WhatsApp Cron] Running daily session reminders…');
+  if (!getTwilioClient()) {
+    console.log('[WhatsApp Cron] Twilio not configured — skipping');
+    return;
+  }
+  try {
+    const tomorrow   = new Date(Date.now() + 86400000);
+    const dayStart   = new Date(tomorrow); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd     = new Date(tomorrow); dayEnd.setHours(23, 59, 59, 999);
+
+    const evRes  = await pool.query('SELECT data FROM events');
+    const clRes  = await pool.query('SELECT data FROM clients');
+    const events  = evRes.rows.map(r => r.data);
+    const clients = clRes.rows.map(r => r.data);
+
+    const tomorrowEvents = events.filter(ev => {
+      const s = new Date(ev.start);
+      return s >= dayStart && s <= dayEnd;
+    });
+
+    console.log(`[WhatsApp Cron] ${tomorrowEvents.length} sessions tomorrow`);
+
+    for (const ev of tomorrowEvents) {
+      const clientId = ev.extendedProps?.clientId;
+      if (!clientId) continue;
+      const client = clients.find(c => c.id === clientId);
+      if (!client?.phone) continue;
+
+      // Skip if already reminded for this event
+      const { rows } = await pool.query(
+        "SELECT id FROM whatsapp_log WHERE event_id=$1 AND status='sent'", [ev.id]
+      );
+      if (rows.length) { console.log(`[WhatsApp Cron] Already reminded for event ${ev.id}`); continue; }
+
+      const start   = new Date(ev.start);
+      const message = buildReminderText(client, start);
+      try {
+        await sendWhatsAppMsg(client.phone, message);
+        await pool.query(
+          'INSERT INTO whatsapp_log (to_phone, client_name, event_id, message) VALUES ($1,$2,$3,$4)',
+          [normalisePhone(client.phone), `${client.firstName} ${client.lastName}`, ev.id, message]
+        );
+        console.log(`[WhatsApp Cron] ✓ Reminded ${client.firstName} ${client.lastName}`);
+      } catch (err) {
+        console.error(`[WhatsApp Cron] ✗ Failed for ${client.firstName}:`, err.message);
+        await pool.query(
+          "INSERT INTO whatsapp_log (to_phone, client_name, event_id, message, status) VALUES ($1,$2,$3,$4,'failed')",
+          [client.phone, `${client.firstName} ${client.lastName}`, ev.id, message]
+        );
+      }
+    }
+  } catch (err) {
+    console.error('[WhatsApp Cron] Error:', err);
+  }
+}, { timezone: 'Europe/London' });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CATCH-ALL — serve index.html for non-API routes

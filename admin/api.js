@@ -128,6 +128,21 @@
     return apiFetch('/api/messages/send', { method: 'POST', body: JSON.stringify(payload) });
   }
 
+  // ── WhatsApp ─────────────────────────────────────────────────────────────────
+
+  async function sendWhatsAppReminder(clientId, eventId, eventStart) {
+    return apiFetch('/api/whatsapp/remind', {
+      method: 'POST',
+      body: JSON.stringify({ clientId, eventId, eventStart })
+    });
+  }
+  async function sendWhatsAppFreeform(phone, clientName, message) {
+    return apiFetch('/api/whatsapp/send', {
+      method: 'POST',
+      body: JSON.stringify({ phone, clientName, message })
+    });
+  }
+
   // ── Unread badge (auto-loads on every admin page) ───────────────────────────
   async function refreshUnreadBadge() {
     const badge = document.getElementById('sidebarUnread');
@@ -147,6 +162,7 @@
     loadClients, saveClients, saveClient, addClient, deleteClient,
     loadEvents, saveEvents,
     loadMessages, getUnreadCount, markMessage, deleteMessage, sendMessage,
+    sendWhatsAppReminder, sendWhatsAppFreeform,
     login, logout, isLoggedIn, requireLogin
   };
 })();
