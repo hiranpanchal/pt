@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -119,6 +120,26 @@ async function initDb() {
       key TEXT PRIMARY KEY,
       value JSONB,
       updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      from_name TEXT NOT NULL,
+      from_email TEXT NOT NULL,
+      subject TEXT NOT NULL DEFAULT '',
+      body TEXT NOT NULL,
+      received_at TIMESTAMPTZ DEFAULT NOW(),
+      read BOOLEAN DEFAULT FALSE,
+      starred BOOLEAN DEFAULT FALSE,
+      replied_at TIMESTAMPTZ
+    );
+    CREATE TABLE IF NOT EXISTS sent_messages (
+      id SERIAL PRIMARY KEY,
+      to_email TEXT NOT NULL,
+      to_name TEXT,
+      subject TEXT NOT NULL,
+      body TEXT NOT NULL,
+      sent_at TIMESTAMPTZ DEFAULT NOW(),
+      reply_to_id INTEGER REFERENCES messages(id)
     );
   `);
 
@@ -296,6 +317,136 @@ app.put('/api/events', requireAuth, async (req, res) => {
     await pool.query('ROLLBACK');
     console.error(e);
     res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MESSAGES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Nodemailer transporter (set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in Railway)
+function getTransporter() {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return null;
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  });
+}
+
+// POST /api/contact — public endpoint (replaces Formspree)
+app.post('/api/contact', async (req, res) => {
+  const { name, email, message, goal, phone, subject } = req.body;
+  if (!name || !email || !message) return res.status(400).json({ error: 'Missing required fields' });
+  try {
+    const subj = subject || (goal ? `New enquiry — ${goal}` : 'New contact form message');
+    const body = [
+      message,
+      phone ? `\nPhone: ${phone}` : '',
+      goal  ? `Goal: ${goal}` : ''
+    ].filter(Boolean).join('\n');
+    await pool.query(
+      'INSERT INTO messages (from_name, from_email, subject, body) VALUES ($1,$2,$3,$4)',
+      [name, email, subj, body]
+    );
+    // Also notify Lee by email if SMTP configured
+    const t = getTransporter();
+    if (t) {
+      await t.sendMail({
+        from: `"${name}" <${process.env.SMTP_USER}>`,
+        replyTo: email,
+        to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
+        subject: `[LHPT] ${subj}`,
+        text: `From: ${name} <${email}>\n\n${body}`
+      }).catch(err => console.error('Notification email failed:', err));
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to save message' });
+  }
+});
+
+// GET /api/messages — inbox
+app.get('/api/messages', requireAuth, async (req, res) => {
+  try {
+    const folder = req.query.folder || 'inbox';
+    if (folder === 'sent') {
+      const result = await pool.query('SELECT * FROM sent_messages ORDER BY sent_at DESC');
+      return res.json(result.rows);
+    }
+    const result = await pool.query('SELECT * FROM messages ORDER BY received_at DESC');
+    res.json(result.rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// GET /api/messages/unread-count
+app.get('/api/messages/unread-count', requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*) AS n FROM messages WHERE read=FALSE');
+    res.json({ count: parseInt(result.rows[0].n) });
+  } catch (e) {
+    res.json({ count: 0 });
+  }
+});
+
+// PATCH /api/messages/:id — mark read/starred
+app.patch('/api/messages/:id', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { read, starred } = req.body;
+  try {
+    const sets = [];
+    const vals = [];
+    if (read !== undefined)    { sets.push(`read=$${vals.length+1}`);    vals.push(read); }
+    if (starred !== undefined) { sets.push(`starred=$${vals.length+1}`); vals.push(starred); }
+    if (!sets.length) return res.json({ ok: true });
+    vals.push(id);
+    await pool.query(`UPDATE messages SET ${sets.join(',')} WHERE id=$${vals.length}`, vals);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// DELETE /api/messages/:id
+app.delete('/api/messages/:id', requireAuth, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM messages WHERE id=$1', [parseInt(req.params.id)]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// POST /api/messages/send — compose or reply
+app.post('/api/messages/send', requireAuth, async (req, res) => {
+  const { to_email, to_name, subject, body, reply_to_id } = req.body;
+  if (!to_email || !subject || !body) return res.status(400).json({ error: 'Missing fields' });
+  const t = getTransporter();
+  if (!t) return res.status(503).json({ error: 'SMTP not configured. Add SMTP_USER and SMTP_PASS in Railway environment variables.' });
+  try {
+    await t.sendMail({
+      from: `"Lee Hayward PT" <${process.env.SMTP_USER}>`,
+      to: to_name ? `"${to_name}" <${to_email}>` : to_email,
+      subject,
+      text: body
+    });
+    await pool.query(
+      'INSERT INTO sent_messages (to_email, to_name, subject, body, reply_to_id) VALUES ($1,$2,$3,$4,$5)',
+      [to_email, to_name || null, subject, body, reply_to_id || null]
+    );
+    if (reply_to_id) {
+      await pool.query('UPDATE messages SET replied_at=NOW() WHERE id=$1', [reply_to_id]);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Send failed:', e);
+    res.status(500).json({ error: 'Failed to send email: ' + e.message });
   }
 });
 

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Messages — Lee Hayward PT Admin</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  --surface:                  #161213;
+  --surface-container-lowest: #110d0e;
+  --surface-container-low:    #1E1B1C;
+  --surface-container:        #252122;
+  --surface-container-high:   #2E2A2B;
+  --surface-container-highest:#383435;
+  --primary:                  #FF6B6B;
+  --primary-container:        #FD772A;
+  --secondary:                #FFB787;
+  --secondary-container:      #C04E00;
+  --on-primary:               #FFFFFF;
+  --on-surface:               #EDE0E1;
+  --on-surface-variant:       #9A8F90;
+  --outline-variant:          rgba(154, 143, 144, 0.15);
+  --gradient-cta:             linear-gradient(45deg, #FD772A, #C04E00);
+  --font-display:             'Lexend', sans-serif;
+  --font-body:                'Plus Jakarta Sans', sans-serif;
+  --space-xs:   0.5rem;
+  --space-sm:   1rem;
+  --space-md:   1.5rem;
+  --space-lg:   2rem;
+  --space-xl:   3rem;
+  --roundness-xs: 2px;
+  --roundness-sm: 4px;
+  --roundness-md: 8px;
+  --roundness-lg: 12px;
+  --transition-kinetic: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-float: 0 20px 40px rgba(17, 13, 14, 0.4);
+  --sidebar-width: 220px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-body);
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  overflow: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: var(--font-body); }
+
+/* ── Admin layout ─────────────────────────────────────────────────────────── */
+.admin-layout { display: flex; min-height: 100vh; width: 100%; }
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--surface-container-lowest);
+  display: flex; flex-direction: column;
+  padding: var(--space-lg) 0;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  border-right: 1px solid var(--outline-variant);
+}
+.sidebar-brand { padding: 0 var(--space-md) var(--space-lg); border-bottom: 1px solid var(--outline-variant); margin-bottom: var(--space-md); }
+.sidebar-logo { font-family: var(--font-display); font-size: 0.9375rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--on-surface); line-height: 1.2; }
+.sidebar-logo span { color: var(--primary-container); }
+.sidebar-sub { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--on-surface-variant); margin-top: 4px; }
+.sidebar-nav { flex: 1; padding: 0 var(--space-xs); display: flex; flex-direction: column; gap: 2px; }
+.sidebar-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--roundness-md);
+  font-size: 0.8125rem; font-weight: 500; color: var(--on-surface-variant);
+  transition: all var(--transition-fast); position: relative;
+}
+.sidebar-link svg { width: 18px; height: 18px; stroke: currentColor; fill: none; flex-shrink: 0; }
+.sidebar-link:hover { background: var(--surface-container); color: var(--on-surface); }
+.sidebar-link.active { background: var(--surface-container-high); color: var(--on-surface); }
+.sidebar-link.active::before {
+  content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; border-radius: 0 2px 2px 0; background: var(--primary-container);
+}
+.sidebar-footer { padding: var(--space-md); border-top: 1px solid var(--outline-variant); margin-top: auto; }
+.sidebar-user { display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-sm); }
+.sidebar-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--gradient-cta); display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.sidebar-user-info h4 { font-size: 0.8125rem; font-weight: 600; color: var(--on-surface); }
+.sidebar-user-info p  { font-size: 0.7rem; color: var(--on-surface-variant); margin-top: 1px; }
+.sidebar-logout {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 8px 12px; border-radius: var(--roundness-md);
+  background: none; border: none; font-size: 0.75rem; font-weight: 500;
+  color: var(--on-surface-variant); transition: all var(--transition-fast);
+}
+.sidebar-logout svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+.sidebar-logout:hover { color: var(--primary-container); background: rgba(253,119,42,0.08); }
+
+/* ── Main ─────────────────────────────────────────────────────────────────── */
+.admin-main {
+  margin-left: var(--sidebar-width); flex: 1;
+  display: flex; flex-direction: column;
+  height: 100vh; overflow: hidden;
+}
+
+/* ── Topbar ───────────────────────────────────────────────────────────────── */
+.admin-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(17,13,14,0.8); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--outline-variant);
+  flex-shrink: 0;
+}
+.admin-topbar-left h1 {
+  font-family: var(--font-display); font-size: 1.25rem; font-weight: 800;
+  letter-spacing: -0.01em; text-transform: uppercase; color: var(--on-surface);
+}
+.admin-topbar-right { display: flex; align-items: center; gap: var(--space-sm); }
+.topbar-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--roundness-md); border: none;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; transition: all var(--transition-fast);
+}
+.topbar-btn-primary { background: var(--gradient-cta); color: #fff; }
+.topbar-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.topbar-btn-secondary { background: var(--surface-container); color: var(--on-surface); }
+.topbar-btn-secondary:hover { background: var(--surface-container-high); }
+.topbar-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+/* ── Mail layout (3-panel) ────────────────────────────────────────────────── */
+.mail-layout {
+  display: flex; flex: 1; overflow: hidden;
+}
+
+/* Mail sidebar (folders) */
+.mail-sidebar {
+  width: 180px; flex-shrink: 0;
+  background: var(--surface-container-lowest);
+  border-right: 1px solid var(--outline-variant);
+  display: flex; flex-direction: column;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+.compose-btn {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 12px 16px;
+  padding: 10px 16px;
+  background: var(--gradient-cta); color: #fff;
+  border: none; border-radius: var(--roundness-md);
+  font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  cursor: pointer; transition: opacity var(--transition-fast);
+}
+.compose-btn:hover { opacity: 0.88; }
+.compose-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex-shrink: 0; }
+.mail-folder {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; border-radius: 0;
+  font-size: 0.8125rem; font-weight: 500; color: var(--on-surface-variant);
+  cursor: pointer; transition: all var(--transition-fast);
+  position: relative;
+}
+.mail-folder svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex-shrink: 0; }
+.mail-folder:hover { background: var(--surface-container); color: var(--on-surface); }
+.mail-folder.active { background: var(--surface-container); color: var(--primary-container); font-weight: 600; }
+.mail-folder .folder-count {
+  margin-left: auto; font-size: 0.65rem; font-weight: 700;
+  background: var(--primary-container); color: #fff;
+  padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center;
+}
+
+/* Message list */
+.msg-list {
+  width: 320px; flex-shrink: 0;
+  background: var(--surface-container-lowest);
+  border-right: 1px solid var(--outline-variant);
+  overflow-y: auto; display: flex; flex-direction: column;
+}
+.msg-list-header {
+  padding: 14px 16px 10px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--on-surface-variant);
+  border-bottom: 1px solid var(--outline-variant);
+  flex-shrink: 0;
+}
+.msg-item {
+  padding: 14px 16px; border-bottom: 1px solid var(--outline-variant);
+  cursor: pointer; transition: background var(--transition-fast);
+  display: flex; flex-direction: column; gap: 4px;
+  position: relative;
+}
+.msg-item:hover { background: var(--surface-container); }
+.msg-item.active { background: var(--surface-container-high); }
+.msg-item.unread .msg-from { font-weight: 700; color: var(--on-surface); }
+.msg-item.unread::before {
+  content: ''; position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+  width: 6px; height: 6px; border-radius: 50%; background: var(--primary-container);
+}
+.msg-from {
+  font-size: 0.8125rem; font-weight: 500; color: var(--on-surface-variant);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.msg-from-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.msg-date { font-size: 0.65rem; color: var(--on-surface-variant); flex-shrink: 0; margin-left: 8px; }
+.msg-subject { font-size: 0.8125rem; font-weight: 600; color: var(--on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-preview { font-size: 0.75rem; color: var(--on-surface-variant); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: var(--on-surface-variant); padding: 40px 20px; text-align: center;
+}
+.msg-empty svg { width: 40px; height: 40px; stroke: var(--on-surface-variant); fill: none; opacity: 0.4; }
+.msg-empty p { font-size: 0.875rem; }
+
+/* Message detail */
+.msg-detail {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--surface-container-lowest);
+  overflow: hidden;
+}
+.msg-detail-empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; color: var(--on-surface-variant);
+}
+.msg-detail-empty svg { width: 56px; height: 56px; stroke: var(--on-surface-variant); fill: none; opacity: 0.25; }
+.msg-detail-empty p { font-size: 0.9rem; }
+
+.msg-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.msg-view-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--outline-variant);
+  flex-shrink: 0;
+}
+.msg-view-subject { font-family: var(--font-display); font-size: 1.125rem; font-weight: 700; color: var(--on-surface); margin-bottom: 12px; }
+.msg-view-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.msg-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface-container-high); display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: var(--on-surface); flex-shrink: 0;
+}
+.msg-sender-info { flex: 1; min-width: 0; }
+.msg-sender-name { font-size: 0.875rem; font-weight: 600; color: var(--on-surface); }
+.msg-sender-email { font-size: 0.75rem; color: var(--on-surface-variant); }
+.msg-view-date { font-size: 0.75rem; color: var(--on-surface-variant); flex-shrink: 0; }
+.msg-view-actions { display: flex; gap: 6px; margin-left: auto; }
+.msg-action-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: var(--roundness-sm);
+  border: none; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  background: var(--surface-container); color: var(--on-surface-variant);
+  transition: all var(--transition-fast);
+}
+.msg-action-btn:hover { background: var(--surface-container-high); color: var(--on-surface); }
+.msg-action-btn.primary { background: var(--gradient-cta); color: #fff; }
+.msg-action-btn.primary:hover { opacity: 0.88; }
+.msg-action-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+.msg-star-btn { background: none; border: none; padding: 6px; color: var(--on-surface-variant); transition: color var(--transition-fast); }
+.msg-star-btn:hover { color: #fbbf24; }
+.msg-star-btn.starred { color: #fbbf24; }
+.msg-star-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+.msg-view-body {
+  flex: 1; overflow-y: auto; padding: 24px;
+}
+.msg-body-text {
+  font-size: 0.9rem; line-height: 1.75; color: var(--on-surface-variant);
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* Reply / Compose area */
+.reply-area {
+  border-top: 1px solid var(--outline-variant);
+  padding: 16px 24px; flex-shrink: 0;
+  background: var(--surface-container-lowest);
+}
+.reply-area-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.reply-label {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+.reply-field {
+  width: 100%; background: var(--surface-container);
+  border: 1px solid var(--outline-variant); border-radius: var(--roundness-sm);
+  padding: 10px 12px; font-family: var(--font-body); font-size: 0.875rem;
+  color: var(--on-surface); outline: none; transition: border-color var(--transition-fast);
+  margin-bottom: 8px;
+}
+.reply-field:focus { border-color: var(--primary-container); }
+.reply-body {
+  width: 100%; background: var(--surface-container);
+  border: 1px solid var(--outline-variant); border-radius: var(--roundness-sm);
+  padding: 10px 12px; font-family: var(--font-body); font-size: 0.875rem;
+  color: var(--on-surface); outline: none; resize: vertical; min-height: 100px;
+  transition: border-color var(--transition-fast); margin-bottom: 10px;
+}
+.reply-body:focus { border-color: var(--primary-container); }
+.reply-actions { display: flex; align-items: center; justify-content: space-between; }
+.reply-send-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: var(--roundness-md); border: none;
+  background: var(--gradient-cta); color: #fff;
+  font-family: var(--font-body); font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  transition: opacity var(--transition-fast);
+}
+.reply-send-btn:hover { opacity: 0.88; }
+.reply-send-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+.reply-discard { background: none; border: none; font-size: 0.75rem; color: var(--on-surface-variant); padding: 6px; }
+.reply-discard:hover { color: var(--on-surface); }
+
+/* Compose modal */
+.compose-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(17,13,14,0.5);
+  z-index: 400; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity var(--transition-kinetic);
+}
+.compose-modal-backdrop.open { opacity: 1; pointer-events: all; }
+.compose-modal {
+  background: var(--surface-container-low);
+  border-radius: var(--roundness-lg);
+  width: 560px; max-width: 95vw;
+  box-shadow: var(--shadow-float);
+  transform: translateY(20px); transition: transform var(--transition-kinetic);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.compose-modal-backdrop.open .compose-modal { transform: translateY(0); }
+.compose-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--surface-container-high);
+  font-family: var(--font-display); font-size: 0.875rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.compose-close { background: none; border: none; color: var(--on-surface-variant); padding: 4px; }
+.compose-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; display: block; }
+.compose-close:hover { color: var(--on-surface); }
+.compose-fields { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.compose-field {
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--outline-variant); padding-bottom: 10px;
+}
+.compose-field label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-surface-variant); width: 48px; flex-shrink: 0; }
+.compose-field input {
+  flex: 1; background: none; border: none; outline: none;
+  font-family: var(--font-body); font-size: 0.875rem; color: var(--on-surface);
+}
+.compose-field input::placeholder { color: var(--on-surface-variant); opacity: 0.5; }
+.compose-body-wrap { padding: 0 20px 16px; }
+.compose-body {
+  width: 100%; background: none; border: none; outline: none; resize: none;
+  font-family: var(--font-body); font-size: 0.875rem; line-height: 1.65;
+  color: var(--on-surface); min-height: 200px;
+}
+.compose-body::placeholder { color: var(--on-surface-variant); opacity: 0.5; }
+.compose-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid var(--outline-variant);
+}
+.compose-send-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 20px; border-radius: var(--roundness-md); border: none;
+  background: var(--gradient-cta); color: #fff;
+  font-family: var(--font-body); font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; transition: opacity var(--transition-fast);
+}
+.compose-send-btn:hover { opacity: 0.88; }
+.compose-send-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+.compose-status { font-size: 0.75rem; color: var(--on-surface-variant); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface-container-highest); color: var(--on-surface);
+  padding: 10px 20px; border-radius: var(--roundness-md); font-size: 0.8rem; font-weight: 500;
+  z-index: 9999; transition: transform 0.3s ease; pointer-events: none; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: #7f1d1d; color: #fca5a5; }
+
+/* Mobile nav */
+.mobile-nav-toggle {
+  display: none; background: none; border: none; color: var(--on-surface); padding: 4px; cursor: pointer;
+}
+.mobile-nav-toggle svg { width: 22px; height: 22px; stroke: currentColor; fill: none; display: block; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .msg-list { width: 260px; }
+}
+@media (max-width: 720px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); z-index: 200; }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .mobile-nav-toggle { display: flex; align-items: center; }
+  .admin-main { margin-left: 0; }
+  .admin-topbar { padding: 10px 14px; gap: 10px; }
+  .admin-topbar-left { min-width: 0; flex: 1; }
+  .admin-topbar-left h1 { font-size: 0.9375rem; }
+  .mail-sidebar { display: none; }
+  .msg-list { width: 100%; border-right: none; }
+  .msg-detail { display: none; }
+  .msg-list.hidden { display: none; }
+  .msg-detail.mobile-open { display: flex; width: 100%; }
+}
+  </style>
+</head>
+<body>
+<script src="api.js?v=3"></script>
+<script>
+(function(){
+  const t = localStorage.getItem('lhpt_auth');
+  if(!t || !t.startsWith('eyJ')){ window.location.replace('login.html'); }
+})();
+</script>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo"><img src="/logo.svg" height="34" width="173" style="display:block;" alt="Lee Hayward PT"></div>
+      <div class="sidebar-sub">Admin Portal</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="clients.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clients
+      </a>
+      <a href="calendar.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendar
+      </a>
+      <a href="messages.html" class="sidebar-link active">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Messages <span class="msg-badge" id="sidebarUnread" style="display:none;background:var(--primary-container);color:#fff;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:10px;margin-left:4px"></span>
+      </a>
+      <a href="../index.html" class="sidebar-link">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        View Site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">LH</div>
+        <div class="sidebar-user-info">
+          <h4>Lee Hayward</h4>
+          <p>Master Coach</p>
+        </div>
+      </div>
+      <button class="sidebar-logout" onclick="(function(){localStorage.removeItem('lhpt_auth');window.location.replace('login.html');})()">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- TOPBAR -->
+    <div class="admin-topbar">
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="admin-topbar-left">
+        <h1>Messages</h1>
+      </div>
+      <div class="admin-topbar-right">
+        <button class="topbar-btn topbar-btn-primary" id="topbarComposeBtn">
+          <svg viewBox="0 0 24 24" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Compose
+        </button>
+      </div>
+    </div>
+
+    <!-- 3-PANEL MAIL LAYOUT -->
+    <div class="mail-layout">
+
+      <!-- Folder sidebar -->
+      <div class="mail-sidebar">
+        <button class="compose-btn" id="composeBtnSide">
+          <svg viewBox="0 0 24 24" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Compose
+        </button>
+        <div class="mail-folder active" id="folderInbox" data-folder="inbox">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M22 12h-6l-2 3H10l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          Inbox
+          <span class="folder-count" id="inboxCount" style="display:none"></span>
+        </div>
+        <div class="mail-folder" id="folderSent" data-folder="sent">
+          <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Sent
+        </div>
+        <div class="mail-folder" id="folderStarred" data-folder="starred">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Starred
+        </div>
+      </div>
+
+      <!-- Message list -->
+      <div class="msg-list" id="msgList">
+        <div class="msg-list-header" id="msgListHeader">Inbox</div>
+        <div id="msgListBody">
+          <div class="msg-empty">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-6l-2 3H10l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+            <p>Loading messages…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message detail -->
+      <div class="msg-detail" id="msgDetail">
+        <div class="msg-detail-empty" id="msgDetailEmpty">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <p>Select a message to read it</p>
+        </div>
+        <div class="msg-view" id="msgView" style="display:none">
+          <div class="msg-view-header" id="msgViewHeader"></div>
+          <div class="msg-view-body" id="msgViewBody"></div>
+          <div class="reply-area" id="replyArea" style="display:none"></div>
+        </div>
+      </div>
+
+    </div><!-- /mail-layout -->
+  </main>
+</div>
+
+<!-- Compose Modal -->
+<div class="compose-modal-backdrop" id="composeModal">
+  <div class="compose-modal">
+    <div class="compose-modal-header">
+      New Message
+      <button class="compose-close" id="composeClose">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="compose-fields">
+      <div class="compose-field">
+        <label>To</label>
+        <input type="email" id="cTo" placeholder="recipient@email.com"/>
+      </div>
+      <div class="compose-field">
+        <label>Subject</label>
+        <input type="text" id="cSubject" placeholder="Subject line"/>
+      </div>
+    </div>
+    <div class="compose-body-wrap">
+      <textarea class="compose-body" id="cBody" placeholder="Write your message here…"></textarea>
+    </div>
+    <div class="compose-footer">
+      <button class="compose-send-btn" id="composeSendBtn">
+        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send
+      </button>
+      <span class="compose-status" id="composeStatus"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let currentFolder = 'inbox';
+let messages = [];
+let selectedId = null;
+let showingReply = false;
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays === 0) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return d.toLocaleDateString('en-GB', { weekday: 'short' });
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function formatDateFull(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function initials(name) {
+  return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+// ── Load messages ──────────────────────────────────────────────────────────
+async function loadMessages() {
+  try {
+    let folder = currentFolder;
+    let data;
+    if (folder === 'starred') {
+      data = await window.LHPT_API.loadMessages('inbox');
+      data = (data || []).filter(m => m.starred);
+    } else {
+      data = await window.LHPT_API.loadMessages(folder) || [];
+    }
+    messages = data;
+    renderList();
+    updateUnreadCount();
+  } catch(e) {
+    document.getElementById('msgListBody').innerHTML = `<div class="msg-empty"><p>Failed to load messages</p></div>`;
+  }
+}
+
+function updateUnreadCount() {
+  const unread = messages.filter(m => !m.read && currentFolder !== 'sent').length;
+  const badge = document.getElementById('inboxCount');
+  const sidebar = document.getElementById('sidebarUnread');
+  if (unread > 0) {
+    badge.textContent = unread; badge.style.display = 'inline';
+    if (sidebar) { sidebar.textContent = unread; sidebar.style.display = 'inline'; }
+  } else {
+    badge.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+  }
+}
+
+// ── Render list ────────────────────────────────────────────────────────────
+function renderList() {
+  const body = document.getElementById('msgListBody');
+  const header = document.getElementById('msgListHeader');
+  const labels = { inbox: 'Inbox', sent: 'Sent', starred: 'Starred' };
+  header.textContent = labels[currentFolder] || 'Inbox';
+
+  if (!messages.length) {
+    body.innerHTML = `<div class="msg-empty">
+      <svg viewBox="0 0 24 24"><path d="M22 12h-6l-2 3H10l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+      <p>No messages here</p>
+    </div>`;
+    return;
+  }
+
+  const isSent = currentFolder === 'sent';
+  body.innerHTML = messages.map(m => {
+    const name = isSent ? (m.to_name || m.to_email) : m.from_name;
+    const date = isSent ? m.sent_at : m.received_at;
+    const preview = (m.body || '').replace(/\n/g, ' ').slice(0, 80);
+    const unreadClass = (!m.read && !isSent) ? ' unread' : '';
+    const activeClass = m.id === selectedId ? ' active' : '';
+    const repliedDot = m.replied_at ? `<span title="Replied" style="color:#4ade80;font-size:0.65rem;margin-left:4px">↩</span>` : '';
+    return `<div class="msg-item${unreadClass}${activeClass}" onclick="selectMessage(${m.id})" data-id="${m.id}">
+      <div class="msg-from">
+        <span class="msg-from-name">${name}${repliedDot}</span>
+        <span class="msg-date">${formatDate(date)}</span>
+      </div>
+      <div class="msg-subject">${m.subject || '(no subject)'}</div>
+      <div class="msg-preview">${preview}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Select message ─────────────────────────────────────────────────────────
+async function selectMessage(id) {
+  selectedId = id;
+  showingReply = false;
+  renderList(); // re-render to highlight active
+
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+
+  const isSent = currentFolder === 'sent';
+
+  // Mark as read
+  if (!m.read && !isSent) {
+    m.read = true;
+    window.LHPT_API.markMessage(id, { read: true }).catch(() => {});
+    updateUnreadCount();
+  }
+
+  // Show view
+  document.getElementById('msgDetailEmpty').style.display = 'none';
+  document.getElementById('msgView').style.display = 'flex';
+
+  const header = document.getElementById('msgViewHeader');
+  const fromName = isSent ? (m.to_name || m.to_email) : m.from_name;
+  const fromEmail = isSent ? m.to_email : m.from_email;
+  const date = isSent ? m.sent_at : m.received_at;
+  const starClass = m.starred ? ' starred' : '';
+
+  header.innerHTML = `
+    <div class="msg-view-subject">${m.subject || '(no subject)'}</div>
+    <div class="msg-view-meta">
+      <div class="msg-avatar">${initials(fromName)}</div>
+      <div class="msg-sender-info">
+        <div class="msg-sender-name">${fromName}</div>
+        <div class="msg-sender-email">${fromEmail}</div>
+      </div>
+      <div class="msg-view-date">${formatDateFull(date)}</div>
+      <div class="msg-view-actions">
+        ${!isSent ? `<button class="msg-action-btn primary" onclick="showReply()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+          Reply
+        </button>` : ''}
+        <button class="msg-action-btn" onclick="forwardMessage(${id})">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 0 4-4h12"/></svg>
+          Forward
+        </button>
+        ${!isSent ? `<button class="msg-star-btn${starClass}" onclick="toggleStar(${id})" title="Star">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>` : ''}
+        <button class="msg-action-btn" onclick="deleteMsg(${id})">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete
+        </button>
+      </div>
+    </div>`;
+
+  document.getElementById('msgViewBody').innerHTML = `<div class="msg-body-text">${escHtml(m.body || '')}</div>`;
+  document.getElementById('replyArea').style.display = 'none';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Reply ──────────────────────────────────────────────────────────────────
+function showReply() {
+  const m = messages.find(x => x.id === selectedId);
+  if (!m) return;
+  showingReply = true;
+  const area = document.getElementById('replyArea');
+  area.style.display = 'block';
+  area.innerHTML = `
+    <div class="reply-area-header">
+      <span class="reply-label">Reply to ${m.from_name}</span>
+    </div>
+    <input class="reply-field" id="replySubject" value="Re: ${m.subject || ''}" placeholder="Subject"/>
+    <textarea class="reply-body" id="replyBody" placeholder="Write your reply…"></textarea>
+    <div class="reply-actions">
+      <button class="reply-send-btn" onclick="sendReply(${m.id}, '${escAttr(m.from_email)}', '${escAttr(m.from_name)}')">
+        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Reply
+      </button>
+      <button class="reply-discard" onclick="document.getElementById('replyArea').style.display='none'">Discard</button>
+    </div>`;
+  document.getElementById('replyBody').focus();
+}
+
+function escAttr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+async function sendReply(replyToId, toEmail, toName) {
+  const subject = document.getElementById('replySubject').value.trim();
+  const body    = document.getElementById('replyBody').value.trim();
+  if (!body) { showToast('Please write a message', 'error'); return; }
+  const btn = document.querySelector('.reply-send-btn');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  try {
+    const res = await window.LHPT_API.sendMessage({ to_email: toEmail, to_name: toName, subject, body, reply_to_id: replyToId });
+    if (res && res.error) throw new Error(res.error);
+    showToast('Reply sent ✓');
+    document.getElementById('replyArea').style.display = 'none';
+    const m = messages.find(x => x.id === replyToId);
+    if (m) m.replied_at = new Date().toISOString();
+    renderList();
+  } catch(e) {
+    showToast(e.message || 'Failed to send', 'error');
+    btn.textContent = 'Send Reply'; btn.disabled = false;
+  }
+}
+
+// ── Forward ────────────────────────────────────────────────────────────────
+function forwardMessage(id) {
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+  openCompose({ subject: `Fwd: ${m.subject || ''}`, body: `\n\n------- Forwarded message -------\nFrom: ${m.from_name} <${m.from_email}>\n\n${m.body}` });
+}
+
+// ── Star ───────────────────────────────────────────────────────────────────
+async function toggleStar(id) {
+  const m = messages.find(x => x.id === id);
+  if (!m) return;
+  m.starred = !m.starred;
+  await window.LHPT_API.markMessage(id, { starred: m.starred }).catch(() => {});
+  selectMessage(id);
+  renderList();
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────────
+async function deleteMsg(id) {
+  if (!confirm('Delete this message?')) return;
+  await window.LHPT_API.deleteMessage(id).catch(() => {});
+  messages = messages.filter(x => x.id !== id);
+  selectedId = null;
+  document.getElementById('msgDetailEmpty').style.display = 'flex';
+  document.getElementById('msgView').style.display = 'none';
+  renderList();
+  showToast('Message deleted');
+}
+
+// ── Compose modal ──────────────────────────────────────────────────────────
+function openCompose(prefill = {}) {
+  document.getElementById('cTo').value = prefill.to || '';
+  document.getElementById('cSubject').value = prefill.subject || '';
+  document.getElementById('cBody').value = prefill.body || '';
+  document.getElementById('composeStatus').textContent = '';
+  document.getElementById('composeModal').classList.add('open');
+  setTimeout(() => document.getElementById('cTo').focus(), 100);
+}
+function closeCompose() {
+  document.getElementById('composeModal').classList.remove('open');
+}
+
+document.getElementById('composeClose').addEventListener('click', closeCompose);
+document.getElementById('composeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCompose(); });
+
+document.getElementById('composeSendBtn').addEventListener('click', async () => {
+  const to      = document.getElementById('cTo').value.trim();
+  const subject = document.getElementById('cSubject').value.trim();
+  const body    = document.getElementById('cBody').value.trim();
+  if (!to || !body) { showToast('Please fill in To and message', 'error'); return; }
+  const btn = document.getElementById('composeSendBtn');
+  const status = document.getElementById('composeStatus');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  try {
+    const res = await window.LHPT_API.sendMessage({ to_email: to, subject: subject || '(no subject)', body });
+    if (res && res.error) throw new Error(res.error);
+    showToast('Message sent ✓');
+    closeCompose();
+    if (currentFolder === 'sent') loadMessages();
+  } catch(e) {
+    status.textContent = e.message || 'Failed to send';
+    status.style.color = '#f87171';
+  } finally {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send`;
+    btn.disabled = false;
+  }
+});
+
+// ── Compose buttons ────────────────────────────────────────────────────────
+document.getElementById('topbarComposeBtn').addEventListener('click', () => openCompose());
+document.getElementById('composeBtnSide').addEventListener('click', () => openCompose());
+
+// ── Folder switching ───────────────────────────────────────────────────────
+['folderInbox','folderSent','folderStarred'].forEach(folderId => {
+  document.getElementById(folderId).addEventListener('click', () => {
+    currentFolder = document.getElementById(folderId).dataset.folder;
+    selectedId = null;
+    document.getElementById('msgDetailEmpty').style.display = 'flex';
+    document.getElementById('msgView').style.display = 'none';
+    document.querySelectorAll('.mail-folder').forEach(f => f.classList.remove('active'));
+    document.getElementById(folderId).classList.add('active');
+    loadMessages();
+  });
+});
+
+// ── Mobile sidebar ─────────────────────────────────────────────────────────
+(function() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const toggle  = document.getElementById('mobileNavToggle');
+  function open()  { sidebar.classList.add('open');  overlay.classList.add('open'); }
+  function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+  if (toggle) toggle.addEventListener('click', open);
+  overlay.addEventListener('click', close);
+})();
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadMessages();
+</script>
+</body>
+</html>

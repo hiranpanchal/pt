@@ -109,10 +109,44 @@
     return !!t && t.startsWith('eyJ') && t.split('.').length === 3;
   }
 
+  // ── Messages ─────────────────────────────────────────────────────────────────
+
+  async function loadMessages(folder = 'inbox') {
+    return apiFetch(`/api/messages?folder=${folder}`) || [];
+  }
+  async function getUnreadCount() {
+    const r = await apiFetch('/api/messages/unread-count');
+    return r ? r.count : 0;
+  }
+  async function markMessage(id, updates) {
+    return apiFetch(`/api/messages/${id}`, { method: 'PATCH', body: JSON.stringify(updates) });
+  }
+  async function deleteMessage(id) {
+    return apiFetch(`/api/messages/${id}`, { method: 'DELETE' });
+  }
+  async function sendMessage(payload) {
+    return apiFetch('/api/messages/send', { method: 'POST', body: JSON.stringify(payload) });
+  }
+
+  // ── Unread badge (auto-loads on every admin page) ───────────────────────────
+  async function refreshUnreadBadge() {
+    const badge = document.getElementById('sidebarUnread');
+    if (!badge) return;
+    try {
+      const count = await getUnreadCount();
+      if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+      else { badge.style.display = 'none'; }
+    } catch {}
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (isLoggedIn()) refreshUnreadBadge();
+  });
+
   // ── Expose ──────────────────────────────────────────────────────────────────
   window.LHPT_API = {
     loadClients, saveClients, saveClient, addClient, deleteClient,
     loadEvents, saveEvents,
+    loadMessages, getUnreadCount, markMessage, deleteMessage, sendMessage,
     login, logout, isLoggedIn, requireLogin
   };
 })();

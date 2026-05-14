@@ -1105,10 +1105,22 @@ if (window.matchMedia('(pointer: fine)').matches) {
         btn.textContent = 'Sending…';
         btn.disabled = true;
         try {
-          const res = await fetch('https://formspree.io/f/mlgoqryq', {
+          const data = Object.fromEntries(new FormData(form));
+          const payload = {
+            name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+            email: data.email,
+            phone: data.phone,
+            goal: data.goal,
+            subject: data.goal ? `New enquiry — ${data.goal}` : 'New contact form message',
+            message: [
+              data.message,
+              data.program ? `Programme interest: ${data.program}` : ''
+            ].filter(Boolean).join('\n')
+          };
+          const res = await fetch('/api/contact', {
             method: 'POST',
-            body: new FormData(form),
-            headers: { 'Accept': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
           });
           if (res.ok) {
             form.style.display = 'none';
