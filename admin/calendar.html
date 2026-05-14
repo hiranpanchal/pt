@@ -886,6 +886,35 @@ button { cursor: pointer; font-family: var(--font-body); }
   cursor: pointer;
 }
 .fc-event:hover { opacity: 0.85; }
+.fc-event-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+}
+.fc-event-client {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+.fc-event-session {
+  font-size: 0.65rem;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+.fc-event-time {
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0.9;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+}
 .fc .fc-timegrid-slot-label {
   font-size: 0.65rem;
   color: var(--on-surface-variant);
@@ -2677,10 +2706,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       const client = cid ? getClient(parseInt(cid)) : null;
       const clientName = client ? `${client.firstName} ${client.lastName}` : '';
       const sessionTitle = info.event.title || '';
+
+      // Format time range e.g. "8–9am"
+      const fmt = (d) => {
+        let h = d.getHours(), m = d.getMinutes();
+        const ampm = h < 12 ? 'am' : 'pm';
+        if (h > 12) h -= 12;
+        if (h === 0) h = 12;
+        return m === 0 ? `${h}${ampm}` : `${h}:${String(m).padStart(2,'0')}${ampm}`;
+      };
+      const start = info.event.start;
+      const end   = info.event.end;
+      const timeStr = start ? (end ? `${fmt(start)}–${fmt(end)}` : fmt(start)) : '';
+
       return {
         html: `<div class="fc-event-inner">
-          ${clientName ? `<div class="fc-event-client">${clientName}</div>` : ''}
-          ${sessionTitle ? `<div class="fc-event-session">${sessionTitle}</div>` : ''}
+          <div style="flex:1;min-width:0;">
+            ${clientName ? `<div class="fc-event-client">${clientName}</div>` : ''}
+            ${sessionTitle && sessionTitle !== clientName ? `<div class="fc-event-session">${sessionTitle}</div>` : ''}
+          </div>
+          ${timeStr ? `<div class="fc-event-time">${timeStr}</div>` : ''}
         </div>`
       };
     },
