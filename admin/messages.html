@@ -437,6 +437,8 @@ button { cursor: pointer; font-family: var(--font-body); }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.error { background: #7f1d1d; color: #fca5a5; }
 
+.msg-back-btn { display: none; }
+
 /* Mobile nav */
 .mobile-nav-toggle {
   display: none; background: none; border: none; color: var(--on-surface); padding: 4px; cursor: pointer;
@@ -461,7 +463,9 @@ button { cursor: pointer; font-family: var(--font-body); }
   .msg-list { width: 100%; border-right: none; }
   .msg-detail { display: none; }
   .msg-list.hidden { display: none; }
-  .msg-detail.mobile-open { display: flex; width: 100%; }
+  .msg-detail.mobile-open { display: flex; width: 100%; flex-direction: column; }
+  .msg-back-btn { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: none; border: none; border-bottom: 1px solid var(--outline-variant); color: var(--primary-container); font-size: 0.875rem; font-weight: 600; cursor: pointer; width: 100%; }
+  .msg-back-btn svg { width: 18px; height: 18px; }
 }
   </style>
 </head>
@@ -573,6 +577,10 @@ button { cursor: pointer; font-family: var(--font-body); }
 
       <!-- Message detail -->
       <div class="msg-detail" id="msgDetail">
+        <button class="msg-back-btn" id="msgBackBtn" onclick="closeMobileDetail()">
+          <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
         <div class="msg-detail-empty" id="msgDetailEmpty">
           <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <p>Select a message to read it</p>
@@ -748,6 +756,12 @@ async function selectMessage(id) {
     updateUnreadCount();
   }
 
+  // Mobile: switch panels
+  if (window.innerWidth <= 720) {
+    document.getElementById('msgList').classList.add('hidden');
+    document.getElementById('msgDetail').classList.add('mobile-open');
+  }
+
   // Show view
   document.getElementById('msgDetailEmpty').style.display = 'none';
   document.getElementById('msgView').style.display = 'flex';
@@ -837,6 +851,13 @@ async function sendReply(replyToId, toEmail, toName) {
     showToast(e.message || 'Failed to send', 'error');
     btn.textContent = 'Send Reply'; btn.disabled = false;
   }
+}
+
+// ── Mobile back button ─────────────────────────────────────────────────────
+function closeMobileDetail() {
+  document.getElementById('msgDetail').classList.remove('mobile-open');
+  document.getElementById('msgList').classList.remove('hidden');
+  selectedId = null;
 }
 
 // ── Forward ────────────────────────────────────────────────────────────────
