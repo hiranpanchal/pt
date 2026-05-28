@@ -445,6 +445,7 @@ app.post('/api/messages/send', requireAuth, async (req, res) => {
     await t.sendMail({
       from: `"Lee Hayward PT" <${process.env.SMTP_USER}>`,
       to: to_name ? `"${to_name}" <${to_email}>` : to_email,
+      bcc: process.env.SMTP_USER,
       subject,
       text: body
     });
