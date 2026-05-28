@@ -922,7 +922,7 @@ button { cursor: pointer; font-family: var(--font-body); }
   text-overflow: ellipsis;
 }
 /* Time labels — top aligned, no border, text sits next to the line */
-.fc .fc-timegrid-slot-label {
+.fc td.fc-timegrid-slot-label {
   font-size: 0.85rem;
   color: #FFFFFF;
   font-weight: 600;
@@ -930,9 +930,16 @@ button { cursor: pointer; font-family: var(--font-body); }
   border: none !important;
 }
 .fc .fc-timegrid-slot-label-frame {
-  padding-top: 4px;
-  text-align: right;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  height: 100%;
+  padding-top: 3px;
   padding-right: 10px;
+}
+.fc .fc-timegrid-slot-label-cushion {
+  padding: 0 !important;
+  line-height: 1;
 }
 .fc .fc-timegrid-axis { background: transparent; border: none !important; }
 /* Wider time column */
