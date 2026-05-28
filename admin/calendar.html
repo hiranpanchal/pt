@@ -925,12 +925,17 @@ button { cursor: pointer; font-family: var(--font-body); }
 .fc .fc-timegrid-slot-label {
   font-size: 0.65rem;
   color: #FFFFFF;
+  background: #FD772A !important;
+  border-color: rgba(0,0,0,0.2) !important;
+  font-weight: 700;
+  text-align: center;
 }
+.fc .fc-timegrid-axis { background: #FD772A !important; border-color: rgba(0,0,0,0.2) !important; }
 /* Hour lines only — hide all 30-min dotted lines */
 .fc .fc-timegrid-slot { border-top: none !important; border-bottom: none !important; }
-.fc .fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-top: 2px solid rgba(255,255,255,0.25) !important; }
+.fc .fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-bottom: 2px solid rgba(255,255,255,0.25) !important; }
+.fc .fc-timegrid-slot-label:not(.fc-timegrid-slot-minor) { border-bottom: 2px solid rgba(0,0,0,0.2) !important; }
 .fc .fc-timegrid-slot-minor { border-top: none !important; border-bottom: none !important; }
-.fc .fc-timegrid-slot-label:not(.fc-timegrid-slot-minor) { border-top: 2px solid rgba(255,255,255,0.25) !important; }
 
 /* Event color classes */
 .event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
