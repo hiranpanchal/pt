@@ -2289,10 +2289,13 @@ document.getElementById('logMeasurementBtn').addEventListener('click', async () 
   const w   = parseFloat(document.getElementById('logWeight').value);
   const bf  = parseFloat(document.getElementById('logBodyFat').value);
   const bmi = parseFloat(document.getElementById('logBmi').value);
+  const logDate = document.getElementById('logDate').value || new Date().toISOString().slice(0,10);
   if (isNaN(w) && isNaN(bf) && isNaN(bmi)) {
     alert('Please enter at least one measurement.');
     return;
   }
+  // Ensure dates array is in sync before appending
+  ensureMeasurementDates(c);
   if (!isNaN(w)) {
     c.weight = w;
     if (!c.weightHistory) c.weightHistory = [];
@@ -2308,6 +2311,8 @@ document.getElementById('logMeasurementBtn').addEventListener('click', async () 
     if (!c.bmiHistory) c.bmiHistory = [];
     c.bmiHistory.push(bmi);
   }
+  // Record the actual date for this entry
+  c.measurementDates.push(logDate);
   try {
     await window.LHPT.saveClients();
     showToast('Measurement saved ✓');
