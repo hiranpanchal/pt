@@ -830,25 +830,20 @@ button { cursor: pointer; font-family: var(--font-body); }
   padding: var(--space-lg);
 }
 
-/* FullCalendar overrides — light theme */
+/* FullCalendar overrides */
 .fc {
-  --fc-border-color: rgba(0, 0, 0, 0.15);
-  --fc-today-bg-color: rgba(253, 119, 42, 0.08);
-  --fc-event-bg-color: #FD772A;
+  --fc-border-color: rgba(255, 255, 255, 0.3);
+  --fc-today-bg-color: rgba(253,119,42, 0.06);
+  --fc-event-bg-color: var(--primary-container);
   --fc-event-border-color: transparent;
-  --fc-button-bg-color: #f0f0f0;
+  --fc-button-bg-color: var(--surface-container-high);
   --fc-button-border-color: transparent;
-  --fc-button-active-bg-color: #FD772A;
+  --fc-button-active-bg-color: var(--primary-container);
   --fc-button-active-border-color: transparent;
-  --fc-button-hover-bg-color: #e0e0e0;
-  --fc-button-text-color: #111;
-  --fc-page-bg-color: #ffffff;
+  --fc-button-hover-bg-color: var(--surface-container-highest);
+  --fc-button-text-color: var(--on-surface);
+  --fc-page-bg-color: transparent;
   font-family: var(--font-body);
-}
-/* White background for the whole calendar area */
-.fc, .fc .fc-view, .fc .fc-timegrid, .fc-theme-standard td, .fc-theme-standard th,
-.fc .fc-scrollgrid, .fc .fc-timegrid-body, .fc .fc-col-header {
-  background: #ffffff !important;
 }
 .fc .fc-toolbar-title {
   font-family: var(--font-display);
@@ -856,7 +851,7 @@ button { cursor: pointer; font-family: var(--font-body); }
   font-weight: 800;
   letter-spacing: -0.01em;
   text-transform: uppercase;
-  color: #111111;
+  color: var(--on-surface);
 }
 .fc .fc-button {
   border-radius: var(--roundness-sm) !important;
@@ -865,11 +860,9 @@ button { cursor: pointer; font-family: var(--font-body); }
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 6px 14px;
-  color: #111 !important;
 }
-.fc .fc-button-primary.fc-button-active { color: #fff !important; }
 .fc .fc-button-primary:not(.fc-button-active):hover {
-  background: #e0e0e0;
+  background: var(--surface-container-highest);
   border-color: transparent;
 }
 .fc th {
@@ -877,21 +870,20 @@ button { cursor: pointer; font-family: var(--font-body); }
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #111111;
+  color: #FFFFFF;
   padding: 8px;
 }
 .fc .fc-daygrid-day-number {
   font-size: 0.8rem;
-  color: #444;
+  color: var(--on-surface-variant);
   padding: 6px;
 }
-.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: #FD772A; font-weight: 700; }
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { color: var(--primary-container); font-weight: 700; }
 .fc-event {
   border-radius: var(--roundness-xs) !important;
   font-size: 0.7rem !important;
   padding: 2px 6px !important;
   cursor: pointer;
-  color: #fff !important;
 }
 .fc-event:hover { opacity: 0.85; }
 .fc-event-inner {
@@ -925,13 +917,15 @@ button { cursor: pointer; font-family: var(--font-body); }
 }
 .fc .fc-timegrid-slot-label {
   font-size: 0.65rem;
-  color: #111111;
+  color: #FFFFFF;
 }
-.fc .fc-timegrid-now-indicator-line { border-color: #FD772A; }
-.fc .fc-timegrid-now-indicator-arrow { border-top-color: #FD772A; border-bottom-color: #FD772A; }
+/* Thicker hour lines, hide 30-min minor lines */
+.fc .fc-timegrid-slot { border-bottom: none; }
+.fc .fc-timegrid-slot.fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-bottom: 2px solid rgba(255,255,255,0.3); }
+.fc .fc-timegrid-slot.fc-timegrid-slot-minor { border-bottom: none; }
 
 /* Event color classes */
-.event-elite    { background: #FD772A !important; border-color: transparent !important; }
+.event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
 .event-online   { background: #C04E00 !important; border-color: transparent !important; }
 .event-group    { background: #2E5B9A !important; border-color: transparent !important; }
 
