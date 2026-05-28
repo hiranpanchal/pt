@@ -1944,7 +1944,7 @@ button { cursor: pointer; font-family: var(--font-body); }
     <div class="book-modal-body">
 
       <!-- Client search -->
-      <div>
+      <div id="clientFieldWrap">
         <label class="bm-label">Client</label>
         <div class="cs-wrap">
           <div class="cs-input-row">
@@ -2714,6 +2714,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('sess-repeat').addEventListener('change', updateConfirmLabel);
 
+  // Hide client field for lunch breaks
+  document.getElementById('sess-type').addEventListener('change', function() {
+    const isLunch = this.value === 'lunch';
+    document.getElementById('clientFieldWrap').style.display = isLunch ? 'none' : '';
+    if (isLunch && window._clearClientSearch) window._clearClientSearch();
+  });
+
   const el = document.getElementById('calendar');
   const isMobile = window.innerWidth < 720;
   calendar = new FullCalendar.Calendar(el, {
@@ -2880,6 +2887,8 @@ function openBookingModal(dateStr) {
     (time !== '00:00') ? `${displayDate} at ${finalTime}` : displayDate;
 
   if (window._clearClientSearch) window._clearClientSearch();
+  document.getElementById('sess-type').value = 'elite';
+  document.getElementById('clientFieldWrap').style.display = '';
   addModal.classList.add('open');
   setTimeout(() => document.getElementById('clientSearchInput').focus(), 50);
 }
@@ -2889,6 +2898,8 @@ document.getElementById('addSessionBtn').addEventListener('click', () => {
   const today = new Date().toISOString().slice(0,10);
   document.getElementById('sess-date').value = today;
   document.getElementById('sess-time').value = '07:00';
+  document.getElementById('sess-type').value = 'elite';
+  document.getElementById('clientFieldWrap').style.display = '';
   if (window._clearClientSearch) window._clearClientSearch();
   addModal.classList.add('open');
   setTimeout(() => document.getElementById('clientSearchInput').focus(), 50);
@@ -2905,8 +2916,9 @@ document.getElementById('confirmSession').addEventListener('click', () => {
   const duration   = parseInt(document.getElementById('sess-duration').value);
   const repeatWeeks= parseInt(document.getElementById('sess-repeat').value) || 0;
   const titleInput = document.getElementById('sess-title').value;
+  const isLunch    = type === 'lunch';
 
-  if (!clientId || !date || !time) {
+  if ((!isLunch && !clientId) || !date || !time) {
     const modal = addModal.querySelector('.book-modal');
     modal.style.animation = 'none';
     modal.offsetHeight; // reflow
@@ -2914,10 +2926,10 @@ document.getElementById('confirmSession').addEventListener('click', () => {
     return;
   }
 
-  const c = getClient(clientId);
-  if (!c) return;
+  const c = isLunch ? null : getClient(clientId);
+  if (!isLunch && !c) return;
 
-  const title = titleInput || `${c.firstName} ${c.lastName}`;
+  const title = titleInput || (isLunch ? 'Lunch Break' : `${c.firstName} ${c.lastName}`);
   const totalSessions = repeatWeeks + 1;
 
   for (let i = 0; i < totalSessions; i++) {
