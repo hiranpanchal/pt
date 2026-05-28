@@ -2102,7 +2102,7 @@ function renderWeightChart(c, range = 'all') {
         },
         y: {
           grid: { color: 'rgba(154,143,144,0.08)' },
-          ticks: { color: 'rgba(154,143,144,0.8)', font: { size: 10 }, callback: v => `${v}kg` }
+          ticks: { color: 'rgba(154,143,144,0.8)', font: { size: 10 }, callback: v => `${parseFloat(v.toFixed(1))}kg` }
         }
       }
     }
