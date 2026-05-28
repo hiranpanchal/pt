@@ -2742,35 +2742,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       openBookingModal(info.dateStr);
     },
 
-    eventContent: (info) => {
+    eventDidMount: (info) => {
       try {
         const cid = info.event.extendedProps && info.event.extendedProps.clientId;
         const client = cid ? getClient(parseInt(cid)) : null;
-        const clientName = client ? `${client.firstName} ${client.lastName}`.trim() : (info.event.title || '');
-        const sessionTitle = info.event.title || '';
-
+        const clientName = client ? `${client.firstName} ${client.lastName}`.trim() : '';
         const fmt = (d) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const start = info.event.start;
-        const end   = info.event.end;
-        const timeStr = start ? (end ? `${fmt(start)} – ${fmt(end)}` : fmt(start)) : '';
-        const showSession = sessionTitle && sessionTitle !== clientName && sessionTitle.trim() !== '-';
-
-        return {
-          html: `<div style="display:block;padding:4px 6px;overflow:hidden;">
-            ${timeStr ? `<div class="lhpt-ev-time">${timeStr}</div>` : ''}
-            ${clientName ? `<div class="lhpt-ev-client">${clientName}</div>` : ''}
-            ${showSession ? `<div class="lhpt-ev-session">${sessionTitle}</div>` : ''}
-          </div>`
-        };
-      } catch(e) {
-        return { html: `<div style="padding:4px 6px;color:#fff;font-size:0.8rem;">${info.event.title || ''}</div>` };
-      }
-    },
-    eventDidMount: (info) => {
-      const cid = info.event.extendedProps && info.event.extendedProps.clientId;
-      const client = cid ? getClient(parseInt(cid)) : null;
-      const clientName = client ? `${client.firstName} ${client.lastName}` : '';
-      info.el.title = [clientName, info.event.title].filter(Boolean).join(' — ');
+        const timeStr = info.event.start && info.event.end
+          ? `${fmt(info.event.start)} – ${fmt(info.event.end)}` : '';
+        const main = info.el.querySelector('.fc-event-main');
+        if (main) {
+          main.innerHTML = `<div style="padding:5px 8px;overflow:hidden;">
+            <div style="font-size:0.75rem;font-weight:700;color:#FFD580;line-height:1.4;white-space:nowrap;">${timeStr}</div>
+            <div style="font-size:0.82rem;font-weight:600;color:#fff;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${clientName || info.event.title || ''}</div>
+          </div>`;
+        }
+        info.el.title = [timeStr, clientName || info.event.title].filter(Boolean).join(' — ');
+      } catch(e) {}
     },
     moreLinkClick: 'week',
   });
