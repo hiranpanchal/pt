@@ -832,10 +832,11 @@ button { cursor: pointer; font-family: var(--font-body); }
 
 /* FullCalendar overrides */
 .fc {
-  --fc-border-color: rgba(255, 255, 255, 0.3);
-  --fc-today-bg-color: rgba(253,119,42, 0.06);
-  --fc-event-bg-color: var(--primary-container);
+  --fc-border-color: rgba(255,255,255,0.15);
+  --fc-today-bg-color: rgba(253,119,42,0.06);
+  --fc-event-bg-color: #FD772A;
   --fc-event-border-color: transparent;
+  --fc-event-text-color: #fff;
   --fc-button-bg-color: var(--surface-container-high);
   --fc-button-border-color: transparent;
   --fc-button-active-bg-color: var(--primary-container);
@@ -921,23 +922,19 @@ button { cursor: pointer; font-family: var(--font-body); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Time labels — top aligned next to hour lines */
-/* Time column width — must target col element */
-.fc .fc-timegrid-axis-chunk col, .fc col.fc-timegrid-axis { width: 90px !important; }
-.fc .fc-scrollgrid-shrink { width: 90px !important; min-width: 90px !important; }
+/* ── Time column ── */
+.fc .fc-timegrid-axis          { background: transparent !important; border: none !important; }
+.fc td.fc-timegrid-slot-label  { border: none !important; vertical-align: top !important; }
+.fc .fc-timegrid-slot-label-frame   { display: block !important; padding: 6px 10px 0 0; text-align: right; }
+.fc .fc-timegrid-slot-label-cushion { font-size: 0.9rem !important; font-weight: 700 !important; color: #fff !important; padding: 0 !important; line-height: 1 !important; }
 
-/* Time labels */
-.fc td.fc-timegrid-slot-label { border: none !important; vertical-align: top !important; width: 90px !important; min-width: 90px !important; }
-.fc .fc-timegrid-slot-label-frame { display: block !important; padding: 5px 12px 0 0; text-align: right; }
-.fc .fc-timegrid-slot-label-cushion { font-size: 0.875rem !important; font-weight: 600 !important; color: #fff !important; padding: 0 !important; line-height: 1 !important; }
-.fc .fc-timegrid-axis { background: transparent !important; border: none !important; }
-
-/* Hour lines — grid only, no line in time column */
+/* ── Grid lines — only in the day columns, not in the time column ── */
 .fc .fc-timegrid-slot { border: none !important; }
-.fc .fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-top: 1px solid rgba(255,255,255,0.18) !important; }
+.fc .fc-timegrid-slot-lane { border-top: 1px solid rgba(255,255,255,0.15) !important; }
 
-/* Events sit inside the hour box */
-.fc .fc-timegrid-event-harness { margin-top: 6px !important; margin-bottom: 4px !important; }
+/* ── Events ── */
+.fc .fc-timegrid-event { overflow: hidden; }
+.fc .fc-timegrid-event-harness { margin: 4px 2px 2px 2px !important; }
 
 /* Event color classes */
 .event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
@@ -2752,7 +2749,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     eventAdd:     (info) => { saveCalendarEvents(); },
     eventChange:  (info) => { saveCalendarEvents(); },
     eventRemove:  (info) => { saveCalendarEvents(); },
-    height:       680,
+    height:       'auto',
+    expandRows:   true,
     events:       events,
 
     /* Click on an existing event → open client panel */
