@@ -1073,6 +1073,7 @@ button { cursor: pointer; font-family: var(--font-body); }
       background: var(--surface-container-low);
       border-radius: var(--roundness-lg);
       padding: var(--space-lg);
+      min-height: calc(100vh - 180px);
     }
 
     /* View legend */
@@ -2728,7 +2729,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     eventChange:  (info) => { saveCalendarEvents(); },
     eventRemove:  (info) => { saveCalendarEvents(); },
     height:       'auto',
-    expandRows:   true,
+    expandRows:   false,
+    slotMinHeight: 60,
     events:       events,
 
     /* Click on an existing event → open client panel */
