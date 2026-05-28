@@ -888,41 +888,39 @@ button { cursor: pointer; font-family: var(--font-body); }
 .fc-event:hover { opacity: 0.85; }
 .fc-event-inner {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 4px;
+  flex-direction: column;
+  gap: 2px;
   width: 100%;
+}
+.fc-event-time {
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: #FFD580;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 .fc-event-client {
   font-weight: 600;
+  font-size: 0.72rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
 }
 .fc-event-session {
-  font-size: 0.65rem;
-  opacity: 0.85;
+  font-size: 0.62rem;
+  opacity: 0.8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
-}
-.fc-event-time {
-  font-weight: 500;
-  white-space: nowrap;
-  opacity: 0.9;
-  flex-shrink: 0;
-  font-size: 0.65rem;
 }
 .fc .fc-timegrid-slot-label {
   font-size: 0.65rem;
   color: #FFFFFF;
 }
-/* Thicker hour lines, hide 30-min minor lines */
-.fc .fc-timegrid-slot { border-bottom: none; }
-.fc .fc-timegrid-slot.fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-bottom: 2px solid rgba(255,255,255,0.3); }
-.fc .fc-timegrid-slot.fc-timegrid-slot-minor { border-bottom: none; }
+/* Hour lines only — hide all 30-min dotted lines */
+.fc .fc-timegrid-slot { border-top: none !important; border-bottom: none !important; }
+.fc .fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-bottom: 2px solid rgba(255,255,255,0.25) !important; }
+.fc .fc-timegrid-slot-minor { border-top: none !important; border-bottom: none !important; }
 
 /* Event color classes */
 .event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
@@ -2720,6 +2718,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     slotDuration: '00:30:00',
     snapDuration:  '00:15:00',
     slotLabelInterval: '01:00:00',
+    slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+    dayHeaderFormat: { weekday: 'long', day: 'numeric', month: 'long' },
     allDaySlot:   false,
     weekends:     true,
     firstDay:     1,   // Monday
@@ -2755,25 +2755,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const clientName = client ? `${client.firstName} ${client.lastName}` : '';
       const sessionTitle = info.event.title || '';
 
-      // Format time range e.g. "8–9am"
-      const fmt = (d) => {
-        let h = d.getHours(), m = d.getMinutes();
-        const ampm = h < 12 ? 'am' : 'pm';
-        if (h > 12) h -= 12;
-        if (h === 0) h = 12;
-        return m === 0 ? `${h}${ampm}` : `${h}:${String(m).padStart(2,'0')}${ampm}`;
-      };
+      // Format time as HH:MM
+      const fmt = (d) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
       const start = info.event.start;
       const end   = info.event.end;
-      const timeStr = start ? (end ? `${fmt(start)}–${fmt(end)}` : fmt(start)) : '';
+      const timeStr = start ? (end ? `${fmt(start)} - ${fmt(end)}` : fmt(start)) : '';
 
       return {
         html: `<div class="fc-event-inner">
-          <div style="flex:1;min-width:0;">
-            ${clientName ? `<div class="fc-event-client">${clientName}</div>` : ''}
-            ${sessionTitle && sessionTitle !== clientName ? `<div class="fc-event-session">${sessionTitle}</div>` : ''}
-          </div>
           ${timeStr ? `<div class="fc-event-time">${timeStr}</div>` : ''}
+          ${clientName ? `<div class="fc-event-client">${clientName}</div>` : ''}
+          ${sessionTitle && sessionTitle !== clientName ? `<div class="fc-event-session">${sessionTitle}</div>` : ''}
         </div>`
       };
     },
