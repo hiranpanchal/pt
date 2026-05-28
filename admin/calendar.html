@@ -939,9 +939,8 @@ button { cursor: pointer; font-family: var(--font-body); }
   padding: 0 !important;
   line-height: 1 !important;
 }
-.fc .fc-timegrid-axis { background: transparent; border: none !important; }
-/* Wider time column */
-.fc .fc-timegrid-axis, .fc .fc-timegrid-slot-label { width: 80px !important; min-width: 80px !important; }
+.fc .fc-timegrid-axis { background: transparent; border: none !important; width: 90px !important; }
+.fc td.fc-timegrid-slot-label { width: 90px !important; }
 /* Hour lines only in the GRID — border-top so line is at top of slot, aligning with time label */
 .fc .fc-timegrid-slot { border-top: none !important; border-bottom: none !important; }
 .fc .fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-top: 1px solid rgba(255,255,255,0.2) !important; }
@@ -2742,7 +2741,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     buttonText:   { month: 'Month', week: 'Week', day: 'Day', today: 'Today' },
     slotMinTime:  '06:00:00',
     slotMaxTime:  '20:00:00',
-    slotDuration: '00:30:00',
+    slotDuration: '01:00:00',
     snapDuration:  '00:15:00',
     slotLabelInterval: '01:00:00',
     slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
