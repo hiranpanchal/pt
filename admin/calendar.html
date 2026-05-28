@@ -876,7 +876,9 @@ button { cursor: pointer; font-family: var(--font-body); }
 }
 .fc .fc-col-header-cell {
   background: #FD772A !important;
-  border-color: rgba(0,0,0,0.2) !important;
+  border-right: 1px solid rgba(0,0,0,0.25) !important;
+  border-left: 1px solid rgba(0,0,0,0.25) !important;
+  border-bottom: none !important;
 }
 .fc .fc-col-header-cell a { color: #fff !important; }
 /* Fix line alignment — use border-top on hour slots instead of border-bottom */
@@ -904,7 +906,7 @@ button { cursor: pointer; font-family: var(--font-body); }
 .fc .fc-timegrid-axis          { background: transparent !important; border: none !important; min-width: 80px !important; }
 .fc td.fc-timegrid-slot-label  { border: none !important; vertical-align: top !important; min-width: 80px !important; width: 80px !important; }
 .fc .fc-timegrid-axis-chunk col, .fc .fc-timegrid-body col:first-child { min-width: 80px !important; width: 80px !important; }
-.fc .fc-timegrid-slot-label-frame   { display: block !important; padding: 0 12px 0 0; text-align: right; margin-top: -2px; }
+.fc .fc-timegrid-slot-label-frame   { display: block !important; padding: 0; text-align: center; margin-top: -8px; }
 .fc .fc-timegrid-slot-label-cushion { font-size: 0.9rem !important; font-weight: 700 !important; color: #fff !important; padding: 0 !important; line-height: 1 !important; }
 
 /* ── Slot height — 65px per hour ── */
