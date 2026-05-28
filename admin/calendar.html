@@ -921,23 +921,28 @@ button { cursor: pointer; font-family: var(--font-body); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Time labels — top aligned, no border, text sits next to the line */
 .fc .fc-timegrid-slot-label {
   font-size: 0.85rem;
   color: #FFFFFF;
   font-weight: 600;
+  vertical-align: top !important;
+  border: none !important;
+}
+.fc .fc-timegrid-slot-label-frame {
+  padding-top: 4px;
   text-align: right;
   padding-right: 10px;
 }
-.fc .fc-timegrid-axis { background: transparent; }
+.fc .fc-timegrid-axis { background: transparent; border: none !important; }
 /* Wider time column */
 .fc .fc-timegrid-axis, .fc .fc-timegrid-slot-label { width: 80px !important; min-width: 80px !important; }
-/* Hour lines only — hide all 30-min dotted lines */
+/* Hour lines only in the GRID — border-top so line is at top of slot, aligning with time label */
 .fc .fc-timegrid-slot { border-top: none !important; border-bottom: none !important; }
-.fc .fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-bottom: 1px solid rgba(255,255,255,0.15) !important; }
-.fc .fc-timegrid-slot-label:not(.fc-timegrid-slot-minor) { border-bottom: 1px solid rgba(255,255,255,0.15) !important; }
+.fc .fc-timegrid-slot-lane:not(.fc-timegrid-slot-minor) { border-top: 1px solid rgba(255,255,255,0.2) !important; }
 .fc .fc-timegrid-slot-minor { border-top: none !important; border-bottom: none !important; }
-/* Push events below the hour line */
-.fc .fc-timegrid-event-harness { margin-top: 4px !important; }
+/* Events sit inside the box — pushed down from the top line */
+.fc .fc-timegrid-event-harness { margin-top: 6px !important; margin-bottom: 4px !important; }
 
 /* Event color classes */
 .event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
