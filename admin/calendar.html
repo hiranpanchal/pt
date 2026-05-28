@@ -832,7 +832,7 @@ button { cursor: pointer; font-family: var(--font-body); }
 
 /* FullCalendar overrides */
 .fc {
-  --fc-border-color: rgba(255,255,255,0.15);
+  --fc-border-color: rgba(255,255,255,0.35);
   --fc-today-bg-color: rgba(253,119,42,0.06);
   --fc-event-bg-color: #FD772A;
   --fc-event-border-color: transparent;
@@ -884,9 +884,9 @@ button { cursor: pointer; font-family: var(--font-body); }
 .fc .fc-col-header-cell a { color: #fff !important; }
 /* Top-left corner cell — transparent to match time column */
 .fc .fc-timegrid-axis { background: transparent !important; border: none !important; min-width: 80px !important; }
-/* Fix line alignment — use border-top on hour slots instead of border-bottom */
-.fc-theme-standard .fc-scrollgrid { border-color: rgba(255,255,255,0.3); }
-.fc .fc-timegrid-col { border-color: rgba(255,255,255,0.3) !important; }
+/* Fix line alignment — vertical column separators match header */
+.fc-theme-standard .fc-scrollgrid { border-color: rgba(255,255,255,0.35); }
+.fc .fc-timegrid-col { border-right: 1px solid rgba(255,255,255,0.35) !important; }
 .fc .fc-daygrid-day-number {
   font-size: 0.8rem;
   color: var(--on-surface-variant);
@@ -915,8 +915,8 @@ button { cursor: pointer; font-family: var(--font-body); }
 /* ── Slot height — 65px per hour ── */
 .fc .fc-timegrid-slot { height: 65px !important; border: none !important; }
 
-/* ── Grid lines — only in the day columns, not in the time column ── */
-.fc .fc-timegrid-slot-lane { border-top: 1px solid rgba(255,255,255,0.15) !important; }
+/* ── Grid lines — horizontal hour lines match vertical separator opacity ── */
+.fc .fc-timegrid-slot-lane { border-top: 1px solid rgba(255,255,255,0.35) !important; }
 
 /* ── Events ── */
 .fc .fc-timegrid-event { overflow: hidden; }
