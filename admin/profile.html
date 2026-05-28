@@ -1367,9 +1367,12 @@ button { cursor: pointer; font-family: var(--font-body); }
                 <div class="dash-card-title">Weight Progression</div>
                 <div class="dash-card-subtitle">kg over time</div>
               </div>
-              <div class="chart-toggle">
-                <button class="chart-toggle-btn active" data-chart="weight" data-range="all">90D</button>
-                <button class="chart-toggle-btn" data-chart="weight" data-range="30">30D</button>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button id="editMeasurementsBtn" style="padding:5px 12px;font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--surface-container-high);color:var(--on-surface-variant);border:1px solid var(--outline-variant);border-radius:6px;cursor:pointer;font-family:var(--font-body)">Edit</button>
+                <div class="chart-toggle">
+                  <button class="chart-toggle-btn active" data-chart="weight" data-range="all">90D</button>
+                  <button class="chart-toggle-btn" data-chart="weight" data-range="30">30D</button>
+                </div>
               </div>
             </div>
             <div class="weight-chart-wrap"><canvas id="weightChart"></canvas></div>
@@ -1476,6 +1479,31 @@ button { cursor: pointer; font-family: var(--font-body); }
     <div class="modal-actions">
       <button class="modal-btn modal-btn-secondary" id="cancelEdit">Cancel</button>
       <button class="modal-btn modal-btn-primary" id="confirmEdit">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MEASUREMENTS MODAL -->
+<div class="modal-backdrop" id="editMeasurementsModal">
+  <div class="modal" style="max-width:600px;width:95%;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-title">Edit Measurements</div>
+    <div style="font-size:0.75rem;color:var(--on-surface-variant);margin:-8px 0 18px">Update any historical weight, body fat or BMI reading. Changes update the charts immediately.</div>
+    <div style="overflow-y:auto;flex:1;margin:0 -4px;padding:0 4px">
+      <table style="width:100%;border-collapse:collapse;font-size:0.8rem" id="measurementsTable">
+        <thead>
+          <tr style="border-bottom:1px solid var(--outline-variant)">
+            <th style="text-align:left;padding:6px 8px;font-size:0.65rem;letter-spacing:0.1em;color:var(--on-surface-variant);font-weight:700;text-transform:uppercase">Month</th>
+            <th style="text-align:left;padding:6px 8px;font-size:0.65rem;letter-spacing:0.1em;color:var(--on-surface-variant);font-weight:700;text-transform:uppercase">Weight (kg)</th>
+            <th style="text-align:left;padding:6px 8px;font-size:0.65rem;letter-spacing:0.1em;color:var(--on-surface-variant);font-weight:700;text-transform:uppercase">Body Fat (%)</th>
+            <th style="text-align:left;padding:6px 8px;font-size:0.65rem;letter-spacing:0.1em;color:var(--on-surface-variant);font-weight:700;text-transform:uppercase">BMI</th>
+          </tr>
+        </thead>
+        <tbody id="measurementsTableBody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--outline-variant)">
+      <button class="modal-btn modal-btn-secondary" id="cancelMeasurements">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="saveMeasurements">Save Changes</button>
     </div>
   </div>
 </div>
@@ -2363,6 +2391,68 @@ document.getElementById('confirmEdit').addEventListener('click', async () => {
   // Refresh selector name
   const opt = document.querySelector(`#clientSelector option[value="${c.id}"]`);
   if (opt) opt.textContent = `${c.firstName} ${c.lastName}`;
+});
+
+/* === EDIT MEASUREMENTS MODAL === */
+const editMeasurementsModal = document.getElementById('editMeasurementsModal');
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function openEditMeasurements() {
+  const c = getClient(currentClientId);
+  if (!c) return;
+  const len = Math.max(
+    (c.weightHistory||[]).length,
+    (c.bodyFatHistory||[]).length,
+    (c.bmiHistory||[]).length
+  );
+  const now = new Date();
+  const tbody = document.getElementById('measurementsTableBody');
+  tbody.innerHTML = Array.from({length: len}, (_, i) => {
+    const monthIdx = (now.getMonth() - len + 1 + i + 120) % 12;
+    const w   = (c.weightHistory||[])[i]   ?? '';
+    const bf  = (c.bodyFatHistory||[])[i]  ?? '';
+    const bmi = (c.bmiHistory||[])[i]      ?? '';
+    const rowStyle = i % 2 === 0 ? 'background:rgba(255,255,255,0.02)' : '';
+    const inp = (id, val) => `<input data-idx="${i}" data-field="${id}" type="number" step="0.1" value="${val}"
+      style="width:80px;background:var(--surface-container);border:1px solid var(--outline-variant);border-radius:4px;
+      padding:5px 8px;font-family:var(--font-body);font-size:0.8rem;color:var(--on-surface);outline:none;
+      box-sizing:border-box" />`;
+    return `<tr style="${rowStyle}">
+      <td style="padding:6px 8px;font-weight:600;color:var(--on-surface-variant)">${MONTHS[monthIdx]}</td>
+      <td style="padding:6px 8px">${inp('weight', w)}</td>
+      <td style="padding:6px 8px">${inp('bodyFat', bf)}</td>
+      <td style="padding:6px 8px">${inp('bmi', bmi)}</td>
+    </tr>`;
+  }).join('');
+  editMeasurementsModal.classList.add('open');
+}
+
+document.getElementById('editMeasurementsBtn').addEventListener('click', openEditMeasurements);
+document.getElementById('cancelMeasurements').addEventListener('click', () => editMeasurementsModal.classList.remove('open'));
+editMeasurementsModal.addEventListener('click', e => { if (e.target === editMeasurementsModal) editMeasurementsModal.classList.remove('open'); });
+
+document.getElementById('saveMeasurements').addEventListener('click', async () => {
+  const c = getClient(currentClientId);
+  if (!c) return;
+  const inputs = document.querySelectorAll('#measurementsTableBody input');
+  inputs.forEach(inp => {
+    const idx   = parseInt(inp.dataset.idx);
+    const field = inp.dataset.field;
+    const val   = parseFloat(inp.value);
+    if (isNaN(val)) return;
+    if (field === 'weight')  { if (!c.weightHistory)    c.weightHistory    = []; c.weightHistory[idx]    = val; }
+    if (field === 'bodyFat') { if (!c.bodyFatHistory)   c.bodyFatHistory   = []; c.bodyFatHistory[idx]   = val; }
+    if (field === 'bmi')     { if (!c.bmiHistory)       c.bmiHistory       = []; c.bmiHistory[idx]       = val; }
+  });
+  // Update current weight to last entry
+  const wh = c.weightHistory;
+  if (wh && wh.length) c.weight = wh[wh.length - 1];
+  await window.LHPT.saveClients();
+  renderWeightChart(c);
+  renderBfChart(c);
+  renderBmiChart(c);
+  editMeasurementsModal.classList.remove('open');
+  showToast('Measurements saved ✓');
 });
 
 /* === SEND UPDATE MODAL === */
