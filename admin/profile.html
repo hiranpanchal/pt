@@ -2434,11 +2434,14 @@ function openEditMeasurements() {
     const dateInp = `<input data-idx="${i}" data-field="date" type="date" value="${date}"
       style="background:var(--surface-container);border:1px solid var(--outline-variant);border-radius:4px;
       padding:5px 8px;font-family:var(--font-body);font-size:0.8rem;color:var(--on-surface);outline:none;box-sizing:border-box;color-scheme:dark"/>`;
-    return `<tr style="${rowStyle}">
+    return `<tr data-row="${i}" style="${rowStyle}">
       <td style="padding:6px 8px">${dateInp}</td>
       <td style="padding:6px 8px">${numInp('weight', w)}</td>
       <td style="padding:6px 8px">${numInp('bodyFat', bf)}</td>
       <td style="padding:6px 8px">${numInp('bmi', bmi)}</td>
+      <td style="padding:6px 4px;text-align:center">
+        <button onclick="this.closest('tr').remove()" style="background:none;border:none;cursor:pointer;color:var(--on-surface-variant);font-size:1rem;line-height:1;padding:4px 6px;border-radius:4px;transition:color 0.15s" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--on-surface-variant)'">✕</button>
+      </td>
     </tr>`;
   }).join('');
   editMeasurementsModal.classList.add('open');
@@ -2452,27 +2455,21 @@ document.getElementById('saveMeasurements').addEventListener('click', async () =
   const c = getClient(currentClientId);
   if (!c) return;
   ensureMeasurementDates(c);
-  document.querySelectorAll('#measurementsTableBody input').forEach(inp => {
-    const idx   = parseInt(inp.dataset.idx);
-    const field = inp.dataset.field;
-    if (field === 'date') {
-      c.measurementDates[idx] = inp.value;
-    } else {
-      const val = parseFloat(inp.value);
-      if (isNaN(val)) return;
-      if (field === 'weight')  { if (!c.weightHistory)  c.weightHistory  = []; c.weightHistory[idx]  = val; }
-      if (field === 'bodyFat') { if (!c.bodyFatHistory) c.bodyFatHistory = []; c.bodyFatHistory[idx] = val; }
-      if (field === 'bmi')     { if (!c.bmiHistory)     c.bmiHistory     = []; c.bmiHistory[idx]     = val; }
-    }
+  // Collect data from remaining (non-deleted) rows
+  const remainingRows = document.querySelectorAll('#measurementsTableBody tr');
+  const rowData = {};
+  remainingRows.forEach(tr => {
+    const rowIdx = tr.dataset.row;
+    rowData[rowIdx] = { date: '', w: null, bf: null, bmi: null };
+    tr.querySelectorAll('input').forEach(inp => {
+      if (inp.dataset.field === 'date') rowData[rowIdx].date = inp.value;
+      if (inp.dataset.field === 'weight')  rowData[rowIdx].w   = parseFloat(inp.value);
+      if (inp.dataset.field === 'bodyFat') rowData[rowIdx].bf  = parseFloat(inp.value);
+      if (inp.dataset.field === 'bmi')     rowData[rowIdx].bmi = parseFloat(inp.value);
+    });
   });
   // Sort all arrays by date ascending
-  const len = c.measurementDates.length;
-  const rows = Array.from({length: len}, (_, i) => ({
-    date: c.measurementDates[i],
-    w:    (c.weightHistory||[])[i],
-    bf:   (c.bodyFatHistory||[])[i],
-    bmi:  (c.bmiHistory||[])[i],
-  })).sort((a, b) => a.date.localeCompare(b.date));
+  const rows = Object.values(rowData).sort((a, b) => a.date.localeCompare(b.date));
   c.measurementDates = rows.map(r => r.date);
   c.weightHistory    = rows.map(r => r.w);
   c.bodyFatHistory   = rows.map(r => r.bf);
