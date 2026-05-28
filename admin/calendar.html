@@ -2815,21 +2815,40 @@ document.addEventListener('DOMContentLoaded', async () => {
    ============================================================ */
 document.getElementById('todayBtn').addEventListener('click', () => calendar.today());
 
-// Fullscreen toggle
+// Fullscreen toggle — CSS-based so it works on iPad/Safari
+let isFakeFullscreen = false;
+function enterFakeFullscreen() {
+  isFakeFullscreen = true;
+  document.querySelector('.sidebar').style.display = 'none';
+  document.querySelector('.admin-main').style.marginLeft = '0';
+  document.querySelector('.admin-topbar').style.display = 'none';
+  const calWrap = document.getElementById('calendarEl').parentElement;
+  calWrap.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--surface-container-lowest);padding:12px;overflow:auto;';
+  document.getElementById('fsIconExpand').style.display   = 'none';
+  document.getElementById('fsIconCompress').style.display = '';
+  document.getElementById('fsLabel').textContent          = 'Exit';
+  // Move button into the calendar wrapper so it stays visible
+  calWrap.prepend(document.getElementById('fullscreenBtn'));
+  document.getElementById('fullscreenBtn').style.cssText = 'position:absolute;top:10px;right:10px;z-index:10000;';
+  if (calendar) { calendar.setOption('height', window.innerHeight - 60); calendar.updateSize(); }
+}
+function exitFakeFullscreen() {
+  isFakeFullscreen = false;
+  document.querySelector('.sidebar').style.display = '';
+  document.querySelector('.admin-main').style.marginLeft = '';
+  document.querySelector('.admin-topbar').style.display = '';
+  const calWrap = document.getElementById('calendarEl').parentElement;
+  calWrap.style.cssText = '';
+  document.getElementById('fsIconExpand').style.display   = '';
+  document.getElementById('fsIconCompress').style.display = 'none';
+  document.getElementById('fsLabel').textContent          = 'Fullscreen';
+  // Move button back to topbar
+  document.getElementById('fullscreenBtn').style.cssText = '';
+  document.querySelector('.admin-topbar-right').prepend(document.getElementById('fullscreenBtn'));
+  if (calendar) { calendar.setOption('height', 680); calendar.updateSize(); }
+}
 document.getElementById('fullscreenBtn').addEventListener('click', () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-});
-document.addEventListener('fullscreenchange', () => {
-  const isFs = !!document.fullscreenElement;
-  document.getElementById('fsIconExpand').style.display   = isFs ? 'none'         : '';
-  document.getElementById('fsIconCompress').style.display = isFs ? ''             : 'none';
-  document.getElementById('fsLabel').textContent          = isFs ? 'Exit'         : 'Fullscreen';
-  // Recalculate calendar height to fill screen
-  if (calendar) calendar.updateSize();
+  isFakeFullscreen ? exitFakeFullscreen() : enterFakeFullscreen();
 });
 
 /* ============================================================
