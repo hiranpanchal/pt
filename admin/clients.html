@@ -1585,7 +1585,7 @@ async function processPastSessions() {
 
   let changed = false;
   CLIENTS.forEach(c => {
-    if (c.paymentPlan !== 'block') return;
+    if (c.paymentPlan !== 'block' && c.paymentPlan !== 'block10') return;
     if (!Array.isArray(c.countedEventIds)) c.countedEventIds = [];
 
     const uncounted = events.filter(ev => {
@@ -1765,7 +1765,7 @@ window.LHPT = {
     }
 
     tbody.innerHTML = clients.map(c => {
-      const isBlock = c.paymentPlan === 'block';
+      const isBlock = c.paymentPlan === 'block' || c.paymentPlan === 'block10';
       const rem = c.sessionsRemaining ?? 0;
       let payBadge = '';
       if (isBlock) {
@@ -1880,7 +1880,7 @@ window.LHPT = {
 
   // Toggle sessions field based on payment plan
   document.getElementById('nc-payment-plan').addEventListener('change', function() {
-    document.getElementById('nc-sessions-group').style.display = this.value === 'block' ? '' : 'none';
+    document.getElementById('nc-sessions-group').style.display = (this.value === 'block' || this.value === 'block10') ? '' : 'none';
   });
   document.getElementById('cancelAddClient').addEventListener('click', closeAddModal);
   addModal.addEventListener('click', (e) => {
@@ -1897,8 +1897,8 @@ window.LHPT = {
     const height  = parseInt(document.getElementById('nc-height').value)     || null;
     const bmi     = (weight && height) ? parseFloat((weight / ((height/100) ** 2)).toFixed(1)) : null;
     const paymentPlan = document.getElementById('nc-payment-plan').value;
-    const sessionsRemaining = paymentPlan === 'block'
-      ? (parseInt(document.getElementById('nc-sessions').value) || 5)
+    const sessionsRemaining = (paymentPlan === 'block' || paymentPlan === 'block10')
+      ? (parseInt(document.getElementById('nc-sessions').value) || (paymentPlan === 'block10' ? 10 : 5))
       : null;
 
     const submitBtn = document.getElementById('addClientSubmit');
@@ -2018,9 +2018,9 @@ window.LHPT = {
     document.getElementById('nc-status').value  = c.status    || 'active';
     document.getElementById('nc-payment-plan').value = c.paymentPlan || 'payg';
     const sessGroup = document.getElementById('nc-sessions-group');
-    if (c.paymentPlan === 'block') {
+    if (c.paymentPlan === 'block' || c.paymentPlan === 'block10') {
       sessGroup.style.display = '';
-      document.getElementById('nc-sessions').value = c.sessionsRemaining ?? 5;
+      document.getElementById('nc-sessions').value = c.sessionsRemaining ?? (c.paymentPlan === 'block10' ? 10 : 5);
     } else {
       sessGroup.style.display = 'none';
     }
