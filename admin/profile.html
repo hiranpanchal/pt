@@ -1977,7 +1977,7 @@ function renderProfile(c) {
             <span class="first">${c.firstName} </span><span class="last">${c.lastName}</span>
           </div>
           <div class="profile-tags">
-            <span class="profile-tag active"><span class="dot"></span>Active Phase: ${c.phase}</span>
+            <span class="profile-tag active"><span class="dot"></span>${statusLabel(c.status)}</span>
             <span class="profile-tag">Joined: ${formatDate(c.joined)}</span>
           </div>
         </div>
