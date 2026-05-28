@@ -933,6 +933,7 @@ button { cursor: pointer; font-family: var(--font-body); }
 .event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
 .event-online   { background: #C04E00 !important; border-color: transparent !important; }
 .event-group    { background: #2E5B9A !important; border-color: transparent !important; }
+.event-lunch    { background: #3A6B4A !important; border-color: transparent !important; }
 
 /* Client detail panel */
 .client-panel {
@@ -1082,6 +1083,7 @@ button { cursor: pointer; font-family: var(--font-body); }
     .event-elite   { background-color: #FD772A !important; }
     .event-online  { background-color: #7C3A00 !important; }
     .event-group   { background-color: #1E3A6E !important; }
+    .event-lunch   { background-color: #3A6B4A !important; }
 
     /* Calendar wrap */
     .calendar-container {
@@ -1317,6 +1319,7 @@ button { cursor: pointer; font-family: var(--font-body); }
     .session-type-elite  { background: rgba(253,119,42,0.15); color: #FF6B6B; }
     .session-type-online { background: rgba(124,58,0,0.2); color: var(--secondary); }
     .session-type-group  { background: rgba(30,58,110,0.2); color: #7EB5FF; }
+    .session-type-lunch  { background: rgba(58,107,74,0.2); color: #6DBF8A; }
     .session-title-panel {
       font-family: var(--font-display);
       font-size: 0.9375rem;
@@ -1897,6 +1900,7 @@ button { cursor: pointer; font-family: var(--font-body); }
           <span class="legend-item"><span class="legend-dot" style="background:#FD772A"></span>1-on-1 Elite</span>
           <span class="legend-item"><span class="legend-dot" style="background:#7C3A00"></span>Online Coaching</span>
           <span class="legend-item"><span class="legend-dot" style="background:#1E3A6E"></span>Group Session</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#3A6B4A"></span>Lunch Break</span>
         </div>
         <div class="cal-hint">
           <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1982,6 +1986,7 @@ button { cursor: pointer; font-family: var(--font-body); }
               <option value="elite">1-on-1 Elite</option>
               <option value="online">Online Coaching</option>
               <option value="group">Group Session</option>
+              <option value="lunch">Lunch Break</option>
             </select>
             <svg class="bm-select-arrow" viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -2382,6 +2387,7 @@ const typeMap = {
   elite:  { label: '1-on-1 Elite',    cls: 'session-type-elite'  },
   online: { label: 'Online Coaching', cls: 'session-type-online' },
   group:  { label: 'Group Session',   cls: 'session-type-group'  },
+  lunch:  { label: 'Lunch Break',     cls: 'session-type-lunch'  },
 };
 
 /* ── VIEW MODE ─────────────────────────────── */
@@ -2525,6 +2531,7 @@ function renderPanelEdit(evt) {
               <option value="elite"  ${type==='elite' ?'selected':''}>1-on-1 Elite</option>
               <option value="online" ${type==='online'?'selected':''}>Online</option>
               <option value="group"  ${type==='group' ?'selected':''}>Group</option>
+              <option value="lunch"  ${type==='lunch' ?'selected':''}>Lunch Break</option>
             </select>
             <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
