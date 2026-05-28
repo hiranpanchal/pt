@@ -1861,7 +1861,9 @@ function renderPaymentCard(c) {
   const card = document.getElementById('paymentCard');
   if (!card) return;
   if (!c.paymentPlan) c.paymentPlan = 'payg'; // default for older clients
-  const isBlock = c.paymentPlan === 'block';
+  const isBlock = c.paymentPlan === 'block' || c.paymentPlan === 'block10';
+  const totalSessions = c.paymentPlan === 'block10' ? 10 : 5;
+  const blockPrice    = c.paymentPlan === 'block10' ? '£300' : '£150';
   const rem = c.sessionsRemaining ?? 0;
 
   if (!isBlock) {
@@ -1887,13 +1889,13 @@ function renderPaymentCard(c) {
 
   // Block Booking
   const dotColor = rem === 0 ? '#f87171' : rem === 1 ? '#fb923c' : '#4ade80';
-  const dots = Array.from({length:5}, (_,i) =>
+  const dots = Array.from({length:totalSessions}, (_,i) =>
     `<div style="width:26px;height:26px;border-radius:50%;background:${i < rem ? dotColor : 'var(--surface-container)'};border:2px solid ${i < rem ? dotColor : 'var(--surface-container-high)'}"></div>`
   ).join('');
 
   const statusText = rem === 0 ? 'Payment due — no sessions remaining'
     : rem === 1 ? 'Last session — payment due soon'
-    : `${rem} of 5 sessions remaining`;
+    : `${rem} of ${totalSessions} sessions remaining`;
   const statusCol = rem === 0 ? '#f87171' : rem === 1 ? '#fb923c' : '#4ade80';
 
   const lastPaid = c.lastPaymentDate ? new Date(c.lastPaymentDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
@@ -1906,7 +1908,7 @@ function renderPaymentCard(c) {
     <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px">
       <div>
         <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:4px">Block Price</div>
-        <div style="font-size:1.4rem;font-weight:800;color:var(--on-surface)">£150<span style="font-size:0.85rem;font-weight:400;color:var(--on-surface-variant)"> / 5 sessions</span></div>
+        <div style="font-size:1.4rem;font-weight:800;color:var(--on-surface)">${blockPrice}<span style="font-size:0.85rem;font-weight:400;color:var(--on-surface-variant)"> / ${totalSessions} sessions</span></div>
       </div>
       <div style="text-align:right">
         <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:4px">Last Payment</div>
@@ -1914,13 +1916,13 @@ function renderPaymentCard(c) {
       </div>
     </div>
     <div style="font-size:0.75rem;font-weight:600;color:${statusCol};margin-bottom:10px">${statusText}</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">${dots}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">${dots}</div>
     <button id="recordPaymentBtn" style="width:100%;padding:10px;background:var(--primary-container);color:#fff;border:none;border-radius:8px;font-family:var(--font-body);font-size:0.8rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer">
-      Record Payment (£150)
+      Record Payment (${blockPrice})
     </button>`;
 
   document.getElementById('recordPaymentBtn').addEventListener('click', () => {
-    c.sessionsRemaining = 5;
+    c.sessionsRemaining = totalSessions;
     c.lastPaymentDate = new Date().toISOString().split('T')[0];
     c.countedEventIds = c.countedEventIds || [];
     window.LHPT.saveClients();
@@ -2346,7 +2348,8 @@ document.getElementById('confirmEdit').addEventListener('click', async () => {
   c.goal         = document.getElementById('editGoal').value.trim()       || c.goal;
   c.targetWeight  = parseFloat(document.getElementById('editTargetWeight').value) || c.targetWeight;
   c.paymentPlan   = document.getElementById('editPaymentPlan').value;
-  if (c.paymentPlan === 'block' && c.sessionsRemaining == null) c.sessionsRemaining = 5;
+  if (c.paymentPlan === 'block'   && c.sessionsRemaining == null) c.sessionsRemaining = 5;
+  if (c.paymentPlan === 'block10' && c.sessionsRemaining == null) c.sessionsRemaining = 10;
   if (c.paymentPlan === 'payg') c.sessionsRemaining = null;
   if (!Array.isArray(c.countedEventIds)) c.countedEventIds = [];
   try {
