@@ -2558,12 +2558,46 @@ function showToast(msg, type = 'success') {
   toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 
+/* === AUTO-DEDUCT SESSIONS FROM PAST CALENDAR EVENTS === */
+async function processPastSessions() {
+  const now = new Date();
+  let events = [];
+  try { events = await window.LHPT_API.loadEvents(); } catch(e) { return; }
+  if (!events || !events.length) return;
+
+  let changed = false;
+  CLIENTS.forEach(c => {
+    if (c.paymentPlan !== 'block' && c.paymentPlan !== 'block10') return;
+    if (!Array.isArray(c.countedEventIds)) c.countedEventIds = [];
+    const defaultSessions = c.paymentPlan === 'block10' ? 10 : 5;
+
+    const uncounted = events.filter(ev => {
+      const start = new Date(ev.start);
+      return ev.extendedProps && ev.extendedProps.clientId === c.id
+        && start < now
+        && !c.countedEventIds.includes(ev.id)
+        && ev.extendedProps.type !== 'lunch'; // don't count lunch breaks
+    });
+
+    if (uncounted.length > 0) {
+      uncounted.forEach(ev => {
+        c.sessionsRemaining = Math.max(0, (c.sessionsRemaining ?? defaultSessions) - 1);
+        c.countedEventIds.push(ev.id);
+      });
+      changed = true;
+    }
+  });
+
+  if (changed) await saveClients();
+}
+
 /* === INIT === */
 async function init() {
   if (!window.LHPT_API || !window.LHPT_API.isLoggedIn()) {
     window.location.href = 'login.html'; return;
   }
   await loadClients();
+  await processPastSessions();
   const client = getClient(currentClientId) || CLIENTS[0];
   if (client) renderProfile(client);
 }

@@ -1596,8 +1596,9 @@ async function processPastSessions() {
     });
 
     if (uncounted.length > 0) {
+      const defaultSessions = c.paymentPlan === 'block10' ? 10 : 5;
       uncounted.forEach(ev => {
-        c.sessionsRemaining = Math.max(0, (c.sessionsRemaining ?? 5) - 1);
+        c.sessionsRemaining = Math.max(0, (c.sessionsRemaining ?? defaultSessions) - 1);
         c.countedEventIds.push(ev.id);
       });
       changed = true;
