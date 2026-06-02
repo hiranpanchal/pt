@@ -1203,6 +1203,9 @@ button { cursor: pointer; font-family: var(--font-body); }
         <!-- populated by JS -->
       </div>
 
+      <!-- Low Session Alerts -->
+      <div id="lowSessionAlerts"></div>
+
       <!-- Client Table -->
       <div class="client-table-wrap">
         <div class="client-table-header">
@@ -1707,6 +1710,36 @@ window.LHPT = {
   let currentFilter = 'all';
   let searchQuery = '';
 
+  /* === LOW SESSION ALERTS === */
+  function renderLowSessionAlerts() {
+    const alerts = CLIENTS.filter(c =>
+      (c.paymentPlan === 'block' || c.paymentPlan === 'block10') &&
+      c.sessionsRemaining !== null && c.sessionsRemaining !== undefined &&
+      c.sessionsRemaining <= 1
+    );
+    const el = document.getElementById('lowSessionAlerts');
+    if (!alerts.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+      <div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+        <div style="font-size:0.65rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#f87171;margin-bottom:10px">
+          ⚠ Sessions Running Low
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${alerts.map(c => {
+            const label = c.sessionsRemaining === 0 ? 'No sessions left — payment due' : '1 session remaining';
+            const col   = c.sessionsRemaining === 0 ? '#f87171' : '#fb923c';
+            return `<div onclick="window.LHPT.goToProfile(${c.id})" style="cursor:pointer;display:flex;align-items:center;gap:8px;background:var(--surface-container);border:1px solid ${col}44;border-radius:8px;padding:8px 12px">
+              <div style="width:30px;height:30px;border-radius:6px;background:var(--primary-container);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;color:#fff">${c.firstName[0]}${c.lastName[0]}</div>
+              <div>
+                <div style="font-size:0.8rem;font-weight:700;color:var(--on-surface)">${c.firstName} ${c.lastName}</div>
+                <div style="font-size:0.65rem;color:${col};font-weight:600">${label}</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
   /* === RENDER KPIs === */
   function renderKPIs() {
     const kpis = getKPIs();
@@ -2074,6 +2107,7 @@ window.LHPT = {
       showToast('Error loading data: ' + e.message, 'error');
     }
     renderKPIs();
+    renderLowSessionAlerts();
     renderTable();
   }
   init();

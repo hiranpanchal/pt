@@ -162,6 +162,14 @@ async function initDb() {
       status TEXT DEFAULT 'sent',
       sent_at TIMESTAMPTZ DEFAULT NOW()
     );
+    CREATE TABLE IF NOT EXISTS client_password_resets (
+      id SERIAL PRIMARY KEY,
+      client_id INTEGER NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      used BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
 
   // Seed demo clients if table is empty
@@ -620,10 +628,167 @@ cron.schedule('0 8 * * *', async () => {
 }, { timezone: 'Europe/London' });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CATCH-ALL — serve index.html for non-API routes
+// CLIENT PORTAL AUTH
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const crypto = require('crypto');
+
+function requireClientAuth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorised' });
+  try {
+    const payload = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+    if (payload.role !== 'client') return res.status(403).json({ error: 'Forbidden' });
+    req.clientId = payload.clientId;
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+// POST /api/client/login
+app.post('/api/client/login', loginRateLimit, async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Missing credentials' });
+  try {
+    const { rows } = await pool.query(
+      "SELECT data FROM clients WHERE lower(data->>'email') = lower($1)", [email]
+    );
+    if (!rows.length) return res.status(401).json({ error: 'Invalid email or password' });
+    const client = rows[0].data;
+    if (!client.clientPassword) return res.status(401).json({ error: 'No portal access set up yet. Please contact Lee.' });
+    const valid = await bcrypt.compare(password, client.clientPassword);
+    if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
+    const token = jwt.sign({ clientId: client.id, role: 'client' }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, clientId: client.id });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/client/forgot-password
+app.post('/api/client/forgot-password', loginRateLimit, async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Missing email' });
+  // Always respond OK to prevent email enumeration
+  res.json({ ok: true, message: 'If that email is registered, a reset link has been sent.' });
+  try {
+    const { rows } = await pool.query(
+      "SELECT data FROM clients WHERE lower(data->>'email') = lower($1)", [email]
+    );
+    if (!rows.length) return;
+    const client = rows[0].data;
+    if (!client.clientPassword) return; // no portal access, don't send reset
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await pool.query(
+      'INSERT INTO client_password_resets (client_id, token, expires_at) VALUES ($1,$2,$3)',
+      [client.id, token, expires]
+    );
+    const t = getTransporter();
+    if (!t) return;
+    const resetUrl = `https://www.leehaywardpt.co.uk/client-reset-password.html?token=${token}`;
+    await t.sendMail({
+      from: `"Lee Hayward PT" <${process.env.SMTP_USER}>`,
+      to: client.email,
+      subject: 'Reset your Lee Hayward PT portal password',
+      text: `Hi ${client.firstName},\n\nClick the link below to reset your portal password. This link expires in 1 hour.\n\n${resetUrl}\n\nIf you didn't request this, please ignore this email.\n\n– Lee Hayward PT`
+    });
+  } catch (e) {
+    console.error('Forgot password error:', e);
+  }
+});
+
+// POST /api/client/reset-password
+app.post('/api/client/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ error: 'Missing token or password' });
+  if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM client_password_resets WHERE token=$1 AND used=FALSE AND expires_at > NOW()',
+      [token]
+    );
+    if (!rows.length) return res.status(400).json({ error: 'Reset link is invalid or has expired' });
+    const reset = rows[0];
+    const hashed = await bcrypt.hash(password, 12);
+    // Update client password
+    const existing = await pool.query('SELECT data FROM clients WHERE id=$1', [reset.client_id]);
+    if (!existing.rows.length) return res.status(404).json({ error: 'Client not found' });
+    const merged = { ...existing.rows[0].data, clientPassword: hashed };
+    await pool.query('UPDATE clients SET data=$1, updated_at=NOW() WHERE id=$2', [merged, reset.client_id]);
+    // Mark token used
+    await pool.query('UPDATE client_password_resets SET used=TRUE WHERE id=$1', [reset.id]);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/client/me — returns client's own safe data
+app.get('/api/client/me', requireClientAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT data FROM clients WHERE id=$1', [req.clientId]);
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    const c = rows[0].data;
+    // Strip sensitive admin-only fields
+    const { clientPassword, countedEventIds, ...safe } = c;
+    res.json(safe);
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/client/sessions — returns upcoming sessions for this client
+app.get('/api/client/sessions', requireClientAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT data FROM events');
+    const now = new Date();
+    const sessions = rows
+      .map(r => r.data)
+      .filter(ev => ev.extendedProps?.clientId === req.clientId && new Date(ev.start) >= now)
+      .sort((a, b) => new Date(a.start) - new Date(b.start))
+      .slice(0, 10)
+      .map(({ id, title, start, end, classNames, extendedProps }) =>
+        ({ id, title, start, end, classNames, type: extendedProps?.type })
+      );
+    res.json(sessions);
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/admin/set-client-password — admin sets a client's portal password
+app.post('/api/admin/set-client-password', requireAuth, async (req, res) => {
+  const { clientId, password } = req.body;
+  if (!clientId || !password) return res.status(400).json({ error: 'Missing fields' });
+  if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  try {
+    const existing = await pool.query('SELECT data FROM clients WHERE id=$1', [parseInt(clientId)]);
+    if (!existing.rows.length) return res.status(404).json({ error: 'Client not found' });
+    const hashed = await bcrypt.hash(password, 12);
+    const merged = { ...existing.rows[0].data, clientPassword: hashed };
+    await pool.query('UPDATE clients SET data=$1, updated_at=NOW() WHERE id=$2', [merged, parseInt(clientId)]);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CATCH-ALL — serve HTML files for non-API routes
 // ═══════════════════════════════════════════════════════════════════════════════
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {
+    // Serve specific HTML files if they exist, otherwise fall back to index.html
+    const htmlFiles = ['client-login', 'client-portal', 'client-forgot-password', 'client-reset-password'];
+    const name = req.path.replace('/', '').replace('.html', '');
+    if (htmlFiles.includes(name)) {
+      return res.sendFile(path.join(__dirname, `${name}.html`));
+    }
     res.sendFile(path.join(__dirname, 'index.html'));
   } else {
     res.status(404).json({ error: 'Not found' });

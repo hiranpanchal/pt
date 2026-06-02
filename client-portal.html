@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Portal — Lee Hayward PT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #161213;
+      --surface: #1E1B1C;
+      --surface-high: #2E2A2B;
+      --primary: #FD772A;
+      --on-surface: #EDE0E1;
+      --muted: #9A8F90;
+      --outline: rgba(154,143,144,0.15);
+      --font-display: 'Lexend', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--on-surface); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+
+    /* === TOPBAR === */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--outline);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topbar-logo { font-family: var(--font-display); font-size: 0.9rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+    .topbar-logo span { color: var(--primary); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .greeting { font-size: 0.8rem; color: var(--muted); }
+    .logout-btn { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: none; border: 1px solid var(--outline); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-family: var(--font-body); transition: color 0.15s; }
+    .logout-btn:hover { color: var(--on-surface); }
+
+    /* === CONTENT === */
+    .content { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* === HERO === */
+    .hero {
+      background: linear-gradient(135deg, #2E2A2B 0%, #252122 100%);
+      border-radius: 14px;
+      padding: 28px;
+      border: 1px solid var(--outline);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .hero-avatar {
+      width: 60px; height: 60px; border-radius: 12px;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+    }
+    .hero-name { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
+    .hero-meta { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+    .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; margin-right: 5px; vertical-align: middle; }
+
+    /* === GRID === */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+    /* === CARDS === */
+    .card { background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--outline); }
+    .card-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .card-value { font-size: 1.8rem; font-weight: 800; font-family: var(--font-display); letter-spacing: -0.01em; }
+    .card-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+    .card-title { font-family: var(--font-display); font-size: 0.85rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 14px; }
+
+    /* === NEXT SESSION === */
+    .next-session-card { grid-column: 1 / -1; }
+    .no-session { font-size: 0.85rem; color: var(--muted); padding: 8px 0; }
+    .session-item {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface-high); border-radius: 10px; padding: 14px 16px;
+    }
+    .session-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+    .session-time { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .session-title { font-size: 0.9rem; font-weight: 700; }
+    .session-date-badge {
+      margin-left: auto; text-align: right;
+      font-family: var(--font-display); font-size: 1.1rem; font-weight: 800;
+      color: var(--primary);
+    }
+    .session-date-badge span { display: block; font-size: 0.65rem; font-weight: 400; color: var(--muted); font-family: var(--font-body); }
+
+    /* === PAYMENT PLAN === */
+    .sessions-dots { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .sessions-dot { width: 22px; height: 22px; border-radius: 50%; }
+
+    /* === CHART === */
+    .chart-wrap { position: relative; height: 180px; }
+
+    /* === STATS GRID === */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+    /* === LOADING === */
+    .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--outline); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-logo">Lee Hayward <span>PT</span></div>
+    <div class="topbar-right">
+      <span class="greeting" id="greeting"></span>
+      <button class="logout-btn" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <div class="content" id="appContent">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('lhpt_client_auth');
+    if (!token) window.location.href = '/client-login.html';
+
+    function logout() {
+      localStorage.removeItem('lhpt_client_auth');
+      window.location.href = '/client-login.html';
+    }
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    }
+
+    async function loadPortal() {
+      try {
+        const [clientRes, sessionsRes] = await Promise.all([
+          fetch('/api/client/me', { headers: authHeaders() }),
+          fetch('/api/client/sessions', { headers: authHeaders() })
+        ]);
+        if (clientRes.status === 401) { logout(); return; }
+        const client = await clientRes.json();
+        const sessions = await sessionsRes.json();
+        renderPortal(client, sessions);
+      } catch (e) {
+        document.getElementById('appContent').innerHTML = `<div style="text-align:center;padding:60px 20px;color:#9A8F90">Failed to load your data. Please refresh.</div>`;
+      }
+    }
+
+    function renderPortal(c, sessions) {
+      const initials = (c.firstName?.[0] || '') + (c.lastName?.[0] || '');
+      const greeting = `Hi, ${c.firstName}`;
+      document.getElementById('greeting').textContent = greeting;
+      document.title = `${c.firstName}'s Portal — Lee Hayward PT`;
+
+      // Next session
+      const next = sessions[0];
+      const nextHtml = next ? (() => {
+        const d = new Date(next.start);
+        const end = next.end ? new Date(next.end) : null;
+        const day = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        const endTime = end ? end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+        return `<div class="session-item">
+          <div class="session-dot"></div>
+          <div>
+            <div class="session-title">Upcoming Session</div>
+            <div class="session-time">${time}${endTime ? ' – ' + endTime : ''}</div>
+          </div>
+          <div class="session-date-badge">${d.getDate()} <span>${d.toLocaleDateString('en-GB',{month:'short', year:'numeric'})}</span></div>
+        </div>`;
+      })() : `<div class="no-session">No upcoming sessions scheduled. Contact Lee to book.</div>`;
+
+      // Upcoming sessions list
+      const upcomingHtml = sessions.slice(1, 4).map(ev => {
+        const d = new Date(ev.start);
+        const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--outline)">
+          <div style="font-size:0.82rem;font-weight:600">${d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</div>
+          <div style="font-size:0.75rem;color:var(--muted)">${time}</div>
+        </div>`;
+      }).join('') || '';
+
+      // Payment plan
+      const isBlock = c.paymentPlan === 'block' || c.paymentPlan === 'block10';
+      const totalSessions = c.paymentPlan === 'block10' ? 10 : 5;
+      const rem = c.sessionsRemaining ?? 0;
+      const dotColor = rem === 0 ? '#f87171' : rem === 1 ? '#fb923c' : '#4ade80';
+      const planHtml = isBlock ? `
+        <div style="font-size:0.75rem;font-weight:600;color:${dotColor};margin-bottom:10px">${rem === 0 ? 'No sessions remaining — payment due' : `${rem} of ${totalSessions} sessions remaining`}</div>
+        <div class="sessions-dots">
+          ${Array.from({length: totalSessions}, (_,i) =>
+            `<div class="sessions-dot" style="background:${i < rem ? dotColor : 'var(--surface-high)'}"></div>`
+          ).join('')}
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:8px">${c.paymentPlan === 'block10' ? '£300 / 10 sessions' : '£150 / 5 sessions'}</div>
+      ` : `<div style="font-size:0.9rem;font-weight:600">Pay As You Go</div><div style="font-size:0.75rem;color:var(--muted);margin-top:4px">£40 per session</div>`;
+
+      // Weight delta
+      const currentW = c.weight || 0;
+      const startW   = (c.weightHistory && c.weightHistory.length) ? c.weightHistory[0] : currentW;
+      const delta    = (currentW - startW).toFixed(1);
+      const deltaColor = delta < 0 ? '#4ade80' : delta > 0 ? '#fb923c' : '#9A8F90';
+      const deltaLabel = delta == 0 ? 'No change' : `${delta > 0 ? '+' : ''}${delta} kg`;
+
+      document.getElementById('appContent').innerHTML = `
+        <div class="hero">
+          <div class="hero-avatar">${initials}</div>
+          <div>
+            <div class="hero-name">${c.firstName} ${c.lastName}</div>
+            <div class="hero-meta"><span class="status-dot"></span>${c.program || '1-on-1 Training'} · ${c.phase || ''} Phase</div>
+            ${c.goal ? `<div style="font-size:0.75rem;color:var(--muted);margin-top:2px">Goal: ${c.goal}</div>` : ''}
+          </div>
+        </div>
+
+        <div class="grid">
+          <!-- Next Session -->
+          <div class="card next-session-card">
+            <div class="card-title">Next Session</div>
+            ${nextHtml}
+            ${upcomingHtml ? `<div style="margin-top:12px"><div style="font-size:0.6rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Also coming up</div>${upcomingHtml}</div>` : ''}
+          </div>
+
+          <!-- Current Weight -->
+          <div class="card">
+            <div class="card-label">Current Weight</div>
+            <div class="card-value">${currentW}<span style="font-size:1rem;font-weight:400;color:var(--muted)"> kg</span></div>
+            <div class="card-sub" style="color:${deltaColor}">${deltaLabel} since start</div>
+            ${c.targetWeight ? `<div class="card-sub">Target: ${c.targetWeight} kg</div>` : ''}
+          </div>
+
+          <!-- Payment Plan -->
+          <div class="card">
+            <div class="card-title">Payment Plan</div>
+            ${planHtml}
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-grid" style="margin-bottom:16px">
+          ${c.bodyFat ? `<div class="card"><div class="card-label">Body Fat</div><div class="card-value" style="font-size:1.4rem">${c.bodyFat}<span style="font-size:0.85rem;color:var(--muted)">%</span></div></div>` : ''}
+          ${c.bmi ? `<div class="card"><div class="card-label">BMI</div><div class="card-value" style="font-size:1.4rem">${c.bmi}</div></div>` : ''}
+          ${c.progress ? `<div class="card"><div class="card-label">Progress</div><div class="card-value" style="font-size:1.4rem">${c.progress}<span style="font-size:0.85rem;color:var(--muted)">%</span></div><div class="card-sub">${c.strengthGain || ''}</div></div>` : ''}
+        </div>
+
+        <!-- Weight Chart -->
+        ${c.weightHistory && c.weightHistory.length > 1 ? `
+        <div class="card">
+          <div class="card-title">Weight Progression</div>
+          <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+        </div>` : ''}
+      `;
+
+      // Render chart
+      if (c.weightHistory && c.weightHistory.length > 1) {
+        const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const data = c.weightHistory;
+        const labels = data.map((_, i) => {
+          if (c.measurementDates && c.measurementDates[i]) {
+            const d = new Date(c.measurementDates[i]);
+            return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+          }
+          const idx = (new Date().getMonth() - data.length + i + 12) % 12;
+          return MONTHS[idx];
+        });
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        const grad = ctx.createLinearGradient(0, 0, 0, 180);
+        grad.addColorStop(0, 'rgba(253,119,42,0.25)');
+        grad.addColorStop(1, 'rgba(253,119,42,0)');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              data,
+              borderColor: '#FD772A',
+              backgroundColor: grad,
+              borderWidth: 2,
+              pointBackgroundColor: '#FD772A',
+              pointRadius: 3,
+              tension: 0.3,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: {
+              backgroundColor: '#2E2A2B', titleColor: '#9A8F90', bodyColor: '#EDE0E1',
+              callbacks: { label: ctx => `${parseFloat(ctx.parsed.y.toFixed(1))} kg` }
+            }},
+            scales: {
+              x: { grid: { color: 'rgba(154,143,144,0.08)' }, ticks: { color: '#9A8F90', font: { size: 10 } } },
+              y: { grid: { color: 'rgba(154,143,144,0.08)' }, ticks: { color: '#9A8F90', font: { size: 10 }, callback: v => `${parseFloat(v.toFixed(1))}kg` } }
+            }
+          }
+        });
+      }
+    }
+
+    loadPortal();
+  </script>
+</body>
+</html>

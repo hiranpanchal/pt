@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Client Login — Lee Hayward PT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #161213;
+      color: #EDE0E1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #1E1B1C;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(154,143,144,0.12);
+    }
+    .logo {
+      font-family: 'Lexend', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #EDE0E1;
+      margin-bottom: 6px;
+    }
+    .logo span { color: #FD772A; }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #9A8F90;
+      margin-bottom: 32px;
+    }
+    h1 {
+      font-family: 'Lexend', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 24px;
+    }
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9A8F90;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      background: #252122;
+      border: 1px solid rgba(154,143,144,0.2);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.9rem;
+      color: #EDE0E1;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: #FD772A; }
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(45deg, #FD772A, #C04E00);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .error {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: #f87171;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .forgot {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #9A8F90;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .forgot:hover { color: #FD772A; }
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(154,143,144,0.12);
+      margin: 24px 0;
+    }
+    .back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #9A8F90;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .back:hover { color: #EDE0E1; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Lee Hayward <span>PT</span></div>
+    <div class="subtitle">Client Portal</div>
+    <h1>Welcome Back</h1>
+    <div class="error" id="errorMsg"></div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="your@email.com" autocomplete="email" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Your password" autocomplete="current-password" required/>
+      </div>
+      <button type="submit" class="btn" id="loginBtn">Sign In</button>
+    </form>
+    <a href="/client-forgot-password.html" class="forgot">Forgot your password?</a>
+    <hr class="divider"/>
+    <a href="/" class="back">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="14" height="14"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to website
+    </a>
+  </div>
+
+  <script>
+    // Redirect if already logged in
+    const existing = localStorage.getItem('lhpt_client_auth');
+    if (existing) {
+      try {
+        const p = JSON.parse(atob(existing.split('.')[1]));
+        if (p.exp * 1000 > Date.now()) window.location.href = '/client-portal.html';
+      } catch {}
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('errorMsg');
+      err.style.display = 'none';
+      btn.textContent = 'Signing in…';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/client/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+        localStorage.setItem('lhpt_client_auth', data.token);
+        window.location.href = '/client-portal.html';
+      } catch (e) {
+        err.textContent = e.message;
+        err.style.display = 'block';
+        btn.textContent = 'Sign In';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

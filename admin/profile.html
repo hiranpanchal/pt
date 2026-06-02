@@ -1306,6 +1306,10 @@ button { cursor: pointer; font-family: var(--font-body); }
           <svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Edit Program
         </button>
+        <button class="topbar-btn topbar-btn-secondary" id="portalAccessBtn">
+          <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Portal Access
+        </button>
         <button class="topbar-btn topbar-btn-primary" id="sendUpdateBtn">
           <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 0 2 2z"/></svg>
           Send Update
@@ -1512,6 +1516,29 @@ button { cursor: pointer; font-family: var(--font-body); }
     <div class="modal-actions">
       <button class="modal-btn modal-btn-secondary" id="cancelEdit">Cancel</button>
       <button class="modal-btn modal-btn-primary" id="confirmEdit">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL ACCESS MODAL -->
+<div class="modal-backdrop" id="portalAccessModal">
+  <div class="modal" style="max-width:420px;width:95%">
+    <div class="modal-title">Client Portal Access</div>
+    <div style="font-size:0.75rem;color:var(--on-surface-variant);margin:-8px 0 18px">Set or reset this client's portal password. They'll log in at <strong style="color:var(--on-surface)">leehaywardpt.co.uk/client-login</strong> with their email address.</div>
+    <div class="modal-form">
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="portalPassword" placeholder="Minimum 8 characters" style="width:100%;background:var(--surface-container);border:none;border-bottom:2px solid rgba(154,143,144,0.2);border-radius:2px 2px 0 0;padding:10px;font-family:var(--font-body);font-size:0.875rem;color:var(--on-surface);outline:none;box-sizing:border-box"/>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="portalPasswordConfirm" placeholder="Repeat password" style="width:100%;background:var(--surface-container);border:none;border-bottom:2px solid rgba(154,143,144,0.2);border-radius:2px 2px 0 0;padding:10px;font-family:var(--font-body);font-size:0.875rem;color:var(--on-surface);outline:none;box-sizing:border-box"/>
+      </div>
+      <div id="portalAccessStatus" style="font-size:0.75rem;min-height:18px;margin-top:-8px"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" id="cancelPortalAccess">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="confirmPortalAccess">Set Password</button>
     </div>
   </div>
 </div>
@@ -2432,6 +2459,44 @@ document.getElementById('confirmEdit').addEventListener('click', async () => {
   // Refresh selector name
   const opt = document.querySelector(`#clientSelector option[value="${c.id}"]`);
   if (opt) opt.textContent = `${c.firstName} ${c.lastName}`;
+});
+
+/* === PORTAL ACCESS MODAL === */
+const portalAccessModal = document.getElementById('portalAccessModal');
+document.getElementById('portalAccessBtn').addEventListener('click', () => {
+  document.getElementById('portalPassword').value = '';
+  document.getElementById('portalPasswordConfirm').value = '';
+  document.getElementById('portalAccessStatus').textContent = '';
+  portalAccessModal.classList.add('open');
+});
+document.getElementById('cancelPortalAccess').addEventListener('click', () => portalAccessModal.classList.remove('open'));
+portalAccessModal.addEventListener('click', e => { if (e.target === portalAccessModal) portalAccessModal.classList.remove('open'); });
+
+document.getElementById('confirmPortalAccess').addEventListener('click', async () => {
+  const pw  = document.getElementById('portalPassword').value;
+  const pw2 = document.getElementById('portalPasswordConfirm').value;
+  const status = document.getElementById('portalAccessStatus');
+  if (pw.length < 8) { status.style.color = '#f87171'; status.textContent = 'Password must be at least 8 characters.'; return; }
+  if (pw !== pw2)    { status.style.color = '#f87171'; status.textContent = 'Passwords do not match.'; return; }
+  const btn = document.getElementById('confirmPortalAccess');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    const token = localStorage.getItem('lhpt_auth');
+    const res = await fetch('/api/admin/set-client-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ clientId: currentClientId, password: pw })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    portalAccessModal.classList.remove('open');
+    showToast('Portal password set ✓');
+  } catch (e) {
+    status.style.color = '#f87171';
+    status.textContent = e.message || 'Failed to set password.';
+  } finally {
+    btn.textContent = 'Set Password'; btn.disabled = false;
+  }
 });
 
 /* === EDIT MEASUREMENTS MODAL === */
