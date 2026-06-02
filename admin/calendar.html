@@ -1900,7 +1900,7 @@ button { cursor: pointer; font-family: var(--font-body); }
           <span class="legend-item"><span class="legend-dot" style="background:#FD772A"></span>1-on-1 Elite</span>
           <span class="legend-item"><span class="legend-dot" style="background:#7C3A00"></span>Online Coaching</span>
           <span class="legend-item"><span class="legend-dot" style="background:#1E3A6E"></span>Group Session</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#3A6B4A"></span>Lunch Break</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#3A6B4A"></span>Dinner Break</span>
         </div>
         <div class="cal-hint">
           <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1986,7 +1986,7 @@ button { cursor: pointer; font-family: var(--font-body); }
               <option value="elite">1-on-1 Elite</option>
               <option value="online">Online Coaching</option>
               <option value="group">Group Session</option>
-              <option value="lunch">Lunch Break</option>
+              <option value="lunch">Dinner Break</option>
             </select>
             <svg class="bm-select-arrow" viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -2387,7 +2387,7 @@ const typeMap = {
   elite:  { label: '1-on-1 Elite',    cls: 'session-type-elite'  },
   online: { label: 'Online Coaching', cls: 'session-type-online' },
   group:  { label: 'Group Session',   cls: 'session-type-group'  },
-  lunch:  { label: 'Lunch Break',     cls: 'session-type-lunch'  },
+  lunch:  { label: 'Dinner Break',     cls: 'session-type-lunch'  },
 };
 
 /* ── VIEW MODE ─────────────────────────────── */
@@ -2531,7 +2531,7 @@ function renderPanelEdit(evt) {
               <option value="elite"  ${type==='elite' ?'selected':''}>1-on-1 Elite</option>
               <option value="online" ${type==='online'?'selected':''}>Online</option>
               <option value="group"  ${type==='group' ?'selected':''}>Group</option>
-              <option value="lunch"  ${type==='lunch' ?'selected':''}>Lunch Break</option>
+              <option value="lunch"  ${type==='lunch' ?'selected':''}>Dinner Break</option>
             </select>
             <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -2929,7 +2929,7 @@ document.getElementById('confirmSession').addEventListener('click', () => {
   const c = isLunch ? null : getClient(clientId);
   if (!isLunch && !c) return;
 
-  const title = titleInput || (isLunch ? 'Lunch Break' : `${c.firstName} ${c.lastName}`);
+  const title = titleInput || (isLunch ? 'Dinner Break' : `${c.firstName} ${c.lastName}`);
   const totalSessions = repeatWeeks + 1;
 
   for (let i = 0; i < totalSessions; i++) {
