@@ -1209,15 +1209,21 @@ button { cursor: pointer; font-family: var(--font-body); }
       .sidebar-overlay.open { display: block; }
       .mobile-nav-toggle { display: flex; align-items: center; }
       .admin-main { margin-left: 0; }
-      .admin-topbar { padding: 10px 14px; gap: 10px; }
-      .admin-topbar-left { min-width: 0; flex: 1; }
+      .admin-topbar { padding: 10px 14px; gap: 8px; flex-wrap: nowrap; }
+      .admin-topbar-left { min-width: 0; flex: 1; overflow: hidden; }
+      .admin-topbar-left h1 { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .admin-topbar-left p { display: none; }
       .admin-topbar-right { gap: 6px; flex-shrink: 0; }
       .admin-topbar-right .client-select-wrap { display: none; }
-      .topbar-btn { padding: 7px 12px; font-size: 0.7rem; }
+      /* Icon-only buttons on mobile */
+      .topbar-btn { padding: 8px 10px; font-size: 0; gap: 0; }
+      .topbar-btn svg { width: 16px; height: 16px; margin: 0; }
+      .topbar-btn-primary { padding: 8px 14px; font-size: 0.7rem; gap: 6px; }
+      .topbar-btn-primary svg { width: 14px; height: 14px; }
       .admin-content { padding: 12px; }
       .profile-header { padding: 14px; }
-      .profile-avatar { width: 42px; height: 42px; font-size: 1rem; }
-      .profile-name { font-size: 1.25rem; }
+      .profile-avatar { width: 44px; height: 44px; font-size: 1rem; }
+      .profile-name { font-size: 1.3rem; }
       .metric-grid { grid-template-columns: repeat(2, 1fr) !important; }
       .dashboard-grid { grid-template-columns: 1fr !important; }
       .breadcrumb { font-size: 0.75rem; }
@@ -1226,7 +1232,8 @@ button { cursor: pointer; font-family: var(--font-body); }
     /* ── RESPONSIVE: small mobile (≤420px) ── */
     @media (max-width: 420px) {
       .metric-grid { grid-template-columns: 1fr 1fr !important; }
-      .admin-topbar-right .topbar-btn:not(.topbar-btn-primary) { display: none; }
+      .topbar-btn-primary span { display: none; }
+      .topbar-btn-primary { font-size: 0; gap: 0; padding: 8px 10px; }
     }
 
   </style>
@@ -1312,7 +1319,7 @@ button { cursor: pointer; font-family: var(--font-body); }
         </button>
         <button class="topbar-btn topbar-btn-primary" id="sendUpdateBtn">
           <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 0 2 2z"/></svg>
-          Send Update
+          <span>Send Update</span>
         </button>
       </div>
     </div>
