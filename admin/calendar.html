@@ -2415,7 +2415,7 @@ function renderPanelView(evt) {
         <div class="panel-avatar">${getInitials(c)}</div>
         <div>
           <div class="panel-client-name">${c.firstName} ${c.lastName}</div>
-          <div class="panel-client-meta">${c.tier} · ${c.phase} Phase</div>
+          <div class="panel-client-meta">${c.program || c.tier}</div>
         </div>
       </div>
     </div>

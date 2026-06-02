@@ -1493,10 +1493,6 @@ button { cursor: pointer; font-family: var(--font-body); }
         <input type="text" id="editTier" placeholder="Elite Performance" class="edit-input"/>
       </div>
       <div class="form-group">
-        <label>Current Phase</label>
-        <input type="text" id="editPhase" placeholder="Hypertrophy" class="edit-input"/>
-      </div>
-      <div class="form-group">
         <label>Goal</label>
         <input type="text" id="editGoal" placeholder="Build Muscle" class="edit-input"/>
       </div>
@@ -2419,7 +2415,6 @@ document.getElementById('editBtn').addEventListener('click', () => {
   document.getElementById('editPhone').value        = c.phone        || '';
   document.getElementById('editProgram').value      = c.program      || '1-on-1 Training';
   document.getElementById('editTier').value         = c.tier         || '';
-  document.getElementById('editPhase').value        = c.phase        || '';
   document.getElementById('editGoal').value         = c.goal         || '';
   document.getElementById('editTargetWeight').value = c.targetWeight || '';
   document.getElementById('editPaymentPlan').value  = c.paymentPlan  || 'payg';
@@ -2440,7 +2435,6 @@ document.getElementById('confirmEdit').addEventListener('click', async () => {
   c.phone        = document.getElementById('editPhone').value.trim()      || c.phone;
   c.program      = document.getElementById('editProgram').value;
   c.tier         = document.getElementById('editTier').value.trim()       || c.tier;
-  c.phase        = document.getElementById('editPhase').value.trim()      || c.phase;
   c.goal         = document.getElementById('editGoal').value.trim()       || c.goal;
   c.targetWeight  = parseFloat(document.getElementById('editTargetWeight').value) || c.targetWeight;
   c.paymentPlan   = document.getElementById('editPaymentPlan').value;
