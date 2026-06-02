@@ -1787,7 +1787,7 @@ window.LHPT = {
 
   function renderTable() {
     const clients = getFilteredClients().sort((a, b) =>
-      `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`)
+      `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
     );
     const tbody = document.getElementById('clientTableBody');
 
