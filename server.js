@@ -70,6 +70,15 @@ app.use(cors({
   credentials: true
 }));
 
+// Redirect naked domain to www
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  if (host === 'leehaywardpt.co.uk') {
+    return res.redirect(301, `https://www.leehaywardpt.co.uk${req.originalUrl}`);
+  }
+  next();
+});
+
 // Security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
