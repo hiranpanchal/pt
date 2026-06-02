@@ -1219,6 +1219,11 @@ button { cursor: pointer; font-family: var(--font-body); }
             <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="searchInput" placeholder="Search client…"/>
           </div>
+          <select id="sortSelect" style="background:var(--surface-container);border:none;border-radius:var(--roundness-sm);padding:6px 10px;font-family:var(--font-body);font-size:0.8rem;color:var(--on-surface);outline:none;cursor:pointer">
+            <option value="firstName">First Name A–Z</option>
+            <option value="lastName">Last Name A–Z</option>
+            <option value="joined">Date Added</option>
+          </select>
         </div>
 
         <table class="client-table" id="clientTable">
@@ -1786,9 +1791,12 @@ window.LHPT = {
   }
 
   function renderTable() {
-    const clients = getFilteredClients().sort((a, b) =>
-      `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
-    );
+    const sortBy = document.getElementById('sortSelect')?.value || 'firstName';
+    const clients = getFilteredClients().sort((a, b) => {
+      if (sortBy === 'lastName')  return `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`);
+      if (sortBy === 'joined')    return new Date(a.joined || 0) - new Date(b.joined || 0);
+      return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+    });
     const tbody = document.getElementById('clientTableBody');
 
     if (CLIENTS.length === 0) {
@@ -1875,6 +1883,9 @@ window.LHPT = {
     searchQuery = e.target.value;
     renderTable();
   });
+
+  /* === SORT === */
+  document.getElementById('sortSelect').addEventListener('change', renderTable);
 
   /* === TOAST NOTIFICATION === */
   function showToast(msg, type = 'success') {
