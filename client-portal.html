@@ -251,17 +251,30 @@
 
         <!-- Weight Chart -->
         ${c.weightHistory && c.weightHistory.length > 1 ? `
-        <div class="card">
+        <div class="card" style="margin-bottom:16px">
           <div class="card-title">Weight Progression</div>
           <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
         </div>` : ''}
+
+        <!-- Body Fat Chart -->
+        ${c.bodyFatHistory && c.bodyFatHistory.length > 1 ? `
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Body Fat</div>
+          <div class="chart-wrap"><canvas id="bfChart"></canvas></div>
+        </div>` : ''}
+
+        <!-- BMI Chart -->
+        ${c.bmiHistory && c.bmiHistory.length > 1 ? `
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">BMI</div>
+          <div class="chart-wrap"><canvas id="bmiChart"></canvas></div>
+        </div>` : ''}
       `;
 
-      // Render chart
-      if (c.weightHistory && c.weightHistory.length > 1) {
-        const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        const data = c.weightHistory;
-        const labels = data.map((_, i) => {
+      // Shared chart labels helper
+      const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      function chartLabels(data) {
+        return data.map((_, i) => {
           if (c.measurementDates && c.measurementDates[i]) {
             const d = new Date(c.measurementDates[i]);
             return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
@@ -269,38 +282,30 @@
           const idx = (new Date().getMonth() - data.length + i + 12) % 12;
           return MONTHS[idx];
         });
-        const ctx = document.getElementById('weightChart').getContext('2d');
-        const grad = ctx.createLinearGradient(0, 0, 0, 180);
-        grad.addColorStop(0, 'rgba(253,119,42,0.25)');
-        grad.addColorStop(1, 'rgba(253,119,42,0)');
+      }
+      function makeChart(id, data, color, unit) {
+        const ctx = document.getElementById(id);
+        if (!ctx) return;
+        const grad = ctx.getContext('2d').createLinearGradient(0, 0, 0, 180);
+        grad.addColorStop(0, color.replace(')', ',0.25)').replace('rgb', 'rgba'));
+        grad.addColorStop(1, color.replace(')', ',0)').replace('rgb', 'rgba'));
         new Chart(ctx, {
           type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              data,
-              borderColor: '#FD772A',
-              backgroundColor: grad,
-              borderWidth: 2,
-              pointBackgroundColor: '#FD772A',
-              pointRadius: 3,
-              tension: 0.3,
-              fill: true
-            }]
-          },
+          data: { labels: chartLabels(data), datasets: [{ data, borderColor: color, backgroundColor: grad, borderWidth: 2, pointBackgroundColor: color, pointRadius: 3, tension: 0.3, fill: true }] },
           options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: {
-              backgroundColor: '#2E2A2B', titleColor: '#9A8F90', bodyColor: '#EDE0E1',
-              callbacks: { label: ctx => `${parseFloat(ctx.parsed.y.toFixed(1))} kg` }
-            }},
+            plugins: { legend: { display: false }, tooltip: { backgroundColor: '#2E2A2B', titleColor: '#9A8F90', bodyColor: '#EDE0E1', callbacks: { label: ctx => `${parseFloat(ctx.parsed.y.toFixed(1))}${unit}` } } },
             scales: {
               x: { grid: { color: 'rgba(154,143,144,0.08)' }, ticks: { color: '#9A8F90', font: { size: 10 } } },
-              y: { grid: { color: 'rgba(154,143,144,0.08)' }, ticks: { color: '#9A8F90', font: { size: 10 }, callback: v => `${parseFloat(v.toFixed(1))}kg` } }
+              y: { grid: { color: 'rgba(154,143,144,0.08)' }, ticks: { color: '#9A8F90', font: { size: 10 }, callback: v => `${parseFloat(v.toFixed(1))}${unit}` } }
             }
           }
         });
       }
+
+      if (c.weightHistory    && c.weightHistory.length    > 1) makeChart('weightChart', c.weightHistory,    '#FD772A', 'kg');
+      if (c.bodyFatHistory   && c.bodyFatHistory.length   > 1) makeChart('bfChart',     c.bodyFatHistory,   '#60a5fa', '%');
+      if (c.bmiHistory       && c.bmiHistory.length       > 1) makeChart('bmiChart',    c.bmiHistory,       '#a78bfa', '');
     }
 
     loadPortal();
