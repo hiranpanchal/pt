@@ -2724,11 +2724,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('sess-repeat').addEventListener('change', updateConfirmLabel);
 
-  // Hide client field for lunch breaks
+  // Hide client field for no-client event types
   document.getElementById('sess-type').addEventListener('change', function() {
-    const isLunch = this.value === 'lunch';
-    document.getElementById('clientFieldWrap').style.display = isLunch ? 'none' : '';
-    if (isLunch && window._clearClientSearch) window._clearClientSearch();
+    const noClient = this.value === 'lunch' || this.value === 'ted';
+    document.getElementById('clientFieldWrap').style.display = noClient ? 'none' : '';
+    if (noClient && window._clearClientSearch) window._clearClientSearch();
   });
 
   const el = document.getElementById('calendar');
@@ -2786,9 +2786,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const type = info.event.extendedProps && info.event.extendedProps.type;
         const cid = info.event.extendedProps && info.event.extendedProps.clientId;
-        const client = (type !== 'lunch' && typeof getClient === 'function' && cid) ? getClient(parseInt(cid)) : null;
-        const clientName = type === 'lunch'
-          ? 'Dinner Break'
+        const noClientType = type === 'lunch' || type === 'ted';
+        const client = (!noClientType && typeof getClient === 'function' && cid) ? getClient(parseInt(cid)) : null;
+        const clientName = noClientType
+          ? (type === 'ted' ? 'Ted' : 'Dinner Break')
           : client
             ? `${client.firstName || ''} ${client.lastName || ''}`.trim()
             : (info.event.title && info.event.title !== '-' ? info.event.title : '');
@@ -2975,9 +2976,9 @@ document.getElementById('confirmSession').addEventListener('click', () => {
   const duration   = parseInt(document.getElementById('sess-duration').value);
   const repeatWeeks= parseInt(document.getElementById('sess-repeat').value) || 0;
   const titleInput = document.getElementById('sess-title').value;
-  const isLunch    = type === 'lunch';
+  const isNoClient = type === 'lunch' || type === 'ted';
 
-  if ((!isLunch && !clientId) || !date || !time) {
+  if ((!isNoClient && !clientId) || !date || !time) {
     const modal = addModal.querySelector('.book-modal');
     modal.style.animation = 'none';
     modal.offsetHeight; // reflow
@@ -2985,10 +2986,11 @@ document.getElementById('confirmSession').addEventListener('click', () => {
     return;
   }
 
-  const c = isLunch ? null : getClient(clientId);
-  if (!isLunch && !c) return;
+  const c = isNoClient ? null : getClient(clientId);
+  if (!isNoClient && !c) return;
 
-  const title = titleInput || (isLunch ? 'Dinner Break' : `${c.firstName} ${c.lastName}`);
+  const noClientLabel = type === 'ted' ? 'Ted' : 'Dinner Break';
+  const title = titleInput || (isNoClient ? noClientLabel : `${c.firstName} ${c.lastName}`);
   const totalSessions = repeatWeeks + 1;
 
   for (let i = 0; i < totalSessions; i++) {
