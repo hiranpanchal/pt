@@ -1881,7 +1881,7 @@ button { cursor: pointer; font-family: var(--font-body); }
       <div class="cal-sidebar">
         <div class="cal-stat-card">
           <div class="cal-stat-num" id="statWeekSessions">0</div>
-          <div class="cal-stat-lbl">This Week</div>
+          <div class="cal-stat-lbl" id="statWeekLabel">This Week</div>
         </div>
         <div class="cal-stat-card">
           <div class="cal-stat-num" id="statMonthSessions">0</div>
@@ -2809,30 +2809,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   calendar.render();
 
-  // Count stats — use the calendar's displayed week, exclude non-client events
-  const now        = new Date();
-  const calDate    = calendar.getDate(); // currently displayed date
-  const calDay     = calDate.getDay();
-  const calDiff    = calDay === 0 ? -6 : 1 - calDay;
-  const weekStart  = new Date(calDate); weekStart.setDate(calDate.getDate() + calDiff); weekStart.setHours(0,0,0,0);
-  const weekEnd    = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
-  const monthStart = new Date(calDate.getFullYear(), calDate.getMonth(), 1);
-  const monthEnd   = new Date(calDate.getFullYear(), calDate.getMonth() + 1, 0);
-  const NON_SESSION_TYPES = ['lunch', 'ted']; // types that aren't client sessions
+  // Stats — recalculated on every navigation via datesSet
+  const NON_SESSION_TYPES = ['lunch', 'ted'];
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  let weekCount = 0, monthCount = 0, nextSession = null;
-  events.forEach(e => {
-    const type = e.extendedProps?.type;
-    if (NON_SESSION_TYPES.includes(type)) return; // skip non-session events
-    const s = new Date(e.start);
-    if (s >= weekStart && s <= weekEnd) weekCount++;
-    if (s >= monthStart && s <= monthEnd) monthCount++;
-    if (s > now && (!nextSession || s < new Date(nextSession.start))) nextSession = e;
-  });
+  function updateStats() {
+    const now     = new Date();
+    const calDate = calendar.getDate();
+    const calDay  = calDate.getDay();
+    const calDiff = calDay === 0 ? -6 : 1 - calDay;
+    const weekStart  = new Date(calDate); weekStart.setDate(calDate.getDate() + calDiff); weekStart.setHours(0,0,0,0);
+    const weekEnd    = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+    const monthStart = new Date(calDate.getFullYear(), calDate.getMonth(), 1);
+    const monthEnd   = new Date(calDate.getFullYear(), calDate.getMonth() + 1, 0);
 
-  document.getElementById('statWeekSessions').textContent  = weekCount;
-  document.getElementById('statMonthSessions').textContent = monthCount;
-  document.getElementById('statActiveClients').textContent = CLIENTS.filter(c => c.status === 'active').length;
+    let weekCount = 0, monthCount = 0, nextSession = null;
+    events.forEach(e => {
+      const type = e.extendedProps?.type;
+      if (NON_SESSION_TYPES.includes(type)) return;
+      const s = new Date(e.start);
+      if (s >= weekStart && s <= weekEnd) weekCount++;
+      if (s >= monthStart && s <= monthEnd) monthCount++;
+      if (s > now && (!nextSession || s < new Date(nextSession.start))) nextSession = e;
+    });
+
+    // Week label: "JUN 8 – 14" format
+    const ws = weekStart, we = weekEnd;
+    const weekLabel = ws.getMonth() === we.getMonth()
+      ? `${MONTHS_SHORT[ws.getMonth()]} ${ws.getDate()} – ${we.getDate()}`
+      : `${MONTHS_SHORT[ws.getMonth()]} ${ws.getDate()} – ${MONTHS_SHORT[we.getMonth()]} ${we.getDate()}`;
+
+    document.getElementById('statWeekSessions').textContent  = weekCount;
+    document.getElementById('statWeekLabel').textContent     = weekLabel;
+    document.getElementById('statMonthSessions').textContent = monthCount;
+    document.getElementById('statActiveClients').textContent = CLIENTS.filter(c => c.status === 'active').length;
 
   // Low session alerts
   const lowAlerts = CLIENTS.filter(c =>
@@ -2860,11 +2870,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>`;
   }
-  if (nextSession) {
-    const d = new Date(nextSession.start);
-    document.getElementById('statNextSession').textContent =
-      d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+    if (nextSession) {
+      const d = new Date(nextSession.start);
+      document.getElementById('statNextSession').textContent =
+        d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+    }
   }
+
+  // Run on load and on every navigation
+  updateStats();
+  calendar.on('datesSet', updateStats);
 });
 
 /* ============================================================
