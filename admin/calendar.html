@@ -2777,11 +2777,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     eventDidMount: (info) => {
       try {
+        const type = info.event.extendedProps && info.event.extendedProps.type;
         const cid = info.event.extendedProps && info.event.extendedProps.clientId;
-        const client = (typeof getClient === 'function' && cid) ? getClient(parseInt(cid)) : null;
-        const clientName = client
-          ? `${client.firstName || ''} ${client.lastName || ''}`.trim()
-          : (info.event.title && info.event.title !== '-' ? info.event.title : '');
+        const client = (type !== 'lunch' && typeof getClient === 'function' && cid) ? getClient(parseInt(cid)) : null;
+        const clientName = type === 'lunch'
+          ? 'Dinner Break'
+          : client
+            ? `${client.firstName || ''} ${client.lastName || ''}`.trim()
+            : (info.event.title && info.event.title !== '-' ? info.event.title : '');
         const fmt = (d) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         const timeStr = info.event.start && info.event.end
           ? `${fmt(info.event.start)} – ${fmt(info.event.end)}` : '';
