@@ -1761,7 +1761,18 @@ button { cursor: pointer; font-family: var(--font-body); }
       .sidebar-overlay.open { display: block; }
       .mobile-nav-toggle { display: flex; align-items: center; }
       .admin-main { margin-left: 0; }
-      .admin-topbar { padding: 10px 14px; gap: 10px; }
+      .admin-topbar { padding: 10px 14px; gap: 8px; flex-wrap: nowrap; }
+      .admin-topbar-left { min-width: 0; flex: 1; overflow: hidden; }
+      .admin-topbar-left h1 { font-size: 0.95rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .admin-topbar-left p { display: none; }
+      .admin-topbar-right { gap: 6px; flex-shrink: 0; }
+      /* Icon-only for Today and Fullscreen on mobile */
+      #todayBtn { padding: 8px 10px; font-size: 0.7rem; }
+      #fullscreenBtn { padding: 8px 10px; font-size: 0; gap: 0; }
+      #fullscreenBtn svg { width: 16px; height: 16px; }
+      #fsLabel { display: none; }
+      /* Keep Add Session readable but compact */
+      #addSessionBtn { padding: 8px 12px; font-size: 0.7rem; gap: 5px; }
       .admin-topbar-left { min-width: 0; flex: 1; }
       .admin-topbar-left h1 { font-size: 0.9375rem; }
       .admin-topbar-left p { display: none; }
@@ -1792,7 +1803,9 @@ button { cursor: pointer; font-family: var(--font-body); }
     /* ── RESPONSIVE: small mobile (≤420px) ── */
     @media (max-width: 420px) {
       .cal-stat-card { min-width: 100%; }
-      .admin-topbar-right .topbar-btn:not(.topbar-btn-primary) { display: none; }
+      #todayBtn { display: none; }
+      #addSessionBtn span { display: none; }
+      #addSessionBtn { font-size: 0; gap: 0; padding: 8px 10px; }
     }
 
   </style>
@@ -1870,7 +1883,7 @@ button { cursor: pointer; font-family: var(--font-body); }
         </button>
         <button class="topbar-btn topbar-btn-primary" id="addSessionBtn">
           <svg viewBox="0 0 24 24" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Session
+          <span>Add Session</span>
         </button>
       </div>
     </div>
