@@ -2053,6 +2053,12 @@ button { cursor: pointer; font-family: var(--font-body); }
 
     </div>
 
+    <!-- Conflict warning -->
+    <div id="bmConflictWarn" style="display:none;margin:0 28px 4px;background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.35);border-radius:8px;padding:10px 14px;font-size:0.8rem;color:#fb923c;line-height:1.4">
+      <strong style="display:block;margin-bottom:2px">⚠ Scheduling Conflict</strong>
+      <span id="bmConflictNames"></span>
+    </div>
+
     <!-- Footer -->
     <div class="book-modal-footer">
       <button class="bm-btn bm-btn-cancel" id="cancelSession">Cancel</button>
@@ -2775,8 +2781,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     selectable:   true,
     selectMirror: true,
     unselectAuto: true,
-    eventDrop:    (info) => { saveCalendarEvents(); },
-    eventResize:  (info) => { saveCalendarEvents(); },
+    eventDrop: (info) => {
+      saveCalendarEvents();
+      const type = info.event.extendedProps?.type;
+      if (!NON_SESSION_TYPES.includes(type)) {
+        const conflicts = getConflicts(info.event.start, info.event.end, info.event.id);
+        if (conflicts.length) {
+          const names = conflicts.map(e => e.title).join(', ');
+          showConflictToast(`Clash with ${names} — double booking!`);
+        }
+      }
+    },
+    eventResize: (info) => {
+      saveCalendarEvents();
+      const type = info.event.extendedProps?.type;
+      if (!NON_SESSION_TYPES.includes(type)) {
+        const conflicts = getConflicts(info.event.start, info.event.end, info.event.id);
+        if (conflicts.length) {
+          const names = conflicts.map(e => e.title).join(', ');
+          showConflictToast(`Clash with ${names} after resize.`);
+        }
+      }
+    },
     eventAdd:     (info) => { saveCalendarEvents(); },
     eventChange:  (info) => { saveCalendarEvents(); },
     eventRemove:  (info) => { saveCalendarEvents(); },
@@ -2865,9 +2891,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     c.sessionsRemaining <= 1
   );
   const alertEl = document.getElementById('calLowSessionAlerts');
+  let alertHTML = '';
+
   if (lowAlerts.length) {
-    alertEl.innerHTML = `
-      <div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+    alertHTML += `
+      <div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:14px 18px;margin-bottom:12px">
         <div style="font-size:0.65rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#f87171;margin-bottom:10px">⚠ Sessions Running Low</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
           ${lowAlerts.map(c => {
@@ -2884,6 +2912,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       </div>`;
   }
+
+  // Conflict scan — show any double-booked slots
+  const conflictIds = scanExistingConflicts();
+  if (conflictIds.size > 0) {
+    const conflictEvents = calendar.getEvents().filter(e => conflictIds.has(e.id));
+    // Group by overlapping pairs (just list unique event titles with date/time)
+    const conflictLines = conflictEvents.map(e => {
+      const d = e.start.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+      const t = e.start.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false });
+      return `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface-container);border:1px solid rgba(251,146,60,0.3);border-radius:7px;padding:5px 10px;font-size:0.75rem;font-weight:600;color:var(--on-surface)">${e.title} <span style="color:#fb923c;font-size:0.7rem">${d} ${t}</span></span>`;
+    });
+    alertHTML += `
+      <div style="background:rgba(251,146,60,0.07);border:1px solid rgba(251,146,60,0.35);border-radius:10px;padding:14px 18px;margin-bottom:12px">
+        <div style="font-size:0.65rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#fb923c;margin-bottom:10px">⚠ Double-Booked Slots</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${conflictLines.join('')}</div>
+      </div>`;
+  }
+
+  alertEl.innerHTML = alertHTML;
     if (nextSession) {
       const d = new Date(nextSession.start);
       document.getElementById('statNextSession').textContent =
@@ -2962,8 +3009,10 @@ function openBookingModal(dateStr) {
   if (window._clearClientSearch) window._clearClientSearch();
   document.getElementById('sess-type').value = 'elite';
   document.getElementById('clientFieldWrap').style.display = '';
+  document.getElementById('bmConflictWarn').style.display = 'none';
   addModal.classList.add('open');
-  setTimeout(() => document.getElementById('clientSearchInput').focus(), 50);
+  // Trigger live check after modal opens (date was pre-filled)
+  setTimeout(() => { checkBookingConflict(); document.getElementById('clientSearchInput').focus(); }, 50);
 }
 
 document.getElementById('addSessionBtn').addEventListener('click', () => {
@@ -2973,13 +3022,88 @@ document.getElementById('addSessionBtn').addEventListener('click', () => {
   document.getElementById('sess-time').value = '07:00';
   document.getElementById('sess-type').value = 'elite';
   document.getElementById('clientFieldWrap').style.display = '';
+  document.getElementById('bmConflictWarn').style.display = 'none';
   if (window._clearClientSearch) window._clearClientSearch();
   addModal.classList.add('open');
-  setTimeout(() => document.getElementById('clientSearchInput').focus(), 50);
+  setTimeout(() => { checkBookingConflict(); document.getElementById('clientSearchInput').focus(); }, 50);
 });
 
 document.getElementById('cancelSession').addEventListener('click', () => addModal.classList.remove('open'));
 addModal.addEventListener('click', e => { if (e.target === addModal) addModal.classList.remove('open'); });
+
+/* === CONFLICT DETECTION === */
+function getConflicts(start, end, excludeId) {
+  return calendar.getEvents().filter(e => {
+    if (excludeId && e.id === excludeId) return false;
+    const type = e.extendedProps?.type;
+    if (NON_SESSION_TYPES.includes(type)) return false;
+    return e.start < end && e.end > start;
+  });
+}
+
+function checkBookingConflict() {
+  const warnEl  = document.getElementById('bmConflictWarn');
+  const namesEl = document.getElementById('bmConflictNames');
+  const type    = document.getElementById('sess-type').value;
+  if (type === 'lunch' || type === 'ted') { warnEl.style.display = 'none'; return; }
+  const date = document.getElementById('sess-date').value;
+  const time = document.getElementById('sess-time').value;
+  const dur  = parseInt(document.getElementById('sess-duration').value) || 60;
+  if (!date || !time) { warnEl.style.display = 'none'; return; }
+  const start = new Date(`${date}T${time}:00`);
+  const end   = new Date(start.getTime() + dur * 60000);
+  const conflicts = getConflicts(start, end, null);
+  if (conflicts.length) {
+    const names = conflicts.map(e => e.title).join(', ');
+    namesEl.textContent = `${names} already booked at this time.`;
+    warnEl.style.display = 'block';
+  } else {
+    warnEl.style.display = 'none';
+  }
+}
+
+// Live conflict check as form fields change
+['sess-date','sess-time','sess-duration','sess-type'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', checkBookingConflict);
+});
+
+// Also hide conflict warn when modal closes
+document.getElementById('cancelSession').addEventListener('click', () => {
+  document.getElementById('bmConflictWarn').style.display = 'none';
+});
+
+/* === CONFLICT TOAST === */
+let conflictToastTimer;
+function showConflictToast(msg) {
+  let toast = document.getElementById('conflictToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'conflictToast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#292121;border:1px solid rgba(251,146,60,0.4);color:#fb923c;padding:10px 18px;border-radius:10px;font-size:0.8rem;font-weight:600;z-index:9999;pointer-events:none;transition:opacity 0.3s;white-space:nowrap';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = '⚠ ' + msg;
+  toast.style.opacity = '1';
+  clearTimeout(conflictToastTimer);
+  conflictToastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 3500);
+}
+
+/* === SCAN FOR EXISTING CONFLICTS ON LOAD === */
+function scanExistingConflicts() {
+  const allEvents = calendar.getEvents().filter(e => !NON_SESSION_TYPES.includes(e.extendedProps?.type));
+  const conflicts = new Set();
+  for (let i = 0; i < allEvents.length; i++) {
+    for (let j = i + 1; j < allEvents.length; j++) {
+      const a = allEvents[i], b = allEvents[j];
+      if (a.start < b.end && a.end > b.start) {
+        conflicts.add(a.id);
+        conflicts.add(b.id);
+      }
+    }
+  }
+  return conflicts;
+}
 
 document.getElementById('confirmSession').addEventListener('click', () => {
   const clientId   = parseInt(document.getElementById('sess-client').value);
