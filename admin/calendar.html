@@ -2838,13 +2838,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const monthEnd   = new Date(calDate.getFullYear(), calDate.getMonth() + 1, 0);
 
     let weekCount = 0, monthCount = 0, nextSession = null;
-    events.forEach(e => {
+    calendar.getEvents().forEach(e => {
       const type = e.extendedProps?.type;
       if (NON_SESSION_TYPES.includes(type)) return;
-      const s = new Date(e.start);
+      const s = e.start; // FullCalendar EventImpl: .start is already a Date
       if (s >= weekStart && s <= weekEnd) weekCount++;
       if (s >= monthStart && s <= monthEnd) monthCount++;
-      if (s > now && (!nextSession || s < new Date(nextSession.start))) nextSession = e;
+      if (s > now && (!nextSession || s < nextSession.start)) nextSession = e;
     });
 
     // Week label: "JUN 8 – 14" format
