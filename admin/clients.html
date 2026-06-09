@@ -1597,9 +1597,9 @@ async function processPastSessions() {
     if (!Array.isArray(c.countedEventIds)) c.countedEventIds = [];
 
     const uncounted = events.filter(ev => {
-      const start = new Date(ev.start);
+      const evEnd = ev.end ? new Date(ev.end) : new Date(new Date(ev.start).getTime() + 3600000);
       return ev.extendedProps && ev.extendedProps.clientId === c.id
-        && start < now
+        && evEnd < now
         && !c.countedEventIds.includes(ev.id);
     });
 
