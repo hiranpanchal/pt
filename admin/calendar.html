@@ -3245,7 +3245,7 @@ function scheduleSessionBadgeUpdate() {
 
 function updateAllSessionBadges() {
   if (!calendar) return;
-  // Group all client events by clientId, sort chronologically
+  // Group all client events by clientId
   const clientGroups = new Map();
   calendar.getEvents().forEach(e => {
     if (NON_SESSION_TYPES.includes(e.extendedProps?.type)) return;
@@ -3258,22 +3258,30 @@ function updateAllSessionBadges() {
   // Map eventId → session number
   const sessionMap = new Map();
   clientGroups.forEach((evts, cid) => {
-    evts.sort((a, b) => a.start - b.start);
     const client = getClient(cid);
-    let baseNumber = 0;
-    if (client) {
-      const remaining = client.sessionsRemaining || 0;
-      if (client.paymentPlan === 'block')   baseNumber = Math.max(0, 5  - remaining);
-      if (client.paymentPlan === 'block10') baseNumber = Math.max(0, 10 - remaining);
-      // PAYG: baseNumber stays 0, sessions count 1, 2, 3…
+
+    // For block clients, only count events from the start of the current block
+    // (lastPaymentDate) so that old-block events don't inflate the number.
+    // For PAYG or no payment date, use all events.
+    let blockStart = null;
+    if (client && (client.paymentPlan === 'block' || client.paymentPlan === 'block10') && client.lastPaymentDate) {
+      blockStart = new Date(client.lastPaymentDate);
+      blockStart.setHours(0, 0, 0, 0);
     }
-    evts.forEach((e, i) => sessionMap.set(e.id, baseNumber + i + 1));
+
+    const relevant = blockStart
+      ? evts.filter(e => e.start >= blockStart)
+      : evts;
+
+    // Sort chronologically then number 1, 2, 3…
+    relevant.sort((a, b) => a.start - b.start);
+    relevant.forEach((e, i) => sessionMap.set(e.id, i + 1));
   });
 
   // Update all currently visible badges
   document.querySelectorAll('.sess-num-badge').forEach(badge => {
     const num = sessionMap.get(badge.dataset.eid);
-    if (num !== undefined) badge.textContent = num;
+    badge.textContent = num !== undefined ? num : '';
   });
 }
 
