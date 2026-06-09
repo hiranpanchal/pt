@@ -929,6 +929,30 @@ button { cursor: pointer; font-family: var(--font-body); }
 /* Hide FC's default event title/time so only our custom content shows */
 .fc-event-main-frame, .fc-event-title-container, .fc-event-title, .fc-event-time { display: none !important; }
 
+/* Session number badge */
+.sess-num-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.28);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 2;
+  box-sizing: border-box;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
 /* Event color classes */
 .event-elite    { background: var(--primary-container) !important; border-color: transparent !important; }
 .event-online   { background: #C04E00 !important; border-color: transparent !important; }
@@ -2377,6 +2401,9 @@ window.LHPT = {
 // CLIENTS, getClient, getInitials, statusLabel, generateCalendarEvents
 // are all available directly from the first script block above
 
+// Session types that don't count as client sessions
+const NON_SESSION_TYPES = ['lunch', 'ted'];
+
 // Client list ready — search is driven dynamically by initClientSearch()
 
 /* === PANEL CONTROLS === */
@@ -2803,9 +2830,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
     },
-    eventAdd:     (info) => { saveCalendarEvents(); },
-    eventChange:  (info) => { saveCalendarEvents(); },
-    eventRemove:  (info) => { saveCalendarEvents(); },
+    eventAdd:     (info) => { saveCalendarEvents(); scheduleSessionBadgeUpdate(); },
+    eventChange:  (info) => { saveCalendarEvents(); scheduleSessionBadgeUpdate(); },
+    eventRemove:  (info) => { saveCalendarEvents(); scheduleSessionBadgeUpdate(); },
     height:       'auto',
     expandRows:   false,
     events:       events,
@@ -2837,10 +2864,19 @@ document.addEventListener('DOMContentLoaded', async () => {
           ? `${fmt(info.event.start)} – ${fmt(info.event.end)}` : '';
         const main = info.el.querySelector('.fc-event-main');
         if (main) {
+          main.style.position = 'relative';
           main.innerHTML = `<div style="padding:4px 6px;overflow:hidden;height:100%;box-sizing:border-box;">
             <div style="font-size:0.72rem;font-weight:700;color:#FFD580;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${timeStr}</div>
             <div style="font-size:0.8rem;font-weight:600;color:#fff;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${clientName}</div>
           </div>`;
+          // Session number badge (client sessions only)
+          if (!noClientType && cid) {
+            const badge = document.createElement('div');
+            badge.className = 'sess-num-badge';
+            badge.dataset.eid = info.event.id;
+            main.appendChild(badge);
+            scheduleSessionBadgeUpdate();
+          }
         }
         info.el.title = [timeStr, clientName].filter(Boolean).join(' — ');
       } catch(e) { console.error('eventDidMount error:', e); }
@@ -2850,7 +2886,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   calendar.render();
 
   // Stats — recalculated on every navigation via datesSet
-  const NON_SESSION_TYPES = ['lunch', 'ted'];
+  // NON_SESSION_TYPES defined at outer scope
   const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   function updateStats() {
@@ -3103,6 +3139,47 @@ function scanExistingConflicts() {
     }
   }
   return conflicts;
+}
+
+/* === SESSION NUMBER BADGES === */
+let sessionBadgeTimer;
+function scheduleSessionBadgeUpdate() {
+  clearTimeout(sessionBadgeTimer);
+  sessionBadgeTimer = setTimeout(updateAllSessionBadges, 80);
+}
+
+function updateAllSessionBadges() {
+  if (!calendar) return;
+  // Group all client events by clientId, sort chronologically
+  const clientGroups = new Map();
+  calendar.getEvents().forEach(e => {
+    if (NON_SESSION_TYPES.includes(e.extendedProps?.type)) return;
+    const cid = parseInt(e.extendedProps?.clientId);
+    if (!cid || isNaN(cid)) return;
+    if (!clientGroups.has(cid)) clientGroups.set(cid, []);
+    clientGroups.get(cid).push(e);
+  });
+
+  // Map eventId → session number
+  const sessionMap = new Map();
+  clientGroups.forEach((evts, cid) => {
+    evts.sort((a, b) => a.start - b.start);
+    const client = getClient(cid);
+    let baseNumber = 0;
+    if (client) {
+      const remaining = client.sessionsRemaining || 0;
+      if (client.paymentPlan === 'block')   baseNumber = Math.max(0, 5  - remaining);
+      if (client.paymentPlan === 'block10') baseNumber = Math.max(0, 10 - remaining);
+      // PAYG: baseNumber stays 0, sessions count 1, 2, 3…
+    }
+    evts.forEach((e, i) => sessionMap.set(e.id, baseNumber + i + 1));
+  });
+
+  // Update all currently visible badges
+  document.querySelectorAll('.sess-num-badge').forEach(badge => {
+    const num = sessionMap.get(badge.dataset.eid);
+    if (num !== undefined) badge.textContent = num;
+  });
 }
 
 document.getElementById('confirmSession').addEventListener('click', () => {
