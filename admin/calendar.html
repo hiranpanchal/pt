@@ -3218,7 +3218,11 @@ function showConflictToast(msg) {
 
 /* === SCAN FOR EXISTING CONFLICTS ON LOAD === */
 function scanExistingConflicts() {
-  const allEvents = calendar.getEvents().filter(e => !NON_SESSION_TYPES.includes(e.extendedProps?.type));
+  const now = new Date();
+  // Only check future events — past conflicts are irrelevant and stale seed data creates noise
+  const allEvents = calendar.getEvents().filter(e =>
+    !NON_SESSION_TYPES.includes(e.extendedProps?.type) && e.start >= now
+  );
   const conflicts = new Set();
   for (let i = 0; i < allEvents.length; i++) {
     for (let j = i + 1; j < allEvents.length; j++) {
