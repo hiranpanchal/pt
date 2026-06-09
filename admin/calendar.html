@@ -853,6 +853,61 @@ button { cursor: pointer; font-family: var(--font-body); }
   letter-spacing: -0.01em;
   text-transform: uppercase;
   color: var(--on-surface);
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+.fc .fc-toolbar-title:hover { opacity: 0.7; }
+
+/* Date jump popover */
+#dateJumpPopover {
+  position: fixed;
+  z-index: 8000;
+  background: #1E1B1C;
+  border: 1px solid rgba(154,143,144,0.2);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 220px;
+}
+#dateJumpPopover.open { display: flex; }
+#dateJumpPopover label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9A8F90;
+  margin-bottom: 2px;
+  display: block;
+}
+#dateJumpPopover input[type="date"] {
+  width: 100%;
+  background: #252122;
+  border: 1px solid rgba(154,143,144,0.2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: #EDE0E1;
+  outline: none;
+}
+#dateJumpPopover input[type="date"]:focus { border-color: #FD772A; }
+#dateJumpPopover .djp-btn {
+  padding: 9px;
+  background: linear-gradient(45deg,#FD772A,#C04E00);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
 }
 .fc .fc-button {
   border-radius: var(--roundness-sm) !important;
@@ -2885,6 +2940,42 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   calendar.render();
 
+  // Clickable toolbar title → date jump popover
+  const titleEl = el.querySelector('.fc-toolbar-title');
+  const popover = document.getElementById('dateJumpPopover');
+  const jumpInput = document.getElementById('dateJumpInput');
+  const jumpGo    = document.getElementById('dateJumpGo');
+
+  if (titleEl) {
+    titleEl.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      // Pre-fill with current calendar date
+      const cd = calendar.getDate();
+      jumpInput.value = cd.toISOString().slice(0, 10);
+      // Position below the title
+      const rect = titleEl.getBoundingClientRect();
+      popover.style.top  = (rect.bottom + 8) + 'px';
+      popover.style.left = Math.min(rect.left, window.innerWidth - 240) + 'px';
+      popover.classList.add('open');
+      setTimeout(() => jumpInput.focus(), 50);
+    });
+  }
+
+  jumpGo.addEventListener('click', () => {
+    if (!jumpInput.value) return;
+    calendar.gotoDate(jumpInput.value);
+    popover.classList.remove('open');
+  });
+
+  jumpInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') jumpGo.click();
+    if (e.key === 'Escape') popover.classList.remove('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!popover.contains(e.target)) popover.classList.remove('open');
+  });
+
   // Stats — recalculated on every navigation via datesSet
   // NON_SESSION_TYPES defined at outer scope
   const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -3238,5 +3329,14 @@ document.getElementById('confirmSession').addEventListener('click', () => {
   sidebarOverlay.addEventListener('click', closeSidebar);
 })();
 </script>
+
+<!-- DATE JUMP POPOVER -->
+<div id="dateJumpPopover">
+  <div>
+    <label>Jump to date</label>
+    <input type="date" id="dateJumpInput"/>
+  </div>
+  <button class="djp-btn" id="dateJumpGo">Go to week</button>
+</div>
 </body>
 </html>
