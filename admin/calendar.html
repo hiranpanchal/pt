@@ -927,6 +927,7 @@ button { cursor: pointer; font-family: var(--font-body); }
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #FFFFFF;
+  text-align: center;
   padding: 10px 8px;
 }
 .fc .fc-col-header-cell {
@@ -2857,7 +2858,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const weekday = d.toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase();
       const dayMonth = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }).toUpperCase();
       const el = document.createElement('div');
-      el.style.cssText = 'display:flex;flex-direction:column;align-items:center;line-height:1.2;';
+      el.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;width:100%;text-align:center;';
       el.innerHTML = `<span>${weekday}</span><span>${dayMonth}</span>`;
       return { domNodes: [el] };
     },
