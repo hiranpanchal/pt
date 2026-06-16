@@ -3245,9 +3245,8 @@ function scheduleSessionBadgeUpdate() {
 
 function updateAllSessionBadges() {
   if (!calendar) return;
-  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
 
-  // Group all client events by clientId
+  // Group all session events by clientId
   const clientGroups = new Map();
   calendar.getEvents().forEach(e => {
     if (NON_SESSION_TYPES.includes(e.extendedProps?.type)) return;
@@ -3260,38 +3259,21 @@ function updateAllSessionBadges() {
   const sessionMap = new Map();
   clientGroups.forEach((evts, cid) => {
     const client = getClient(cid);
-    const isBlock = client && (client.paymentPlan === 'block' || client.paymentPlan === 'block10');
+    const isBlock = client?.paymentPlan === 'block' || client?.paymentPlan === 'block10';
 
-    let relevant, startNum;
-
+    // Block client with a recorded payment date → number events from that date only
+    // Everyone else → number all events from 1
+    let relevant;
     if (isBlock && client.lastPaymentDate) {
-      // ── Block with recorded payment ──────────────────────────────────────
-      // Show all events since the payment date, numbered 1, 2, 3…
       const blockStart = new Date(client.lastPaymentDate);
       blockStart.setHours(0, 0, 0, 0);
       relevant = evts.filter(e => e.start >= blockStart);
-      startNum = 1;
-
-    } else if (isBlock) {
-      // ── Block, no payment date yet ────────────────────────────────────
-      // Count sessions that have ENDED (not just started) so in-progress
-      // sessions get the right number. e.g. session 4 in-progress → badge 4.
-      const nowTime = new Date();
-      const getEnd = e => e.end instanceof Date ? e.end
-                        : e.end ? new Date(e.end)
-                        : new Date(e.start.getTime() + 3600000);
-      const endedCount = evts.filter(e => getEnd(e) < nowTime).length;
-      relevant = evts.filter(e => getEnd(e) >= nowTime);
-      startNum = endedCount + 1;
-
     } else {
-      // ── Pay as you go ─────────────────────────────────────────────────
-      relevant = evts;
-      startNum = 1;
+      relevant = [...evts];
     }
 
     relevant.sort((a, b) => a.start - b.start);
-    relevant.forEach((e, i) => sessionMap.set(e.id, startNum + i));
+    relevant.forEach((e, i) => sessionMap.set(e.id, i + 1));
   });
 
   document.querySelectorAll('.sess-num-badge').forEach(badge => {
