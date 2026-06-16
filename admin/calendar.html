@@ -2906,9 +2906,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     eventDidMount: (info) => {
       try {
         const type = info.event.extendedProps && info.event.extendedProps.type;
-        const cid = info.event.extendedProps && info.event.extendedProps.clientId;
+        const cidRaw = info.event.extendedProps && info.event.extendedProps.clientId;
+        const cid = parseInt(cidRaw) || 0;   // always a number; 0 = no valid client
         const noClientType = type === 'lunch' || type === 'ted';
-        const client = (!noClientType && typeof getClient === 'function' && cid) ? getClient(parseInt(cid)) : null;
+        const client = (!noClientType && typeof getClient === 'function' && cid > 0) ? getClient(cid) : null;
         const clientName = noClientType
           ? (type === 'ted' ? 'Ted' : 'Dinner Break')
           : client
@@ -2925,7 +2926,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div style="font-size:0.8rem;font-weight:600;color:#fff;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${clientName}</div>
           </div>`;
           // Session number badge (client sessions only)
-          if (!noClientType && cid) {
+          if (!noClientType && cid > 0) {
             const badge = document.createElement('div');
             badge.className = 'sess-num-badge';
             badge.dataset.eid = info.event.id;
