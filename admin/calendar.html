@@ -2852,7 +2852,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     snapDuration:  '00:15:00',
     slotLabelInterval: '01:00:00',
     slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
-    dayHeaderFormat: { weekday: 'long', day: 'numeric', month: 'long' },
+    dayHeaderContent: (args) => {
+      const d = args.date;
+      const weekday = d.toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase();
+      const dayMonth = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }).toUpperCase();
+      const el = document.createElement('div');
+      el.style.cssText = 'display:flex;flex-direction:column;align-items:center;line-height:1.2;';
+      el.innerHTML = `<span>${weekday}</span><span>${dayMonth}</span>`;
+      return { domNodes: [el] };
+    },
     allDaySlot:   false,
     weekends:     true,
     firstDay:     1,   // Monday
