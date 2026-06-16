@@ -1452,6 +1452,16 @@ button { cursor: pointer; font-family: var(--font-body); }
             <div class="weight-chart-wrap"><canvas id="bmiChart"></canvas></div>
           </div>
 
+          <!-- Previous Sessions -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <div>
+                <div class="dash-card-title">Previous Sessions</div>
+                <div class="dash-card-subtitle" id="prevSessionsSubtitle"></div>
+              </div>
+            </div>
+            <div id="prevSessionsList"></div>
+          </div>
 
         </div>
       </div>
@@ -2139,6 +2149,66 @@ function renderProfile(c) {
   renderWeightChart(c);
   renderBfChart(c);
   renderBmiChart(c);
+
+  // Previous Sessions
+  (async function renderPreviousSessions() {
+    const now = new Date();
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const listEl = document.getElementById('prevSessionsList');
+    const subEl  = document.getElementById('prevSessionsSubtitle');
+    let sessions = [];
+
+    try {
+      const allEvents = await window.LHPT_API.loadEvents() || [];
+
+      // Determine the cut-off: lastPaymentDate for block clients, or all history
+      const isBlock = c.paymentPlan === 'block' || c.paymentPlan === 'block10';
+      const cutoff  = (isBlock && c.lastPaymentDate) ? new Date(c.lastPaymentDate) : null;
+      if (cutoff) cutoff.setHours(0, 0, 0, 0);
+
+      if (subEl) {
+        subEl.textContent = cutoff
+          ? `From payment on ${cutoff.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`
+          : 'All recorded sessions';
+      }
+
+      sessions = allEvents
+        .filter(e => {
+          const cid = e.extendedProps && e.extendedProps.clientId;
+          if (parseInt(cid) !== c.id) return false;
+          const s = new Date(e.start);
+          if (s >= now) return false;              // future → skip
+          if (cutoff && s < cutoff) return false;  // before payment → skip
+          return true;
+        })
+        .sort((a, b) => new Date(b.start) - new Date(a.start)); // newest first
+    } catch(err) {}
+
+    if (!sessions.length) {
+      listEl.innerHTML = `<p style="color:var(--on-surface-variant);font-size:0.875rem">No previous sessions${c.lastPaymentDate ? ' since last payment' : ''}</p>`;
+      return;
+    }
+
+    listEl.innerHTML = sessions.map((e, idx) => {
+      const d       = new Date(e.start);
+      const timeStr = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const endStr  = e.end ? new Date(e.end).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+      const sessNum = sessions.length - idx; // oldest = #1, newest = highest
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--outline-variant)">
+          <div style="min-width:36px;height:36px;border-radius:50%;background:var(--surface-container);border:1px solid var(--outline-variant);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.75rem;font-weight:800;color:var(--on-surface-variant)">#${sessNum}</div>
+          <div style="min-width:40px;text-align:center">
+            <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:900;color:var(--primary-container);line-height:1">${d.getDate()}</div>
+            <div style="font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--on-surface-variant)">${months[d.getMonth()]}</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.8125rem;font-weight:600;color:var(--on-surface);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.title}</div>
+            <div style="font-size:0.7rem;color:var(--on-surface-variant);margin-top:2px">${timeStr}${endStr ? ' – ' + endStr : ''} · ${d.toLocaleDateString('en-GB',{weekday:'long'})}</div>
+          </div>
+          <div style="font-size:0.65rem;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.1);padding:3px 8px;border-radius:3px;white-space:nowrap">Done</div>
+        </div>`;
+    }).join('');
+  })();
 }
 
 /* === WEIGHT CHART === */
